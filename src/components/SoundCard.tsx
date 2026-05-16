@@ -24,6 +24,18 @@ function tagStyle(tag: string): string {
   return TAG_COLORS[tag] || "bg-[#1E1E2E] text-[#636E72]";
 }
 
+function scoreColor(score: number): string {
+  if (score >= 70) return "text-[#00B894]";
+  if (score >= 50) return "text-[#FDCB6E]";
+  return "text-[#D63031]";
+}
+
+function scoreBg(score: number): string {
+  if (score >= 70) return "bg-[#00B894]/10 border-[#00B894]/20";
+  if (score >= 50) return "bg-[#FDCB6E]/10 border-[#FDCB6E]/20";
+  return "bg-[#D63031]/10 border-[#D63031]/20";
+}
+
 interface SoundCardProps {
   id: string;
   waveform: number[];
@@ -31,6 +43,8 @@ interface SoundCardProps {
   tags: string[];
   durationMs: number;
   prompt: string;
+  score?: number;
+  model?: string;
   isFavorited: boolean;
   isPlaying: boolean;
   isLoading?: boolean;
@@ -47,6 +61,8 @@ export function SoundCard({
   tags,
   durationMs,
   prompt,
+  score,
+  model,
   isFavorited,
   isPlaying,
   isLoading,
@@ -57,11 +73,8 @@ export function SoundCard({
 }: SoundCardProps) {
   const handlePlay = () => {
     if (isLoading) return;
-    if (isPlaying) {
-      onStop();
-    } else {
-      onPlay(id);
-    }
+    if (isPlaying) { onStop(); }
+    else { onPlay(id); }
   };
 
   const handleFavorite = () => {
@@ -99,7 +112,9 @@ export function SoundCard({
       className={`rounded-xl border bg-[#14141F] p-5 transition-all ${
         isFavorited
           ? "border-[#FDCB6E]/30 shadow-[0_0_16px_rgba(253,203,110,0.06)]"
-          : "border-[#2A2A3F] hover:border-[#3A3A5F]"
+          : isPlaying
+            ? "border-[#6C5CE7]/50 shadow-[0_0_20px_rgba(108,92,231,0.08)]"
+            : "border-[#2A2A3F] hover:border-[#3A3A5F]"
       }`}
     >
       <div className="flex items-start justify-between mb-4">
@@ -112,22 +127,32 @@ export function SoundCard({
               ? `${Math.round(durationMs)}ms`
               : `${(durationMs / 1000).toFixed(1)}s`}
           </span>
+          {model && (
+            <span className="text-[9px] text-[#2A2A3F] font-mono">
+              {model}
+            </span>
+          )}
         </div>
+        {score !== undefined && (
+          <div
+            className={`shrink-0 flex items-center gap-1 rounded-md border px-2 py-0.5 ${scoreBg(score)}`}
+          >
+            <span className={`text-[10px] font-mono font-bold ${scoreColor(score)}`}>
+              {score}
+            </span>
+          </div>
+        )}
       </div>
 
       <button
         onClick={handlePlay}
         disabled={isLoading}
-        className={`group relative mb-4 w-full cursor-pointer ${
-          isLoading ? "opacity-50" : ""
-        }`}
+        className={`group relative mb-4 w-full cursor-pointer ${isLoading ? "opacity-50" : ""}`}
       >
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           className={`w-full h-16 transition-all duration-200 ${
-            isPlaying
-              ? "opacity-100"
-              : "opacity-50 group-hover:opacity-80"
+            isPlaying ? "opacity-100" : "opacity-50 group-hover:opacity-80"
           }`}
         >
           <defs>
@@ -136,35 +161,14 @@ export function SoundCard({
               <stop offset="100%" stopColor="#00D2D3" />
             </linearGradient>
           </defs>
-          <path
-            d={pathD}
-            fill="none"
-            stroke={`url(#wave-grad-${id})`}
-            strokeWidth="1.5"
-          />
-          <path
-            d={pathD2}
-            fill="none"
-            stroke={`url(#wave-grad-${id})`}
-            strokeWidth="1.5"
-          />
+          <path d={pathD} fill="none" stroke={`url(#wave-grad-${id})`} strokeWidth="1.5" />
+          <path d={pathD2} fill="none" stroke={`url(#wave-grad-${id})`} strokeWidth="1.5" />
           {isPlaying && (
-            <rect
-              x={0}
-              y={0}
-              width={3}
-              height={svgHeight}
-              fill="#00D2D3"
-              opacity="0.5"
-            >
+            <rect x={0} y={0} width={3} height={svgHeight} fill="#00D2D3" opacity="0.5">
               <animate
                 attributeName="x"
                 values={`0;${svgWidth - 3};0`}
-                dur={
-                  waveform.length > 0
-                    ? `${(durationMs || 1000) / 1000}s`
-                    : "2s"
-                }
+                dur={waveform.length > 0 ? `${(durationMs || 1000) / 1000}s` : "2s"}
                 repeatCount="indefinite"
               />
             </rect>
@@ -175,20 +179,12 @@ export function SoundCard({
             {isLoading ? (
               <div className="spinner w-5 h-5 rounded-full border-2 border-[#636E72] border-t-[#6C5CE7]" />
             ) : isPlaying ? (
-              <svg
-                className="w-5 h-5 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <rect x="6" y="4" width="4" height="16" />
                 <rect x="14" y="4" width="4" height="16" />
               </svg>
             ) : (
-              <svg
-                className="w-5 h-5 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <polygon points="6,4 20,12 6,20" />
               </svg>
             )}
@@ -199,10 +195,7 @@ export function SoundCard({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {tags.map((tag) => (
-            <span
-              key={tag}
-              className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${tagStyle(tag)}`}
-            >
+            <span key={tag} className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${tagStyle(tag)}`}>
               {tag}
             </span>
           ))}
@@ -263,8 +256,11 @@ export function SoundCard({
         <button
           onClick={handleExport}
           disabled={isLoading}
-          className="rounded-lg bg-[#1E1E2E] px-3 py-1.5 text-xs font-mono text-[#636E72] hover:bg-[#2A2A3F] hover:text-[#DFE6E9] transition-colors"
+          className="flex items-center gap-1.5 rounded-lg bg-[#1E1E2E] px-3 py-1.5 text-xs font-mono text-[#636E72] hover:bg-[#2A2A3F] hover:text-[#DFE6E9] transition-colors"
         >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
           Export
         </button>
       </div>

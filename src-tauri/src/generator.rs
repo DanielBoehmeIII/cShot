@@ -140,7 +140,7 @@ pub fn generate(
             audio::SoundType::Other => 500.0,
         };
 
-        let mut samples = audio::synthesize::generate_base(parsed.sound_type, duration_ms);
+        let mut samples = audio::synthesize::generate_with_dsp(parsed.sound_type, duration_ms, &parsed.dsp);
 
         if let Some(bpm) = parsed.dsp.bpm {
             let beat_dur = 60.0 / bpm;
