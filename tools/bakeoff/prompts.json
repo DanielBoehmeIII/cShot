@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "description": "cShot Model Bakeoff — 20 test prompts from Prompt 44",
+  "categories": {
+    "kick": {
+      "description": "Kick Drums",
+      "prompts": [
+        {"id": 1, "text": "punchy kick drum 140bpm, short attack, sub-bass body"},
+        {"id": 2, "text": "808 kick deep boomy hip hop"},
+        {"id": 3, "text": "tight electronic kick, clicky attack, short decay"},
+        {"id": 4, "text": "rock kick drum, natural, beater attack, medium body"},
+        {"id": 5, "text": "experimental kick, distorted, lo-fi, 80bpm"}
+      ]
+    },
+    "snare": {
+      "description": "Snares & Claps",
+      "prompts": [
+        {"id": 6, "text": "crack snare drum 100bpm, tight, bright, metal shell"},
+        {"id": 7, "text": "trap snare, layered clap, short, punchy, 140bpm"},
+        {"id": 8, "text": "rimshot, wooden, dry, acoustic"},
+        {"id": 9, "text": "deep clap, reverb, wide, house music"},
+        {"id": 10, "text": "military snare, marching, crisp, snappy"}
+      ]
+    },
+    "hat": {
+      "description": "Hi-Hats & Percussion",
+      "prompts": [
+        {"id": 11, "text": "closed hi-hat, tight, bright, 130bpm"},
+        {"id": 12, "text": "open hi-hat, wash, sizzle, electronic"},
+        {"id": 13, "text": "shaker loop, subtle, high-end, organic"},
+        {"id": 14, "text": "cowbell, metallic, cutting, dance music"},
+        {"id": 15, "text": "tambourine hit, bright, jingle, acoustic"}
+      ]
+    },
+    "fx": {
+      "description": "FX & Tonal",
+      "prompts": [
+        {"id": 16, "text": "riser sound effect, tension build, electronic, 4 bars"},
+        {"id": 17, "text": "sub bass hit, deep, 808, long release"},
+        {"id": 18, "text": "glitch impact, stutter, digital, short"},
+        {"id": 19, "text": "orchestral hit, cinematic, dramatic, brass and strings"},
+        {"id": 20, "text": "reverse cymbal, swells, wash, build-up"}
+      ]
+    }
+  },
+  "seeds": [42, 123, 456, 789, 1024]
+}
