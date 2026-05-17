@@ -34,6 +34,11 @@ ADJECTIVE_MAP = {
     "mellow": {"brightness": 0.55, "saturation": 0.05, "high_shelf_db": -3.0},
     "edgy": {"brightness": 1.5, "saturation": 0.5, "high_shelf_db": 6.0},
     "crisp": {"brightness": 1.4, "attack_ms": 2.0, "high_shelf_db": 5.0},
+    "expensive": {"brightness": 1.1, "saturation": 0.05, "noise_floor": 0.0, "high_shelf_db": 1.0},
+    "dusty": {"noise_floor": 0.02, "lo_fi": 0.3, "high_shelf_db": -3.0, "brightness": 0.6},
+    "vintage": {"saturation": 0.15, "noise_floor": 0.005, "high_shelf_db": -2.0, "brightness": 0.7},
+    "glossy": {"brightness": 1.3, "high_shelf_db": 5.0, "saturation": 0.1},
+    "crunchy": {"saturation": 0.6, "distortion": 0.4, "drive": 0.5},
 
     # Attack / velocity
     "soft": {"attack_ms": 30.0, "velocity": 0.15, "hammer_noise_amp": 0.02, "saturation": 0.0},
@@ -48,6 +53,8 @@ ADJECTIVE_MAP = {
     "lo_fi": {"saturation": 0.3, "bit_depth": 8, "noise_floor": 0.03, "bandwidth_reduce": 0.45, "lo_fi": 0.5},
     "glitchy": {"grain_ms": 10.0, "bit_depth": 6, "decay_rate": 0.7},
     "metallic": {"brightness": 1.5, "high_shelf_db": 8.0, "saturation": 0.3, "resonance_boost": 0.5},
+    "analog": {"saturation": 0.15, "noise_floor": 0.005, "lo_fi": 0.1, "brightness": 0.85},
+    "digital": {"saturation": 0.0, "noise_floor": 0.0, "lo_fi": 0.0, "brightness": 1.2},
 
     # Space / width
     "wide": {"stereo_width": 0.85, "stereo_detune": 3.0},
@@ -55,6 +62,12 @@ ADJECTIVE_MAP = {
     "big": {"stereo_width": 0.7, "sustain_level": 0.5, "release_ms": 600},
     "small": {"stereo_width": 0.0, "sustain_level": 0.0, "release_ms": 30},
     "intimate": {"stereo_width": 0.0, "sustain_level": 0.1, "release_ms": 80},
+    "huge": {"stereo_width": 1.0, "sustain_level": 0.6, "release_ms": 800, "brightness": 1.2},
+    "tiny": {"stereo_width": 0.0, "sustain_level": 0.0, "release_ms": 10, "duration_scale": 0.3},
+
+    # Wet/Dry
+    "dry": {"saturation": 0.0, "noise_floor": 0.0, "reverb_mix": 0.0, "sustain_level": 0.0},
+    "wet": {"saturation": 0.1, "reverb_mix": 0.5, "sustain_level": 0.4, "release_ms": 400},
 
     # Duration
     "short": {"duration_scale": 0.4, "sustain_level": 0.0},
@@ -73,6 +86,29 @@ ADJECTIVE_MAP = {
     "low": {"pitch_scale": 0.5},
     "mid": {"pitch_scale": 1.0},
 }
+
+
+CONFLICTING_PAIRS = [
+    ("bright", "dark"),
+    ("soft", "hard"),
+    ("soft", "punchy"),
+    ("punchy", "gentle"),
+    ("clean", "distorted"),
+    ("dry", "wet"),
+    ("narrow", "wide"),
+    ("small", "big"),
+    ("small", "huge"),
+    ("huge", "tiny"),
+    ("analog", "digital"),
+    ("long", "short"),
+    ("staccato", "sustained"),
+    ("airy", "dark"),
+    ("smooth", "rough"),
+    ("aggressive", "gentle"),
+    ("expensive", "dusty"),
+    ("glossy", "dusty"),
+    ("vintage", "digital"),
+]
 
 # Primary instrument nouns (higher priority than style modifiers)
 PRIMARY_NOUNS = {
@@ -172,14 +208,31 @@ def parse_prompt(prompt: str) -> dict:
     if style_modifier and style_modifier in NOUN_MAP and family == NOUN_MAP[style_modifier][0]:
         profile = NOUN_MAP[style_modifier][1]
 
+    # Conflict detection
+    conflicts = _detect_conflicts(adjectives)
+
     return {
         "family": family,
         "default_profile": profile,
         "adjectives": adjectives,
+        "conflicts": conflicts,
         "noun": noun,
         "overrides": overrides,
         "raw_prompt": prompt,
     }
+
+
+def _detect_conflicts(adjectives: list[str]) -> list[dict]:
+    """Detect conflicting adjective pairs. Returns list of {a, b, resolution_hint}."""
+    adj_set = set(adjectives)
+    conflicts = []
+    for a, b in CONFLICTING_PAIRS:
+        if a in adj_set and b in adj_set:
+            conflicts.append({
+                "a": a, "b": b,
+                "hint": f"'{a}' and '{b}' conflict — later adjective takes priority",
+            })
+    return conflicts
 
 
 def _resolve_generator(parsed: dict) -> tuple:
@@ -536,6 +589,10 @@ def cmd_prompt(args):
     print(f"  → Adjectives: {parsed['adjectives']}")
     if parsed['overrides']:
         print(f"  → Overrides: {json.dumps(parsed['overrides'], indent=4)}")
+    if parsed.get('conflicts'):
+        print(f"  ⚠ Conflicts:")
+        for c in parsed['conflicts']:
+            print(f"      {c['a']} vs {c['b']} — {c['hint']}")
 
     out_path = Path(args.out) if args.out else Path("outputs/prompt")
     count = args.count
