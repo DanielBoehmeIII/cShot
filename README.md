@@ -1,238 +1,196 @@
-# cShot — Local Sound Design Laboratory
+# cShot — AI One-Shot Pack Generator
 
-A desktop app for generating, recreating, editing, and transforming production-ready one-shot audio samples — entirely locally.
+Generate, refine, rank, and export producer-ready one-shot packs from natural language prompts. No cloud, no API keys.
 
-Built with Tauri v2 + React + Rust + Python synthesis engine.
-
-**Note:** The Python synthesis engine (`gen.py`) is currently the stable generation backend. See [Known Working Path](#known-working-path).
+**Status:** Python CLI is the working backend. Rust/Tauri UI is experimental.
 
 ## Quick Start
 
 ```bash
-# Python generation (stable)
-pip3 install soundfile scipy numpy
-python3 gen.py oneshot clap --out outputs/clap.wav
+# 1. Install
+pip install -r requirements.txt
 
-# Tauri UI (experimental)
-npm install
-npm run tauri dev
+# 2. Generate your first one-shot
+./cshot prompt "dark soft piano stab" --out outputs/my_first.wav
+
+# 3. Hear what adjectives do
+./cshot prompt "bright hard piano stab" --out outputs/bright_hard.wav
+./cshot prompt "dark soft piano stab"  --out outputs/dark_soft.wav
+
+# 4. Batch from a prompt
+./cshot prompt "warm punchy kick" --count 10 --out outputs/kicks/
 ```
 
-No API keys, no accounts, no cloud dependencies. cShot works immediately after install.
+## Install
 
-## Features
-
-### Sound Generation
-- **Text-to-one-shot** — Type a prompt like "punchy kick 140bpm" and get a WAV in under 500ms
-- **Resynthesis engine** — 5-layer modular synthesis (transient, body, noise, sub, tail) per sound type
-- **Advanced drum synthesis** — Layered kick, advanced snare, metallic hat (FM), multi-hit clap, FM percussion, resonant impact, tonal percussion, cinematic boom, UI click, bass hit
-- **10 sound types** — Kick, snare, closed/open hat, clap, tom, perc, bass, FX, and more
-- **Prompt-to-DSP** — 60+ natural language descriptors with semantic graph (punchy, airy, crunchy, warm, glossy, vintage, analog, digital, etc.)
-- **Genre presets** — 25+ genre templates with genre-specific descriptor interpretation (trap, drill, house, techno, lo-fi, dubstep, etc.)
-- **Recipe presets** — 18 built-in professional sound recipes
-- **Smart variants** — 16 constrained variations with quality-aware filtering (brighter, darker, punchier, softer, shorter, longer, distorted, cleaner, subbier, airier, noisier, tighter, fattier, metallic, thinner, warmer)
-- **Mode control** — Safer / balanced / experimental variation modes
-
-### Audio Analysis
-- **Full analysis pipeline** — Duration, RMS, peak, loudness LUFS, noise floor, spectral centroid/rolloff/brightness
-- **Envelope extraction** — Attack/decay/tail detection with envelope curve
-- **Multi-band spectral profile** — 64-bin spectral profile for detailed timbre analysis
-- **Transient detection** — Onset strength, count, timing via spectral flux
-- **Pitch estimation** — Autocorrelation-based fundamental frequency detection
-- **Silence detection** — Leading/trailing silence measurement
-- **Transient profiling** — Sharpness, spectral spread, onset shape
-
-### Sound Recreation
-- **Recreate any sound** — Analyze → extract sound DNA → choose synthesis strategy → generate approximations → rank by similarity
-- **Multi-band similarity scoring** — 6-dimension comparison (envelope attack/body/tail, spectral low/mid/high, RMS, transient, duration)
-- **Analysis-driven params** — Attack time, decay, tail, brightness, noise, sub, body gain all extracted from reference
-- **Fidelity control** — 0-100% closeness to original with preservation constraints
-- **Preserve toggles** — Keep transient/body/tail during recreation
-
-### Hybrid Sample + Synthesis Engine
-- **Layer synthesis onto source audio** — Blend original with synthesized layers
-- **Transient replacement** — Replace or blend transient region
-- **Body replacement** — Replace or blend tonal body
-- **Tail regeneration** — Replace or regenerate tail with synthesis
-- **Sub reinforcement** — Add synthesized sub bass to any sound
-- **Spectral blending** — Match spectral profile between original and synthesis
-- **Preservation controls** — Preserve original transient, tail, pitch, rhythm, texture
-
-### Sound Transformation
-- **Prompt-based editing** — "make this darker, shorter, and punchier" actually changes the sound
-- **12 DSP operations** — Reverse, saturate, filter, pitch shift, transient shape, add sub/noise/click, brightness tilt, duration scale
-- **Parent-child lineage** — Every transform links back to source
-
-### Library & Export
-- **Library** — Browse, search, filter, favorite, delete all your sounds
-- **Export** — One-click WAV export to Desktop with semantic filenames (DAW-friendly)
-- **Batch export** — Export all variants at once, export favorite packs as ZIP
-- **Import** — Import WAV/MP3 files with auto-analysis and tagging
-- **Repair chain** — Normalize, trim silence, fade, brighten/darken, punch, add sub, saturate, soften, sharpen, compress
-- **Score** — Every sound gets an automated quality score (0-100)
-- **Undo/Redo** — Full generation history with undo/redo support
-- **Quick compare** — Compare current and previous generation
-
-### Producer Workflow
-- **Keyboard shortcuts** — Full keyboard-driven workflow (⌘1/2 views, Space play, R regenerate, ⌘E export, ⌘F favorite, ⌘Z undo)
-- **Export folder** — Organized exports with DAW-friendly filenames
-- **Rapid iteration** — Regenerate (R), undo (⌘Z), redo (⌘⇧Z) without touching mouse
-- **Drag/drop ready** — Reference audio drag-drop support
-- **Pack system** — Organize sounds into packs, export packs as ZIP
-
-### Plugin Ready
-- **DSP core separated** — No app-level dependencies in audio engine
-- **CLI harness** — `cargo run --bin cshot-cli` for headless generation, analysis, transform, recreate, batch render
-- **Plugin prototype** — Standalone binary with 8 DAW automation parameters, MIDI note trigger, preset save/load
-- **VST3/CLAP compatible** — DSP engine ready for nih-plug wrapping
-- **MIDI support** — Note On trigger, velocity gain, pitch bend modulation
-- **Preset system** — JSON-based preset save/load for plugin parameters
-
-### Sound DNA + Similarity
-- **64-dim sound embedding** — Rich vector representation (transient profile, envelope, spectral, perceptual, temporal, type encoding)
-- **Hybrid similarity** — Combines metadata similarity + embedding cosine similarity
-- **Similarity search** — Find similar sounds in your library
-- **Filter by descriptors** — Filter library by tags and descriptors
-
-### Privacy
-- Local-first, no accounts
-- No data leaves your machine
-- Clear session memory
-
-## Beta Status
-
-cShot is in **Beta** — the core workflow is stable and usable for real production.
-All generation happens locally with zero cloud dependencies.
-
-### What's in Beta (Stable)
-
-- ✓ **Python synthesis engine** (gen.py) — 10 class, reference-informed generation
-- ✓ Oneshot and batch CLI generation
-- ✓ Reference scanning, profiling, and QA comparison pipeline
-- ✓ Full audit system with feature reports and similarity scoring
-
-### What's in Beta (Experimental)
-
-- ✓ Rust/Tauri DSP engine with 5-layer resynthesis and advanced drum synthesis
-- ✓ Prompt-to-DSP mapping with 60+ descriptors and semantic graph
-- ✓ Reference recreation with multi-band similarity scoring
-- ✓ Desktop app with full generation, library, export workflow
-- ✓ Undo/redo, keyboard shortcuts, quick iteration
-- ✓ Hybrid sample + synthesis engine
-- ✓ Smart constrained variation system
-- ✓ Sound DNA embedding and similarity search
-- ✓ CLI tool for headless generation, batch rendering, benchmark
-- ✓ Plugin prototype with DAW automation and MIDI support
-
-### What's NOT in Beta
-
-- VST3/AU plugin (standalone only, plugin prototype exists)
-- Marketplace/social features
-- Cloud sync
-- Stereo support (mono only, stereo planned)
-
-## Architecture
-
-```
-Frontend:  React 18 + TypeScript + Vite + Tailwind
-Backend:   Rust (Tauri v2) + SQLite + DSP engine
-Engines:
-  Python (official):   gen.py — 10 synth classes, reference-informed, stable
-  Rust (experimental): src-tauri/src/audio/synthesize.rs — needs parity work
-    Rust engine modules:
-      synthesize.rs     — Layer-based resynthesis (5 layers)
-      analyze.rs        — Full audio analysis pipeline
-      resynthesize.rs   — Category-specific synthesis recipes
-      transform.rs      — Prompt-based + DSP transformation
-      recreate.rs       — Reference recreation + similarity scoring
-      prompt_dsp.rs     — NLP-to-synthesis-parameter mapping
-      dsp.rs            — Filters, EQ, transient shaping
-      process.rs        — Repair chain + validation
-Storage:   Content-addressed WAV files + SQLite metadata
-CLI:       python3 gen.py (stable) | cargo run --bin cshot-cli (experimental)
-Plugin:    cshot-plugin (standalone plugin prototype)
-```
-
-## Build
+**Requirements:** Python 3.10+, pip.
 
 ```bash
-# Python generator (stable — no build needed)
-python3 gen.py oneshot clap --out outputs/clap.wav
-
-# Tauri desktop app (experimental)
-npm run tauri build
-
-# Rust CLI (experimental)
-cargo run --bin cshot-cli
-
-# Plugin prototype (experimental)
-cargo run --bin cshot-plugin
+git clone <repo-url> && cd cShot
+pip install -r requirements.txt
 ```
 
-## Configuration
+That's it. No accounts, no API keys, no Docker. The `cshot` wrapper at repo root calls `python3 gen.py`.
 
-cShot works out of the box with no configuration.
+## 10 Example Prompts
 
-For optional cloud providers, see the Settings panel in the app.
+All generate single WAV files for immediate listening:
 
-## Keyboard Shortcuts
+| # | Command | What You Get |
+|---|---------|-------------|
+| 1 | `./cshot prompt "dark soft piano stab" --out outputs/01.wav` | Mellow acoustic piano, soft attack |
+| 2 | `./cshot prompt "bright hard piano stab" --out outputs/02.wav` | Bright piano with hard transient |
+| 3 | `./cshot prompt "punchy kick 808" --out outputs/03.wav` | Kick drum with 808 sub |
+| 4 | `./cshot prompt "warm synth pluck" --out outputs/04.wav` | Soft filtered synth pluck |
+| 5 | `./cshot prompt "aggressive distorted bass" --out outputs/05.wav` | Distorted growly bass |
+| 6 | `./cshot prompt "clean nylon guitar" --out outputs/06.wav` | Clean acoustic-guitar pluck |
+| 7 | `./cshot prompt "cinematic impact fx" --out outputs/07.wav` | Big impact with long tail |
+| 8 | `./cshot prompt "mellow synth pad" --out outputs/08.wav` | Soft evolving pad |
+| 9 | `./cshot prompt "bright synth chord" --out outputs/09.wav` | Major chord stab |
+| 10 | `./cshot prompt "lo-fi glitch texture" --out outputs/10.wav` | Noisy glitch with lo-fi character |
 
-| Key | Action |
-|-----|--------|
-| ⌘1 | Generator view |
-| ⌘2 | Library view |
-| Space | Play / Stop |
-| Enter | Generate |
-| R | Regenerate |
-| ⌘E | Export |
-| ⌘F | Favorite |
-| ? | Shortcuts help |
+Try replacing adjectives: `bright`/`dark`, `soft`/`punchy`, `clean`/`distorted`, `dry`/`wet`, `narrow`/`wide`.
 
-## Commercial Use
+## Supported Sound Families
 
-Generated sounds from cShot's local engine are safe for commercial use.
-See [docs/COPYRIGHT-SAFETY.md](docs/COPYRIGHT-SAFETY.md) for details.
+| Family | Nouns | Profiles |
+|--------|-------|----------|
+| Piano | `piano`, `keys` | acoustic, felt, dark, bright, lo-fi |
+| Synth | `stab`, `pluck`, `pad`, `lead`, `chord`, `synth` | stab, pluck, pad, chord, lead, bass |
+| Bass | `bass`, `808`, `reese`, `sub` | 808, reese, distorted, pluck, fm, hybrid |
+| Guitar | `guitar`, `nylon`, `acoustic` | nylon, muted, bright, dark, processed, reversed |
+| FX | `impact`, `fx`, `riser`, `glitch`, `noise`, `vinyl`, `texture` | impact, downlifter, riser, glitch, noise_hit, vinyl, air |
+| Drums | `kick`, `snare`, `clap`, `hat`, `hihat`, `open_hat` | Basic synthesized drums |
 
-## Known Working Path
+## Adjectives
 
-The **Python synthesis engine** (`gen.py`) is the current stable generation backend. It produces better reference-grounded outputs than the Rust/Tauri engine.
+| Category | Words |
+|----------|-------|
+| Brightness | bright, dark, warm, mellow, edgy, crisp |
+| Attack | soft, hard, punchy, gentle, aggressive |
+| Character | distorted, clean, lo-fi, glitchy, metallic |
+| Space | dry, wet, narrow, wide, intimate, huge |
+| Style | vintage, modern, analog, digital, dusty, glossy |
 
-### Prerequisites
+`./cshot prompt "dark bright piano"` warns about conflicting descriptors.
+
+## All Commands
 
 ```bash
-pip3 install soundfile scipy numpy
+./cshot scan                              # Scan reference folders
+./cshot profiles                          # Build class profiles
+./cshot oneshot <class> --out file.wav    # Single one-shot
+./cshot batch --class kick --count 20     # Batch generation
+./cshot prompt "dark soft piano"          # Natural language prompt
+./cshot prompt "punchy kick" --count 10   # Batch from prompt
+./cshot qa                                # QA audit
+./cshot all                               # Full pipeline
+./cshot piano-gen acoustic --count 10     # Piano generation
+./cshot synth-gen stab --count 10         # Synth generation
+./cshot bass-gen 808 --count 10           # Bass generation
+./cshot guitar-gen nylon --count 10       # Guitar generation
+./cshot fx-gen impact --count 10          # FX generation
+./cshot mvp-audit                         # Full 100-file audit
 ```
 
-### Commands
+## Output Format
+
+- 44100 Hz, 16-bit mono WAV
+- Normalized to ~0.9 peak amplitude
+- DAW-friendly filenames
+
+## Known Working Path (Python CLI)
+
+The Python synthesis engine (`gen/`) is the **official working backend**. It produces reference-grounded outputs across all families and supports natural language prompting with 60+ adjectives.
+
+To verify your setup:
+```bash
+./cshot prompt "dark soft piano stab" --out outputs/test.wav
+# → Writes a ~1.5s WAV to outputs/test.wav
+# → Outputs feature summary (centroid, attack, RMS, etc.)
+```
+
+## Known Broken / Experimental (Rust/Tauri)
+
+The Rust DSP engine and Tauri desktop app were early prototypes. They contain ambitious but unverified code:
+
+- **Tauri desktop app** (`npm run tauri dev`) — UI shell works, generation may lag behind Python
+- **Rust CLI** (`cargo run --bin cshot-cli`) — mirrors some Python commands, not in sync
+- **Rust synthesis engine** (`src-tauri/src/audio/`) — 5-layer resynthesis framework, needs parity with Python
+- **Plugin prototype** (`cargo run --bin cshot-plugin`) — standalone VST prototype, not production-ready
+
+Development priority: Python CLI first. Rust/Tauri will be revisited once generation quality stabilizes.
+
+## Troubleshooting
+
+### `pip install` fails
 
 ```bash
-# Single one-shot to exact path
-python3 gen.py oneshot clap --out outputs/clap.wav
-
-# Batch generate 20 claps into a directory
-python3 gen.py batch --class clap --count 20 --out outputs/claps/
-
-# Available sound classes:
-#   kick, snare, clap, closed_hat, open_hat, 808,
-#   bass_stab, impact_fx, synth_stab, guitar_stab
-
-# Full pipeline: scan references → build profiles → generate QA → compare
-python3 gen.py scan
-python3 gen.py profiles
-python3 gen.py all
+# Install system deps for soundfile
+# Ubuntu/Debian:
+sudo apt-get install libsndfile1
+# macOS:
+brew install libsndfile
 ```
 
-### Output
+### `ModuleNotFoundError: No module named 'gen'`
 
-Generated WAVs are 44100 Hz, 16-bit mono, normalized to ~0.9 peak. Each sample has varied duration/pitch/gain from seed-based randomization.
+Run commands from repo root (where `cshot` and `gen/` live):
+```bash
+cd /path/to/cShot
+./cshot prompt "dark soft piano"
+```
+
+### Generated WAV is silent / very short
+
+Some prompt + family combinations produce thin output. Try adding adjectives:
+```bash
+./cshot prompt "warm punchy kick" --out outputs/test.wav    # Better
+# vs
+./cshot prompt "kick" --out outputs/test.wav                # May be thin
+```
+
+### `outputs/` not created
+
+The script creates the directory automatically. Check permissions or create it:
+```bash
+mkdir -p outputs
+```
+
+### "Unknown command" error
+
+```bash
+./cshot --help   # List all commands
+./cshot prompt "dark soft piano"   # "prompt" is one word
+```
+
+### WAV won't play
+
+Ensure the file is valid:
+```bash
+file outputs/test.wav
+# Should show: RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 44100 Hz
+```
+
+### Pitch sounds wrong
+
+Tonal families (piano, keys) are locked to specific pitches by default. Use `--count 10` to get variation.
+
+### I want more sounds
+
+```
+./cshot mvp-audit   # Generates 100 files across 20+ categories
+```
 
 ## Engine Status
 
 | Engine | Status | Notes |
 |--------|--------|-------|
-| **Python (`gen.py`)** | **Official** | Stable, reference-informed synthesis, ready for CLI/DAW use |
-| **Rust/Tauri** | **Experimental / Legacy** | Needs parity work; Tauri UI drives this engine — CLI generation via Python is the reliable path for now |
+| **Python (`gen/`)** | **Official** | Stable, reference-informed, natural language prompting |
+| **Rust/Tauri** | **Experimental** | Needs parity; not the current development focus |
 
 ## License
 
 MIT
+
+Generated sounds from the local engine are safe for commercial use. See [docs/COPYRIGHT-SAFETY.md](docs/COPYRIGHT-SAFETY.md).
