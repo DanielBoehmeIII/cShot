@@ -83,6 +83,7 @@ from gen.prompt import cmd_prompt, cmd_prompt_refine, cmd_mvp_audit, cmd_compare
 from gen.presets import cmd_save_preset, cmd_preset_list, cmd_preset_generate
 from gen.polish import cmd_polish
 from gen.pack import cmd_pack, cmd_pack_audit
+from gen.similar import cmd_similar, cmd_variations
 
 
 def main():
@@ -356,6 +357,19 @@ def main():
     p_audit = subparsers.add_parser("pack-audit", help="Audit a pack for quality issues")
     p_audit.add_argument("pack_dir", help="Pack directory to audit")
 
+    # ── Make Similar ──
+    p_sim = subparsers.add_parser("similar", help="Generate variations similar to a reference sample")
+    p_sim.add_argument("reference", help="Path to reference .wav file")
+    p_sim.add_argument("--count", "-n", type=int, default=20, help="Number of variations")
+    p_sim.add_argument("--out", "-o", help="Output directory")
+
+    # ── Make Variations ──
+    p_var = subparsers.add_parser("variations", help="Generate a variation cloud from a reference sample")
+    p_var.add_argument("reference", help="Path to reference .wav file")
+    p_var.add_argument("--count", "-n", type=int, default=30, help="Number of variations")
+    p_var.add_argument("--spread", choices=["low", "medium", "high"], default="medium", help="Variation spread")
+    p_var.add_argument("--out", "-o", help="Output directory")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -455,6 +469,10 @@ def main():
         cmd_pack(args)
     elif args.command == "pack-audit":
         cmd_pack_audit(args)
+    elif args.command == "similar":
+        cmd_similar(args)
+    elif args.command == "variations":
+        cmd_variations(args)
     elif args.command == "all":
         cmd_all(args)
     else:
