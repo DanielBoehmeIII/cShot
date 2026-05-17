@@ -1,5 +1,6 @@
-"""Batch pack generation and audit."""
+"""Batch pack generation, themes, and audit."""
 import json
+import random
 import sys
 import time
 from collections import Counter
@@ -8,9 +9,9 @@ from pathlib import Path
 import numpy as np
 
 from gen import REPO_ROOT, SAMPLE_RATE
-from gen.prompt import parse_prompt, generate_from_prompt
+from gen.prompt import parse_prompt, generate_from_prompt, _seed_from_prompt, _resolve_generator, _generate_variation, _write_metadata
 from gen.polish import polish_file, validate_audio
-from gen.io import read_wav
+from gen.io import read_wav, write_wav
 from gen.features import compute_features
 
 
@@ -260,3 +261,148 @@ def cmd_pack_audit(args):
     with open(audit_path, "w") as f:
         json.dump(audit, f, indent=2)
     print(f"\nAudit saved: {audit_path}")
+
+
+# Theme-based category + prompt plans for sample packs
+THEME_PLANS = {
+    "noir piano kit": {
+        "label": "Noir Piano Kit",
+        "adjectives": ["dark", "soft", "warm", "mellow", "dusty", "vintage", "intimate"],
+        "categories": {
+            "keys": {"profile": "piano", "count": 15, "variations": ["acoustic", "felt", "dark", "lo-fi"]},
+            "fx": {"profile": "fx", "count": 10, "variations": ["impact", "riser", "air", "vinyl"]},
+            "bass": {"profile": "bass", "count": 10, "variations": ["808", "sub", "reese"]},
+            "drums": {"profile": "drums", "count": 15, "variations": ["kick", "snare", "clap", "hat"]},
+        },
+    },
+    "trap god kit": {
+        "label": "Trap God Kit",
+        "adjectives": ["aggressive", "punchy", "dark", "distorted", "edgy", "hard"],
+        "categories": {
+            "drums": {"profile": "drums", "count": 20, "variations": ["kick", "snare", "clap", "hat"]},
+            "bass": {"profile": "bass", "count": 15, "variations": ["808", "reese", "distorted", "fm"]},
+            "synth": {"profile": "synth", "count": 10, "variations": ["stab", "pluck", "lead"]},
+            "fx": {"profile": "fx", "count": 5, "variations": ["impact", "riser", "glitch"]},
+        },
+    },
+    "cinematic impacts": {
+        "label": "Cinematic Impacts",
+        "adjectives": ["big", "huge", "airy", "sustained", "bright", "wide", "aggressive"],
+        "categories": {
+            "fx": {"profile": "fx", "count": 25, "variations": ["impact", "riser", "downlifter", "air", "noise_hit"]},
+            "keys": {"profile": "keys", "count": 10, "variations": ["acoustic", "bell", "rhodes"]},
+            "synth": {"profile": "synth", "count": 10, "variations": ["pad", "lead", "chord"]},
+            "drums": {"profile": "drums", "count": 5, "variations": ["kick", "snare"]},
+        },
+    },
+    "hyperpop synth pack": {
+        "label": "Hyperpop Synth Pack",
+        "adjectives": ["bright", "glossy", "distorted", "wide", "crisp", "edgy", "digital", "aggressive"],
+        "categories": {
+            "synth": {"profile": "synth", "count": 25, "variations": ["stab", "pluck", "lead", "pad", "chord"]},
+            "bass": {"profile": "bass", "count": 10, "variations": ["808", "distorted", "fm"]},
+            "drums": {"profile": "drums", "count": 10, "variations": ["kick", "snare", "clap", "hat"]},
+            "fx": {"profile": "fx", "count": 5, "variations": ["glitch", "noise_hit", "impact"]},
+        },
+    },
+    "lo-fi keys pack": {
+        "label": "Lo-fi Keys Pack",
+        "adjectives": ["lo_fi", "warm", "dusty", "mellow", "soft", "vintage", "intimate"],
+        "categories": {
+            "keys": {"profile": "keys", "count": 25, "variations": ["acoustic", "felt", "bell", "rhodes", "dark"]},
+            "drums": {"profile": "drums", "count": 10, "variations": ["kick", "snare", "clap", "hat"]},
+            "bass": {"profile": "bass", "count": 10, "variations": ["808", "sub", "reese"]},
+            "fx": {"profile": "fx", "count": 5, "variations": ["vinyl", "air", "noise_hit"]},
+        },
+    },
+}
+
+FAMILY_PROFILE_MAP = {
+    "keys": ("piano-gen", "piano"),
+    "drums": ("batch", "kick"),
+    "bass": ("bass-gen", "bass"),
+    "synth": ("synth-gen", "synth"),
+    "fx": ("fx-gen", "fx"),
+}
+
+
+def cmd_theme(args):
+    """Generate a themed pack with coherent naming and category planning."""
+    theme_name = " ".join(args.theme).lower().strip()
+    if theme_name not in THEME_PLANS:
+        print(f"Unknown theme '{theme_name}'. Available themes:")
+        for t in sorted(THEME_PLANS.keys()):
+            print(f"  {t}")
+        sys.exit(1)
+
+    theme = THEME_PLANS[theme_name]
+    out_dir = Path(args.out) if args.out else Path(f"Packs/{theme_name.replace(' ', '_')}")
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    total_planned = sum(c["count"] for c in theme["categories"].values())
+
+    print(f"Theme: {theme['label']}")
+    print(f"{'='*60}")
+    for cat_name, cat_info in sorted(theme["categories"].items()):
+        print(f"  {cat_name:10s}: {cat_info['count']:>3} files ({', '.join(cat_info['variations'])})")
+    print(f"\n  Total: {total_planned} files")
+    print()
+
+    theme_plan = {
+        "theme": theme_name,
+        "label": theme["label"],
+        "adjectives": theme["adjectives"],
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "total_planned": total_planned,
+        "categories": {},
+    }
+
+    total_generated = 0
+    for cat_name, cat_info in sorted(theme["categories"].items()):
+        cat_dir = out_dir / cat_name
+        cat_dir.mkdir(parents=True, exist_ok=True)
+
+        count = cat_info["count"]
+        variations = cat_info["variations"]
+        per_var = max(1, count // len(variations))
+
+        gen_family, profile_noun = FAMILY_PROFILE_MAP.get(cat_name, ("synth-gen", "synth"))
+        cat_paths = []
+
+        for var_name in variations:
+            adj = random.choice(theme["adjectives"])
+            prompt = f"{adj} {var_name}"
+            parsed = parse_prompt(prompt)
+
+            for i in range(per_var):
+                seed = _seed_from_prompt(f"{theme_name}_{cat_name}_{var_name}_{i}", i)
+                np.random.seed(seed % 2**32)
+
+                try:
+                    gen_fn, default_dur, default_pitch, gen_family_name, profile_name, overrides = _resolve_generator(parsed)
+                    dur = default_dur
+                    pitch = default_pitch
+                    samples, actual_dur, actual_pitch = _generate_variation(dur, pitch, gen_family_name, gen_fn)
+                    safe_theme = theme_name.replace(" ", "_").lower()[:20]
+                    out_path = cat_dir / f"{safe_theme}_{var_name}_{adj}_{i+1:03d}.wav"
+                    write_wav(out_path, samples)
+                    _write_metadata(out_path, parsed, seed, actual_dur, actual_pitch)
+                    cat_paths.append(out_path)
+                except Exception as e:
+                    print(f"  ✗ {cat_name}/{var_name}: {e}")
+
+        total_generated += len(cat_paths)
+        theme_plan["categories"][cat_name] = {
+            "count": len(cat_paths),
+            "variations": variations,
+            "files": [p.name for p in cat_paths],
+        }
+        print(f"  ✓ {cat_name:10s}: {len(cat_paths)} files → {cat_dir}")
+
+    theme_plan["total_generated"] = total_generated
+
+    plan_path = out_dir / "theme_plan.json"
+    with open(plan_path, "w") as f:
+        json.dump(theme_plan, f, indent=2)
+    print(f"\nTheme plan: {plan_path}")
+    print(f"Generated {total_generated}/{total_planned} files in {out_dir}")

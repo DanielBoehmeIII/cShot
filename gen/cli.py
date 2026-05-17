@@ -82,7 +82,7 @@ from gen.fx_gen import cmd_fx_gen, cmd_fx_qa, FX_PROFILES
 from gen.prompt import cmd_prompt, cmd_prompt_refine, cmd_mvp_audit, cmd_compare_prompt, cmd_contrast_test, cmd_regenerate
 from gen.presets import cmd_save_preset, cmd_preset_list, cmd_preset_generate
 from gen.polish import cmd_polish
-from gen.pack import cmd_pack, cmd_pack_audit
+from gen.pack import cmd_pack, cmd_pack_audit, cmd_theme
 from gen.similar import cmd_similar, cmd_variations
 from gen.genre import cmd_genre, GENRE_PROFILES
 from gen.refine_feedback import cmd_refine_feedback
@@ -359,30 +359,10 @@ def main():
     p_audit = subparsers.add_parser("pack-audit", help="Audit a pack for quality issues")
     p_audit.add_argument("pack_dir", help="Pack directory to audit")
 
-    # ── Make Similar ──
-    p_sim = subparsers.add_parser("similar", help="Generate variations similar to a reference sample")
-    p_sim.add_argument("reference", help="Path to reference .wav file")
-    p_sim.add_argument("--count", "-n", type=int, default=20, help="Number of variations")
-    p_sim.add_argument("--out", "-o", help="Output directory")
-
-    # ── Make Variations ──
-    p_var = subparsers.add_parser("variations", help="Generate a variation cloud from a reference sample")
-    p_var.add_argument("reference", help="Path to reference .wav file")
-    p_var.add_argument("--count", "-n", type=int, default=30, help="Number of variations")
-    p_var.add_argument("--spread", choices=["low", "medium", "high"], default="medium", help="Variation spread")
-    p_var.add_argument("--out", "-o", help="Output directory")
-
-    # ── Refine Feedback ──
-    p_rf = subparsers.add_parser("refine-feedback", help="Refine a file using natural language feedback")
-    p_rf.add_argument("file", help="Path to the .wav file to refine")
-    p_rf.add_argument("feedback", help="Natural language feedback (e.g. 'less harsh, more warm, shorter tail')")
-    p_rf.add_argument("--out", "-o", help="Output path for refined file")
-
-    # ── Genre ──
-    p_genre = subparsers.add_parser("genre", help="Generate sounds for a specific genre")
-    p_genre.add_argument("genre", help=f"Genre name ({', '.join(sorted(GENRE_PROFILES.keys()))})")
-    p_genre.add_argument("--count", "-n", type=int, default=20, help="Number of samples")
-    p_genre.add_argument("--out", "-o", help="Output directory")
+    # ── Theme ──
+    p_theme = subparsers.add_parser("theme", help="Generate a themed pack (e.g. 'Noir Piano Kit')")
+    p_theme.add_argument("theme", nargs="+", help="Theme name")
+    p_theme.add_argument("--out", "-o", help="Output directory")
 
     args = parser.parse_args()
 
@@ -491,6 +471,8 @@ def main():
         cmd_refine_feedback(args)
     elif args.command == "genre":
         cmd_genre(args)
+    elif args.command == "theme":
+        cmd_theme(args)
     elif args.command == "all":
         cmd_all(args)
     else:
