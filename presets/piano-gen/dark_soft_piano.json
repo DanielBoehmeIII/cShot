@@ -1,0 +1,22 @@
+{
+  "name": "dark_soft_piano",
+  "family": "piano-gen",
+  "profile": "acoustic",
+  "prompt": "dark soft piano stab",
+  "adjectives": [
+    "dark",
+    "soft"
+  ],
+  "overrides": {
+    "brightness": 0.3,
+    "high_shelf_db": -8.0,
+    "filter_cutoff_end": 0.25,
+    "attack_ms": 30.0,
+    "velocity": 0.15,
+    "hammer_noise_amp": 0.02,
+    "saturation": 0.0
+  },
+  "seed": 42,
+  "source_file": "seed_test_42.wav",
+  "saved_at": "2026-05-17T20:18:13Z"
+}

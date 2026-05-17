@@ -80,6 +80,7 @@ from gen.guitar_gen import cmd_guitar_gen, cmd_guitar_qa, GUITAR_PROFILES
 from gen.bass_gen import cmd_bass_gen, cmd_bass_qa, BASS_PROFILES
 from gen.fx_gen import cmd_fx_gen, cmd_fx_qa, FX_PROFILES
 from gen.prompt import cmd_prompt, cmd_prompt_refine, cmd_mvp_audit, cmd_compare_prompt, cmd_contrast_test, cmd_regenerate
+from gen.presets import cmd_save_preset, cmd_preset_list, cmd_preset_generate
 
 
 def main():
@@ -318,6 +319,19 @@ def main():
 
     p_fav = subparsers.add_parser("favorites", help="List all favorited files")
 
+    # ── Presets ──
+    p_save = subparsers.add_parser("save-preset", help="Save a generation preset from metadata")
+    p_save.add_argument("name", help="Preset name")
+    p_save.add_argument("--from", "-f", dest="from_meta", required=True, help="Path to metadata JSON")
+
+    p_plist = subparsers.add_parser("preset", help="Manage presets")
+    p_plist_sub = p_plist.add_subparsers(dest="preset_action", help="Preset action")
+    p_plist_list = p_plist_sub.add_parser("list", help="List all saved presets")
+    p_plist_gen = p_plist_sub.add_parser("generate", help="Generate from a preset")
+    p_plist_gen.add_argument("name", help="Preset name to generate")
+    p_plist_gen.add_argument("--out", "-o", help="Output directory")
+    p_plist_gen.add_argument("--count", "-n", type=int, default=1, help="Number of samples")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -402,6 +416,15 @@ def main():
         cmd_favorites(args)
     elif args.command == "regenerate":
         cmd_regenerate(args)
+    elif args.command == "save-preset":
+        cmd_save_preset(args)
+    elif args.command == "preset":
+        if args.preset_action == "list":
+            cmd_preset_list(args)
+        elif args.preset_action == "generate":
+            cmd_preset_generate(args)
+        else:
+            print("Usage: cshot preset list|generate <name>")
     elif args.command == "all":
         cmd_all(args)
     else:

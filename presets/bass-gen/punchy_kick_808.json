@@ -1,0 +1,18 @@
+{
+  "name": "punchy_kick_808",
+  "family": "bass-gen",
+  "profile": "808",
+  "prompt": "punchy kick 808",
+  "adjectives": [
+    "punchy"
+  ],
+  "overrides": {
+    "attack_ms": 2.0,
+    "saturation": 0.5,
+    "compression": 0.6,
+    "transient_boost": 1.0
+  },
+  "seed": 35056404140165,
+  "source_file": "tmprg710a6b.wav",
+  "saved_at": "2026-05-17T20:18:36Z"
+}
