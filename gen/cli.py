@@ -88,6 +88,8 @@ from gen.genre import cmd_genre, GENRE_PROFILES
 from gen.rank import cmd_rank, cmd_top
 from gen.taste import cmd_taste_profile, cmd_prompt_history
 from gen.make import cmd_make
+from gen.search_ref import cmd_search_ref
+from gen.blend import cmd_blend
 from gen.refine_feedback import cmd_refine_feedback
 
 
@@ -319,6 +321,9 @@ def main():
     p_mvp = subparsers.add_parser("mvp-audit", help="Final MVP audit: generate 100 files across 20 categories with contrast tests")
     p_mvp.add_argument("--out", "-o", default="outputs/mvp_audit", help="Output directory")
 
+    # ── Dataset Health ──
+    subparsers.add_parser("dataset-health", help="Run dataset health checks on reference library")
+
     # ── Rating System ──
     p_rate = subparsers.add_parser("rate", help="Rate a generated file")
     p_rate.add_argument("file", help="Path to the .wav file to rate")
@@ -384,6 +389,19 @@ def main():
     p_make.add_argument("prompt", nargs="+", help="Pack description")
     p_make.add_argument("--count", "-n", type=int, default=100, help="Target file count")
     p_make.add_argument("--out", "-o", help="Output directory")
+
+    # ── Reference Search ──
+    p_sr = subparsers.add_parser("search-ref", help="Search reference library by text query")
+    p_sr.add_argument("query", nargs="+", help="Search query (e.g. 'bright clap' or 'kick')")
+
+    # ── Blend Mode ──
+    p_blend = subparsers.add_parser("blend", help="Blend two audio samples together")
+    p_blend.add_argument("sample_a", help="First .wav file")
+    p_blend.add_argument("sample_b", help="Second .wav file")
+    p_blend.add_argument("--blend", type=float, default=0.5, help="Blend ratio (0=only A, 1=only B)")
+    p_blend.add_argument("--mode", choices=["mix", "envelope"], default="mix",
+                         help="Blend mode: mix (default) or envelope (attack from A, body from B)")
+    p_blend.add_argument("--out", "-o", help="Output path")
 
     args = parser.parse_args()
 
@@ -504,6 +522,10 @@ def main():
         cmd_prompt_history(args)
     elif args.command == "make":
         cmd_make(args)
+    elif args.command == "search-ref":
+        cmd_search_ref(args)
+    elif args.command == "blend":
+        cmd_blend(args)
     elif args.command == "all":
         cmd_all(args)
     else:
