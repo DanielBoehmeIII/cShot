@@ -1863,3 +1863,133 @@ fn test_showcase_end_to_end() {
     println!("  Variants: {}", variants.len());
     println!("  Export ready: {}", assessment.export_ready);
 }
+
+// ─── WAV I/O Tests ────────────────────────────────────────
+
+fn wav_test_path(name: &str) -> std::path::PathBuf {
+    let dir = std::env::temp_dir().join(format!("cshot_wav_test_{}", name));
+    let _ = std::fs::create_dir_all(&dir);
+    dir.join(format!("{}.wav", name))
+}
+
+fn cleanup_wav_test(name: &str) {
+    let dir = std::env::temp_dir().join(format!("cshot_wav_test_{}", name));
+    let path = dir.join(format!("{}.wav", name));
+    let _ = std::fs::remove_file(&path);
+    let _ = std::fs::remove_dir(&dir);
+}
+
+#[test]
+fn test_write_wav_success() {
+    let path = wav_test_path("test_write_wav_success");
+    let samples = generate_sine_wave(440.0, 100.0, 0.5);
+    let result = cshot_lib::audio::write_wav(&path, &samples, 44100);
+    assert!(result.is_ok(), "write_wav should succeed: {:?}", result);
+    let file_size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+    assert!(file_size >= 44, "WAV file should be at least 44 bytes");
+    cleanup_wav_test("test_write_wav_success");
+}
+
+#[test]
+fn test_write_wav_empty_rejected() {
+    let path = wav_test_path("test_write_wav_empty_rejected");
+    let samples: Vec<f32> = vec![];
+    let result = cshot_lib::audio::write_wav(&path, &samples, 44100);
+    assert!(result.is_err(), "Empty samples should be rejected");
+    assert!(result.unwrap_err().contains("empty"), "Error should mention 'empty'");
+    cleanup_wav_test("test_write_wav_empty_rejected");
+}
+
+#[test]
+fn test_write_wav_nan_rejected() {
+    let path = wav_test_path("test_write_wav_nan_rejected");
+    let samples = vec![std::f32::NAN; 100];
+    let result = cshot_lib::audio::write_wav(&path, &samples, 44100);
+    assert!(result.is_err(), "NaN samples should be rejected");
+    assert!(result.unwrap_err().contains("NaN"), "Error should mention 'NaN'");
+    cleanup_wav_test("test_write_wav_nan_rejected");
+}
+
+#[test]
+fn test_write_wav_inf_rejected() {
+    let path = wav_test_path("test_write_wav_inf_rejected");
+    let samples = vec![std::f32::INFINITY; 100];
+    let result = cshot_lib::audio::write_wav(&path, &samples, 44100);
+    assert!(result.is_err(), "Inf samples should be rejected");
+    assert!(result.unwrap_err().contains("Inf"), "Error should mention 'Inf'");
+    cleanup_wav_test("test_write_wav_inf_rejected");
+}
+
+#[test]
+fn test_write_wav_clamps_above_1() {
+    let path = wav_test_path("test_write_wav_clamps_above_1");
+    let mut samples = generate_sine_wave(440.0, 50.0, 0.5);
+    samples.push(1.5);
+    samples.push(2.0);
+    samples.push(10.0);
+    let result = cshot_lib::audio::write_wav(&path, &samples, 44100);
+    assert!(result.is_ok(), "Samples above 1.0 should be clamped and written: {:?}", result);
+    let read_back = cshot_lib::audio::read_wav(&path).unwrap();
+    let peak = read_back.iter().map(|&s| s.abs()).fold(0.0f32, f32::max);
+    assert!(peak <= 1.0, "Peak should be clamped to 1.0, got {}", peak);
+    cleanup_wav_test("test_write_wav_clamps_above_1");
+}
+
+#[test]
+fn test_write_wav_clamps_below_neg1() {
+    let path = wav_test_path("test_write_wav_clamps_below_neg1");
+    let mut samples = generate_sine_wave(440.0, 50.0, 0.5);
+    samples.push(-1.5);
+    samples.push(-2.0);
+    samples.push(-10.0);
+    let result = cshot_lib::audio::write_wav(&path, &samples, 44100);
+    assert!(result.is_ok(), "Samples below -1.0 should be clamped and written: {:?}", result);
+    let read_back = cshot_lib::audio::read_wav(&path).unwrap();
+    let min = read_back.iter().fold(0.0f32, |a, &b| a.min(b));
+    assert!(min >= -1.0, "Min should be clamped to -1.0, got {}", min);
+    cleanup_wav_test("test_write_wav_clamps_below_neg1");
+}
+
+#[test]
+fn test_write_wav_bytes_roundtrip() {
+    let original = generate_sine_wave(440.0, 50.0, 0.5);
+    let bytes = cshot_lib::audio::write_wav_bytes(&original, 44100).unwrap();
+    assert!(bytes.len() >= 44, "WAV bytes should be at least 44 bytes");
+    let path = wav_test_path("test_write_wav_bytes_roundtrip");
+    std::fs::write(&path, &bytes).unwrap();
+    let read_back = cshot_lib::audio::read_wav(&path).unwrap();
+    assert_eq!(read_back.len(), original.len(), "Roundtrip should preserve sample count");
+    cleanup_wav_test("test_write_wav_bytes_roundtrip");
+}
+
+#[test]
+fn test_write_wav_bytes_nan_rejected() {
+    let samples = vec![std::f32::NAN; 100];
+    let result = cshot_lib::audio::write_wav_bytes(&samples, 44100);
+    assert!(result.is_err(), "NaN samples should be rejected in write_wav_bytes");
+}
+
+#[test]
+fn test_write_wav_bytes_inf_rejected() {
+    let samples = vec![std::f32::INFINITY; 100];
+    let result = cshot_lib::audio::write_wav_bytes(&samples, 44100);
+    assert!(result.is_err(), "Inf samples should be rejected in write_wav_bytes");
+}
+
+#[test]
+fn test_write_wav_local_engine() {
+    use cshot_lib::audio::resynthesize;
+    let params = resynthesize::params_for_sound_type(
+        cshot_lib::audio::SoundType::Kick, 60.0, 300.0,
+    );
+    let samples = resynthesize::resynthesize(&params);
+    assert!(!samples.is_empty(), "Engine should produce samples");
+    let path = wav_test_path("test_write_wav_local_engine");
+    let result = cshot_lib::audio::write_wav(&path, &samples, 44100);
+    assert!(result.is_ok(), "Local engine WAV write should succeed: {:?}", result);
+    let read_back = cshot_lib::audio::read_wav(&path).unwrap();
+    assert_eq!(read_back.len(), samples.len(), "Read-back sample count should match");
+    let peak = read_back.iter().map(|&s| s.abs()).fold(0.0f32, f32::max);
+    assert!(peak > 0.0, "Read-back audio should have content");
+    cleanup_wav_test("test_write_wav_local_engine");
+}

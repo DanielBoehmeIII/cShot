@@ -12,20 +12,18 @@ pub fn write_wav(path: &Path, samples: &[f32], sample_rate: u32) -> Result<(), S
     let spec = hound::WavSpec {
         channels: 1,
         sample_rate,
-        bits_per_sample: 24,
-        sample_format: hound::SampleFormat::Int,
+        bits_per_sample: 32,
+        sample_format: hound::SampleFormat::Float,
     };
 
     let mut writer = hound::WavWriter::create(path, spec).map_err(|e| {
         format!("Could not create WAV file at {}: {}", path.display(), e)
     })?;
 
-    let amplitude = i32::MAX as f64;
     let mut written = 0usize;
     for &sample in samples {
-        let clamped = sample.clamp(-1.0, 1.0) as f64;
-        let int_val = (clamped * amplitude) as i32;
-        writer.write_sample(int_val).map_err(|e| {
+        let clamped = sample.clamp(-1.0, 1.0);
+        writer.write_sample(clamped).map_err(|e| {
             format!("Failed to write sample {}: {}", written, e)
         })?;
         written += 1;
@@ -46,22 +44,23 @@ pub fn write_wav_bytes(samples: &[f32], sample_rate: u32) -> Result<Vec<u8>, Str
     if samples.is_empty() {
         return Err("Cannot write empty audio buffer".to_string());
     }
+    if samples.iter().any(|s| s.is_nan() || s.is_infinite()) {
+        return Err("Audio buffer contains NaN or Inf values".to_string());
+    }
 
     let spec = hound::WavSpec {
         channels: 1,
         sample_rate,
-        bits_per_sample: 24,
-        sample_format: hound::SampleFormat::Int,
+        bits_per_sample: 32,
+        sample_format: hound::SampleFormat::Float,
     };
 
     let mut cursor = Cursor::new(Vec::new());
     let mut writer = hound::WavWriter::new(&mut cursor, spec).map_err(|e| e.to_string())?;
 
-    let amplitude = i32::MAX as f64;
     for &sample in samples {
-        let clamped = sample.clamp(-1.0, 1.0) as f64;
-        let int_val = (clamped * amplitude) as i32;
-        writer.write_sample(int_val).map_err(|e| e.to_string())?;
+        let clamped = sample.clamp(-1.0, 1.0);
+        writer.write_sample(clamped).map_err(|e| e.to_string())?;
     }
 
     writer.finalize().map_err(|e| e.to_string())?;
