@@ -81,6 +81,7 @@ from gen.bass_gen import cmd_bass_gen, cmd_bass_qa, BASS_PROFILES
 from gen.fx_gen import cmd_fx_gen, cmd_fx_qa, FX_PROFILES
 from gen.prompt import cmd_prompt, cmd_prompt_refine, cmd_mvp_audit, cmd_compare_prompt, cmd_contrast_test, cmd_regenerate
 from gen.presets import cmd_save_preset, cmd_preset_list, cmd_preset_generate
+from gen.polish import cmd_polish
 
 
 def main():
@@ -332,6 +333,15 @@ def main():
     p_plist_gen.add_argument("--out", "-o", help="Output directory")
     p_plist_gen.add_argument("--count", "-n", type=int, default=1, help="Number of samples")
 
+    # ── Polish / Export Quality ──
+    p_polish = subparsers.add_parser("polish", help="Polish audio: trim, fade, normalize, validate")
+    p_polish.add_argument("input", help="WAV file or directory of WAV files")
+    p_polish.add_argument("--target-db", type=float, default=-1.0,
+                          help="Peak normalization target in dB (default: -1.0, options: 0, -1, -3, -6)")
+    p_polish.add_argument("--trim-db", type=float, default=-60.0, help="Silence threshold in dB (default: -60)")
+    p_polish.add_argument("--fade-in-ms", type=float, default=3.0, help="Fade-in length in ms")
+    p_polish.add_argument("--fade-out-ms", type=float, default=5.0, help="Fade-out length in ms")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -425,6 +435,8 @@ def main():
             cmd_preset_generate(args)
         else:
             print("Usage: cshot preset list|generate <name>")
+    elif args.command == "polish":
+        cmd_polish(args)
     elif args.command == "all":
         cmd_all(args)
     else:
