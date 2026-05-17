@@ -82,7 +82,7 @@ from gen.fx_gen import cmd_fx_gen, cmd_fx_qa, FX_PROFILES
 from gen.prompt import cmd_prompt, cmd_prompt_refine, cmd_mvp_audit, cmd_compare_prompt, cmd_contrast_test, cmd_regenerate
 from gen.presets import cmd_save_preset, cmd_preset_list, cmd_preset_generate
 from gen.polish import cmd_polish
-from gen.pack import cmd_pack
+from gen.pack import cmd_pack, cmd_pack_audit
 
 
 def main():
@@ -352,6 +352,10 @@ def main():
     p_pack.add_argument("--count", "-n", type=int, default=100, help="Total files to generate")
     p_pack.add_argument("--out", "-o", required=True, help="Output pack directory")
 
+    # ── Pack Audit ──
+    p_audit = subparsers.add_parser("pack-audit", help="Audit a pack for quality issues")
+    p_audit.add_argument("pack_dir", help="Pack directory to audit")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -449,6 +453,8 @@ def main():
         cmd_polish(args)
     elif args.command == "pack":
         cmd_pack(args)
+    elif args.command == "pack-audit":
+        cmd_pack_audit(args)
     elif args.command == "all":
         cmd_all(args)
     else:

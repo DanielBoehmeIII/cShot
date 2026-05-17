@@ -1,12 +1,17 @@
-"""Batch pack generation: build themed packs from prompts."""
+"""Batch pack generation and audit."""
 import json
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 
-from gen import REPO_ROOT
+import numpy as np
+
+from gen import REPO_ROOT, SAMPLE_RATE
 from gen.prompt import parse_prompt, generate_from_prompt
-from gen.polish import polish_file
+from gen.polish import polish_file, validate_audio
+from gen.io import read_wav
+from gen.features import compute_features
 
 
 PACK_CATEGORIES = {
@@ -139,3 +144,119 @@ def cmd_pack(args):
 
     print(f"Report: {report_path}")
     print(f"\nDone. {total_generated} files in {out_dir}")
+
+
+def cmd_pack_audit(args):
+    """Audit an existing pack directory for quality issues."""
+    pack_dir = Path(args.pack_dir)
+    if not pack_dir.exists():
+        print(f"Error: {pack_dir} not found", file=sys.stderr)
+        sys.exit(1)
+
+    wav_files = sorted(pack_dir.rglob("*.wav"))
+    if not wav_files:
+        print(f"No .wav files found in {pack_dir}")
+        return
+
+    print(f"Pack Audit: {pack_dir}")
+    print(f"{'='*60}")
+    print(f"Files: {len(wav_files)}")
+    print()
+
+    # Check category subdirectories
+    categories = {}
+    for w in wav_files:
+        cat = w.parent.name
+        categories.setdefault(cat, []).append(w)
+
+    print(f"Categories: {len(categories)}")
+    for cat, files in sorted(categories.items()):
+        print(f"  {cat:12s}: {len(files)} files")
+
+    print(f"\n--- Quality Checks ---\n")
+
+    results = []
+    issues_found = 0
+    for w in wav_files:
+        cat = w.parent.name
+        result = read_wav(w)
+        if result is None:
+            results.append({"file": str(w), "pass": False, "issues": ["unreadable"]})
+            issues_found += 1
+            continue
+        samples, sr = result
+        validation = validate_audio(samples)
+        feats = compute_features(samples, sr)
+
+        entry = {
+            "file": str(w.relative_to(pack_dir)),
+            "category": cat,
+            "pass": validation["pass"],
+            "issues": validation["issues"],
+            "peak": validation["peak"],
+            "rms": validation["rms"],
+            "duration_s": validation["duration_s"],
+            "spectral_centroid": round(float(feats.get("spectral_centroid", 0)), 1),
+            "attack_ms": round(float(feats.get("attack_ms", 0)), 2),
+        }
+        results.append(entry)
+        if not validation["pass"]:
+            issues_found += 1
+            print(f"  ! {entry['file']}: {'; '.join(validation['issues'])}")
+
+    if issues_found == 0:
+        print(f"  All {len(wav_files)} files pass basic QA")
+
+    # Variation check per category
+    print(f"\n--- Variation Check ---\n")
+    weak_categories = []
+    for cat, files in sorted(categories.items()):
+        if len(files) < 2:
+            continue
+        centroids = []
+        attacks = []
+        durations = []
+        for w in files:
+            result = read_wav(w)
+            if result is None:
+                continue
+            samples, sr = result
+            feats = compute_features(samples, sr)
+            centroids.append(feats.get("spectral_centroid", 0))
+            attacks.append(feats.get("attack_ms", 0))
+            durations.append(len(samples) / sr)
+
+        if len(centroids) > 1:
+            centroid_range = max(centroids) - min(centroids)
+            attack_range = max(attacks) - min(attacks)
+            duration_range = max(durations) - min(durations)
+            weak = centroid_range < 50 or (attack_range < 1 and len(files) > 2)
+            if weak:
+                weak_categories.append(cat)
+                print(f"  △ {cat}: low variation (centroid range={centroid_range:.0f}, "
+                      f"attack range={attack_range:.2f}ms)")
+            else:
+                print(f"  ✓ {cat}: centroid range={centroid_range:.0f}, "
+                      f"attack range={attack_range:.2f}ms, dur range={duration_range:.3f}s")
+
+    # Summary
+    print(f"\n--- Audit Summary ---")
+    print(f"  Total files:    {len(wav_files)}")
+    print(f"  Issues:         {issues_found}")
+    print(f"  Weak variation: {len(weak_categories)} category(s)")
+    overall_pass = issues_found == 0 and len(weak_categories) == 0
+    print(f"  Overall:        {'PASS' if overall_pass else 'ISSUES FOUND'}")
+
+    audit = {
+        "pack_dir": str(pack_dir),
+        "total_files": len(wav_files),
+        "categories": {cat: len(files) for cat, files in sorted(categories.items())},
+        "issues_found": issues_found,
+        "weak_categories": weak_categories,
+        "overall_pass": overall_pass,
+        "results": results,
+    }
+    audit_path = pack_dir / "pack_audit.json"
+    with open(audit_path, "w") as f:
+        json.dump(audit, f, indent=2)
+    print(f"\nAudit saved: {audit_path}")
