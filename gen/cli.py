@@ -279,6 +279,9 @@ def main():
     p_pr.add_argument("--count", "-n", type=int, default=1, help="Number of samples")
     p_pr.add_argument("--out", "-o", help="Output path (file.wav for single, directory for multiple)")
     p_pr.add_argument("--seed", "-s", type=int, help="Fixed seed for deterministic generation")
+    p_pr.add_argument("--name-template", "-t",
+                      help="Filename template. Variables: {prompt}, {family}, {profile}, {seed}, {n}, {adj}. "
+                           "Default: prompt_{prompt}_{n:03d}.wav")
 
     # ── Regenerate from metadata ──
     p_reg = subparsers.add_parser("regenerate", help="Regenerate a file from its metadata JSON sidecar")

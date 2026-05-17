@@ -280,8 +280,31 @@ def generate_single_from_prompt(parsed: dict, seed: int = None) -> np.ndarray:
     return samples
 
 
+def _safe_filename(text: str) -> str:
+    """Sanitize a string for use in filenames."""
+    safe = re.sub(r'[^a-zA-Z0-9]+', '_', text)
+    return safe.strip('_').lower()[:40]
+
+
+def _render_filename_template(template: str, parsed: dict, seed: int, index: int,
+                               family: str, profile: str) -> str:
+    """Render a filename template with variables.
+    Supported variables: {prompt}, {family}, {profile}, {seed}, {n}, {adj}.
+    """
+    prompt_slug = _safe_filename(parsed.get("raw_prompt", "unknown"))
+    adj_slug = "_".join(_safe_filename(a) for a in parsed.get("adjectives", [])) or "none"
+    name = template.replace("{prompt}", prompt_slug)
+    name = name.replace("{family}", _safe_filename(family))
+    name = name.replace("{profile}", _safe_filename(profile))
+    name = name.replace("{seed}", str(seed))
+    name = name.replace("{n}", f"{index + 1:03d}")
+    name = name.replace("{adj}", adj_slug)
+    name = _safe_filename(name)
+    return name + ".wav"
+
+
 def generate_from_prompt(parsed: dict, count: int = 1, out_dir: Path = None,
-                         base_seed: int = None) -> list[Path]:
+                         base_seed: int = None, name_template: str = None) -> list[Path]:
     """Generate audio from a parsed prompt with metadata sidecar.
     
     When count==1, generates a single file with metadata.
@@ -298,6 +321,9 @@ def generate_from_prompt(parsed: dict, count: int = 1, out_dir: Path = None,
     out_dir = out_dir or Path("outputs/prompt")
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    if name_template is None:
+        name_template = "prompt_{prompt}_{n}"
+
     paths = []
     for i in range(count):
         seed = _seed_from_prompt(parsed["raw_prompt"], i, base_seed)
@@ -306,8 +332,9 @@ def generate_from_prompt(parsed: dict, count: int = 1, out_dir: Path = None,
 
         samples, actual_dur, actual_pitch = _generate_variation(dur, pitch, family, gen_fn)
 
-        safe_name = re.sub(r'[^a-z0-9]+', '_', parsed["raw_prompt"].lower())[:35].strip("_")
-        out_path = out_dir / f"prompt_{safe_name}_{i+1:03d}.wav"
+        filename = _render_filename_template(name_template, parsed, seed, i,
+                                              family, profile_name)
+        out_path = out_dir / filename
         write_wav(out_path, samples)
         _write_metadata(out_path, parsed, seed, actual_dur, actual_pitch)
         paths.append(out_path)
@@ -513,11 +540,14 @@ def cmd_prompt(args):
     out_path = Path(args.out) if args.out else Path("outputs/prompt")
     count = args.count
     base_seed = args.seed if hasattr(args, 'seed') and args.seed is not None else None
+    name_template = args.name_template if hasattr(args, 'name_template') and args.name_template else None
 
     if base_seed is not None:
         print(f"  → Seed: {base_seed} (deterministic mode)")
     else:
         print(f"  → Seed: auto (random mode)")
+    if name_template:
+        print(f"  → Name template: {name_template}")
 
     # If --out ends with .wav and count=1, write to exact file
     if out_path.suffix.lower() == ".wav" and count == 1:
@@ -536,7 +566,7 @@ def cmd_prompt(args):
         paths = [out_path]
         print(f"\n  Generated → {out_path} (seed={seed})")
     else:
-        paths = generate_from_prompt(parsed, count, out_path, base_seed=base_seed)
+        paths = generate_from_prompt(parsed, count, out_path, base_seed=base_seed, name_template=name_template)
         print(f"\n  Generated {len(paths)} file(s) → {out_path}")
         for p in paths:
             meta = p.with_suffix(".json")
