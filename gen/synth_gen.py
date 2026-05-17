@@ -44,11 +44,28 @@ def osc_noise(t: float, seed_offset: float = 0.0) -> float:
     return noise_like(t * SAMPLE_RATE + seed_offset)
 
 
+def osc_fm(t: float, freq: float, mod_freq_ratio: float = 2.0,
+           mod_index: float = 1.0, detune: float = 0.0) -> float:
+    """FM oscillator: carrier frequency with sinusoidal modulation."""
+    f = freq * (1.0 + detune)
+    mod = mod_index * math.sin(2.0 * math.pi * f * mod_freq_ratio * t)
+    return math.sin(2.0 * math.pi * f * t + mod)
+
+
+def osc_triangle(t: float, freq: float, detune: float = 0.0) -> float:
+    """Triangle oscillator."""
+    f = freq * (1.0 + detune)
+    phase = (t * f) % 1.0
+    return 4.0 * abs(phase - 0.5) - 1.0
+
+
 OSCILLATORS = {
     "saw": osc_saw,
     "square": osc_square,
     "sine": osc_sine,
     "noise": lambda t, f, d=0.0: osc_noise(t, d * 100.0),
+    "fm": osc_fm,
+    "triangle": osc_triangle,
 }
 
 
@@ -181,6 +198,52 @@ SYNTH_PROFILES = {
         "chord_density": 1,
         "pulse_width": 0.5,
     },
+    "fm": {
+        "label": "FM Synth",
+        "default_duration_ms": 600.0,
+        "default_pitch_hz": 261.63,
+        "osc_type": "fm",
+        "osc_mix": {"saw": 0.0, "square": 0.0, "sine": 0.0, "noise": 0.0, "fm": 1.0, "triangle": 0.0},
+        "detune_amount": 0,
+        "detune_layers": 1,
+        "filter_envelope": "opening",
+        "filter_cutoff_start": 1.0,
+        "filter_cutoff_end": 0.3,
+        "filter_resonance": 0.3,
+        "attack_ms": 1.0,
+        "decay_ms": 200,
+        "sustain_level": 0.3,
+        "release_ms": 150,
+        "stereo_width": 0.2,
+        "saturation": 0.1,
+        "chord_density": 1,
+        "pulse_width": 0.5,
+        "fm_mod_freq_ratio": 3.0,
+        "fm_mod_index": 2.5,
+    },
+    "wavetable": {
+        "label": "Wavetable-Like Synth",
+        "default_duration_ms": 500.0,
+        "default_pitch_hz": 261.63,
+        "osc_type": "fm",
+        "osc_mix": {"saw": 0.3, "square": 0.3, "sine": 0.2, "noise": 0.0, "fm": 0.2, "triangle": 0.0},
+        "detune_amount": 5,
+        "detune_layers": 2,
+        "filter_envelope": "opening",
+        "filter_cutoff_start": 1.0,
+        "filter_cutoff_end": 0.5,
+        "filter_resonance": 0.2,
+        "attack_ms": 5.0,
+        "decay_ms": 250,
+        "sustain_level": 0.2,
+        "release_ms": 100,
+        "stereo_width": 0.5,
+        "saturation": 0.3,
+        "chord_density": 1,
+        "pulse_width": 0.5,
+        "fm_mod_freq_ratio": 1.5,
+        "fm_mod_index": 0.8,
+    },
 }
 
 
@@ -236,6 +299,12 @@ def _oscillator_mix(t: float, freqs: list[float], profile: dict, sample_idx: int
                     val += osc_sine(t, freq, detune_offset) * mix
                 elif osc_type == "noise":
                     val += osc_noise(t, freq + seed + layer) * mix
+                elif osc_type == "fm":
+                    fm_ratio = profile.get("fm_mod_freq_ratio", 2.0)
+                    fm_idx = profile.get("fm_mod_index", 1.0)
+                    val += osc_fm(t, freq, fm_ratio, fm_idx, detune_offset) * mix
+                elif osc_type == "triangle":
+                    val += osc_triangle(t, freq, detune_offset) * mix
 
             # Per-layer panning for stereo width
             if stereo > 0 and n_layers > 1:

@@ -148,6 +148,24 @@ PIANO_PROFILES = {
         "lo_fi": 0.0,
         "compression": 0.0,
     },
+    "felt": {
+        "label": "Felt Piano",
+        "default_duration_ms": 1400.0,
+        "default_pitch_hz": 261.63,
+        "harmonics": [
+            (1, 1.00), (2, 0.45), (3, 0.25), (4, 0.12),
+            (5, 0.06), (6, 0.03), (7, 0.01), (8, 0.005),
+        ],
+        "harmonic_decay": [2.0, 3.0, 4.0, 5.5, 8.0, 11.0, 15.0, 20.0],
+        "hammer_noise_amp": 0.03,
+        "hammer_noise_duration_s": 0.002,
+        "body_resonance_hz": 50.0,
+        "body_resonance_amp": 0.08,
+        "brightness": 0.4,
+        "stereo_width": 0.0,
+        "lo_fi": 0.0,
+        "compression": 0.3,
+    },
     # ── Electric Piano / Rhodes / Bell ──
     "rhodes": {
         "label": "Rhodes EP",
