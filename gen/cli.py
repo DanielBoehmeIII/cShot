@@ -85,6 +85,7 @@ from gen.polish import cmd_polish
 from gen.pack import cmd_pack, cmd_pack_audit, cmd_theme
 from gen.similar import cmd_similar, cmd_variations
 from gen.genre import cmd_genre, GENRE_PROFILES
+from gen.rank import cmd_rank, cmd_top
 from gen.refine_feedback import cmd_refine_feedback
 
 
@@ -364,6 +365,14 @@ def main():
     p_theme.add_argument("theme", nargs="+", help="Theme name")
     p_theme.add_argument("--out", "-o", help="Output directory")
 
+    # ── Ranking ──
+    p_rank = subparsers.add_parser("rank", help="Rank all WAV files by quality score")
+    p_rank.add_argument("input_dir", help="Directory of WAV files to rank")
+
+    p_top = subparsers.add_parser("top", help="Show top N ranked files")
+    p_top.add_argument("input_dir", help="Directory of WAV files")
+    p_top.add_argument("--n", type=int, default=10, help="Number of top files to show")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -473,6 +482,10 @@ def main():
         cmd_genre(args)
     elif args.command == "theme":
         cmd_theme(args)
+    elif args.command == "rank":
+        cmd_rank(args)
+    elif args.command == "top":
+        cmd_top(args)
     elif args.command == "all":
         cmd_all(args)
     else:
