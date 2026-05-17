@@ -1,52 +1,38 @@
 # Provider Decision — cShot
 
+## Updated Direction (May 2026)
+
+**cShot is now local-first. There is no cloud dependency.**
+
+The "mock-dsp" provider has been renamed to **cShot Engine** and is always
+the default. Cloud providers (ElevenLabs, Stable Audio, AudioLDM 2) are
+registered but never auto-selected and never required.
+
 ## Current State
 
-cShot uses `mock-dsp` as the default provider — algorithmic synthesis
-(sine waves, noise, envelopes, filters) with no AI model dependency.
+cShot uses `cshot-engine` as the default and only active provider — a local
+DSP synthesis engine (sine waves, noise, envelopes, filters) with no AI
+model dependency and no API key required.
+
 Placeholder providers exist for ElevenLabs, Stable Audio, and AudioLDM 2
-but require API keys and are not tested.
+but are hidden from the main generation flow. They appear only in the
+Provider Selector for users who explicitly configure them.
 
 ## Evaluation
 
-| Factor | Mock DSP | Real Provider |
-|--------|----------|---------------|
-| Quality | Basic (functional one-shots) | Higher (realistic, varied) |
+| Factor | cShot Engine (Local) | Cloud Provider |
+|--------|----------------------|----------------|
+| Quality | Improving (synthesis + analysis-driven) | Higher but inconsistent |
 | Latency | ~500ms | 2-10s (network) |
 | Cost | $0 | Per-generation API cost |
-| Offline | Yes | No (requires network) |
+| Offline | Yes | No |
 | Setup | None | API key, env config |
-| Reliability | Deterministic | Variable (network, rate limits) |
+| Reliability | Deterministic, always available | Variable (network, rate limits) |
 | Copyright | Safe (algorithmic) | Provider-dependent |
 | Complexity | Zero | API integration, error handling |
 
-## Recommendation
+## Principle
 
-**Do not integrate a real provider yet.**
-
-Rationale:
-1. Mock DSP quality is sufficient for alpha testing the core loop
-2. Real provider integration adds cost, latency, and complexity without
-   validating the product thesis
-3. The product thesis is: "Can a producer get a usable sound from a text
-   prompt faster than browsing samples?" — this is testable with mock DSP
-4. Adding a real provider now would conflate "AI quality" with "product
-   value" — we need to validate the product first
-5. Mock DSP lets us iterate fast (no API costs, no network issues)
-
-## When to Revisit
-
-- After alpha testing confirms the core loop is valuable
-- When user feedback specifically asks for higher sound quality
-- When we need to demonstrate "real AI" for funding/investor purposes
-
-## Provider Shortlist (Future)
-
-1. **ElevenLabs SFX** — Best quality for drum sounds, paid API
-2. **Stable Audio Open** — Open-source, can self-host, good for one-shots
-3. **AudioCraft (Meta)** — Free, open-source, needs local inference setup
-
-## Fallback Plan
-
-Mock DSP remains the default fallback even when real providers are added.
-The `generate_with_fallback` chain in the registry already supports this.
+No paid-per-generation dependency. Local engine must always work.
+No API key required for core functionality.
+Do not call cloud models by default.

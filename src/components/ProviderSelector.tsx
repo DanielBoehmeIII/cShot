@@ -15,7 +15,7 @@ interface ProviderInfo {
 
 export function ProviderSelector() {
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
-  const [activeProvider, setActiveProvider] = useState("mock-dsp");
+  const [activeProvider, setActiveProvider] = useState("cshot-engine");
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -91,7 +91,7 @@ export function ProviderSelector() {
           <div className="absolute right-0 top-full mt-1 z-50 w-72 rounded-xl border border-[#2A2A3F] bg-[#1A1A2E] shadow-2xl backdrop-blur-xl overflow-hidden">
             <div className="p-2 border-b border-[#2A2A3F]/50">
               <p className="text-[10px] text-[#636E72] font-mono uppercase tracking-wider px-2 py-1">
-                Generation Provider
+                Sound Engine
               </p>
             </div>
             <div className="p-1">
@@ -99,18 +99,18 @@ export function ProviderSelector() {
                 <button
                   key={p.name}
                   onClick={() => p.is_available && handleSelect(p.name)}
-                  disabled={!p.is_available}
+                  disabled={p.name !== "cshot-engine" && !p.is_available}
                   className={`w-full rounded-lg px-3 py-2.5 text-left transition-all ${
                     activeProvider === p.name
                       ? "bg-[#6C5CE7]/15 border border-[#6C5CE7]/30"
                       : "border border-transparent hover:bg-[#14141F]"
-                  } ${!p.is_available ? "opacity-40 cursor-not-allowed" : ""}`}
+                  } ${p.name !== "cshot-engine" && !p.is_available ? "opacity-40 cursor-not-allowed" : ""}`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span
                         className={`w-2 h-2 rounded-full ${
-                          p.is_available ? "bg-[#00B894]" : "bg-[#D63031]"
+                          p.is_available || p.name === "cshot-engine" ? "bg-[#00B894]" : "bg-[#636E72]"
                         }`}
                       />
                       <span className="text-xs font-mono text-[#DFE6E9]">
@@ -129,8 +129,8 @@ export function ProviderSelector() {
                     {p.requires_network && <span>🌐</span>}
                     {p.supports_reference_audio && <span>ref</span>}
                   </div>
-                  {!p.is_available && p.reason_unavailable && (
-                    <p className="mt-1 text-[9px] text-[#D63031] font-mono leading-tight">
+                  {!p.is_available && p.name !== "cshot-engine" && p.reason_unavailable && (
+                    <p className="mt-1 text-[9px] text-[#636E72] font-mono leading-tight">
                       {p.reason_unavailable}
                     </p>
                   )}
@@ -139,10 +139,10 @@ export function ProviderSelector() {
             </div>
             <div className="p-2 border-t border-[#2A2A3F]/50">
               <p className="text-[9px] text-[#2A2A3F] font-mono text-center">
-                {active?.requires_api_key
-                  ? "Set API keys in .env file"
-                  : activeProvider === "mock-dsp"
-                    ? "Local DSP · No API key needed"
+                {activeProvider === "cshot-engine"
+                  ? "Local engine · No API key needed · Always available"
+                  : active?.requires_api_key
+                    ? "Configure in Settings / .env"
                     : ""}
               </p>
             </div>

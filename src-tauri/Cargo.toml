@@ -3,9 +3,20 @@ name = "cshot"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+
 [lib]
 name = "cshot_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "cshot-cli"
+path = "src/bin/cshot-cli.rs"
+
+[[bin]]
+name = "cshot-plugin"
+path = "src/bin/cshot_plugin.rs"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

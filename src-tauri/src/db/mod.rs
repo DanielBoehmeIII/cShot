@@ -1,7 +1,7 @@
 use rusqlite::{Connection, Result as SqlResult, params};
 use std::path::Path;
 
-const SCHEMA_VERSION: i32 = 6;
+const SCHEMA_VERSION: i32 = 7;
 
 pub fn init_database(db_path: &Path) -> SqlResult<Connection> {
     let conn = Connection::open(db_path)?;
@@ -76,6 +76,26 @@ fn migrate(conn: &Connection) -> SqlResult<()> {
         let _ = conn.execute_batch("CREATE INDEX IF NOT EXISTS idx_packs_category ON packs(tags)");
         conn.execute("INSERT OR IGNORE INTO schema_version (version, applied_at) VALUES (6, datetime('now'))", [])?;
     }
+    if current_version < 7 {
+        let _ = conn.execute_batch(
+            "CREATE INDEX IF NOT EXISTS idx_sounds_prompt ON sounds(prompt);
+             CREATE INDEX IF NOT EXISTS idx_sounds_duration ON sounds(duration_ms);
+             CREATE INDEX IF NOT EXISTS idx_sounds_spectral ON sounds(spectral_centroid);
+             CREATE INDEX IF NOT EXISTS idx_sounds_rms ON sounds(rms);
+             CREATE INDEX IF NOT EXISTS idx_sounds_sound_type ON sounds(sound_type);
+             CREATE INDEX IF NOT EXISTS idx_sounds_created_at ON sounds(created_at);
+             CREATE INDEX IF NOT EXISTS idx_pack_sounds_pack ON pack_sounds(pack_id);
+             CREATE INDEX IF NOT EXISTS idx_pack_sounds_sound ON pack_sounds(sound_id);
+             CREATE INDEX IF NOT EXISTS idx_exports_exported ON exports(exported_at);
+             CREATE INDEX IF NOT EXISTS idx_embeddings_provider ON embeddings(provider);
+             CREATE TABLE IF NOT EXISTS library_cache (
+                 key TEXT PRIMARY KEY,
+                 value TEXT NOT NULL,
+                 updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+             );"
+        ).ok();
+        conn.execute("INSERT OR IGNORE INTO schema_version (version, applied_at) VALUES (7, datetime('now'))", [])?;
+    }
 
     Ok(())
 }
@@ -97,7 +117,7 @@ fn create_schema(conn: &Connection) -> SqlResult<()> {
             source TEXT DEFAULT 'generated',
             reference_path TEXT,
             variant_name TEXT,
-            model TEXT DEFAULT 'mock-dsp',
+            model TEXT DEFAULT 'cshot-engine',
             seed INTEGER DEFAULT 0,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
@@ -145,6 +165,9 @@ fn create_schema(conn: &Connection) -> SqlResult<()> {
         CREATE INDEX IF NOT EXISTS idx_sounds_created ON sounds(created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_sounds_favorite ON sounds(is_favorite);
         CREATE INDEX IF NOT EXISTS idx_exports_sound ON exports(sound_id);
+        CREATE INDEX IF NOT EXISTS idx_sounds_type_source ON sounds(sound_type, source);
+        CREATE INDEX IF NOT EXISTS idx_sounds_prompt_search ON sounds(prompt);
+        CREATE INDEX IF NOT EXISTS idx_sounds_tags_search ON sounds(tags);
         "
     )?;
 
@@ -154,7 +177,7 @@ fn create_schema(conn: &Connection) -> SqlResult<()> {
         .map(|c| c > 0)
         .unwrap_or(false);
     if !has_model {
-        conn.execute_batch("ALTER TABLE sounds ADD COLUMN model TEXT DEFAULT 'mock-dsp';").ok();
+        conn.execute_batch("ALTER TABLE sounds ADD COLUMN model TEXT DEFAULT 'cshot-engine';").ok();
     }
     let has_seed: bool = conn
         .prepare("SELECT COUNT(*) FROM pragma_table_info('sounds') WHERE name='seed'")

@@ -11,18 +11,20 @@ pub mod validator;
 pub use provider::*;
 pub use registry::ProviderRegistry;
 
-/// Build the standard provider registry with all known providers.
-/// Mock is always available; real providers require env keys.
+/// Build the standard provider registry.
+/// The local engine (cshot-engine) is always the default and always available.
+/// Cloud providers are registered only for explicit opt-in via Settings.
 pub fn build_default_registry() -> ProviderRegistry {
     let mut registry = ProviderRegistry::new().with_defaults();
 
+    // Cloud providers are registered but never auto-selected.
+    // They appear in Settings for users who explicitly configure them.
     registry.register(Box::new(placeholder_elevanlabs::ElevenLabsProvider::new()));
     registry.register(Box::new(placeholder_stableaudio::StableAudioProvider::new()));
     registry.register(Box::new(placeholder_audioldm::AudioLdmProvider::new()));
 
-    if registry.healthy_providers().len() > 1 {
-        registry.set_active("elevenlabs");
-    }
+    // Local engine is always the default. No cloud auto-selection.
+    registry.set_active("cshot-engine");
 
     registry
 }

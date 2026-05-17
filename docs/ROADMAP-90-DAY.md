@@ -1,58 +1,58 @@
-# cShot 90-Day Roadmap
+# cShot 90-Day Roadmap (Updated — Local-First Direction)
 
 ## Current Status (Week 0)
 
-- **Frontend**: React 18 + TS + Vite + Tailwind. 5 views: Generate, Bakeoff, Library, Packs, Batch.
-- **Backend**: Tauri v2 + Rust. Provider registry, DSP pipeline, SQLite, semantic library, embeddings.
-- **Generation**: Mock DSP (always available), ElevenLabs (real API, needs key), Stable Audio (stub), AudioLDM 2 (stub).
-- **Storage**: Local WAV files + SQLite. ~50 tests passing.
+- **Frontend**: React 18 + TS + Vite + Tailwind. Generate + Library views.
+- **Backend**: Tauri v2 + Rust. Provider registry (local-first), DSP engine, SQLite, semantic library.
+- **Generation**: cShot Engine (local synthesis, always available, no API key).
+- **Storage**: Local WAV files + SQLite. 50+ tests passing.
+- **Direction**: Local-first sound design laboratory. No cloud generation dependency.
 
 ## Biggest Risks
 
-1. **Quality ceiling** — Mock DSP sounds are basic. Real providers need paid API keys.
+1. **Quality ceiling** — cShot Engine (DSP synthesis) sounds are functional but not yet production-grade.
 2. **No users** — No alpha testers signed up yet. Risk of building in a vacuum.
-3. **Commands.rs is monolithic** — 1081 lines will become unmaintainable.
-4. **No error recovery** in batch gen or multi-step workflows.
+3. **Commands.rs is monolithic** — Large file needs modularization.
+4. **No audio analysis layer** — Can't "read" a sound to recreate it yet.
 
 ## Strongest Wedge
 
-**Speed of generation** — 5 seconds from prompt to playable sound. This is the core value prop. Everything serves this loop.
+**Speed of generation** — 5 seconds from prompt to playable sound. Local-only means zero latency, zero API cost, zero setup.
 
 ## What to Cut
 
+- Cloud generation APIs as primary workflow (local engine is default)
 - Marketplace (too early)
 - Mobile app (wrong platform)
-- Plugin development (Phase 3)
 - Social / community features
 - Multi-language support
 - Enterprise auth / teams
 
 ## What to Improve
 
-1. **Provider quality** — Fix Stable Audio API, add auto-retry with backoff
-2. **UI polish** — Loading states, error recovery, keyboard shortcuts
-3. **Alpha readiness** — Auto-update, crash reporting, feedback collection
-4. **Architecture** — Split commands.rs, extract view routing
+1. **Local engine quality** — Multi-layer synthesis, analysis-driven generation
+2. **Audio analysis** — Extract envelope, transient, spectral data from any sound
+3. **UI polish** — Loading states, error recovery, keyboard shortcuts
+4. **Architecture** — Split commands.rs, plugin-ready DSP core
 
 ## Technical Roadmap
 
-**Weeks 1-4: Reliability**
-- Stable Audio API implementation
-- Generation timeout + retry UI
-- Error state recovery in all views
-- Split commands.rs into modules
+**Weeks 1-4: Remove Cloud Dependency**
+- Rename mock-dsp → cShot Engine
+- Fix blocking provider errors when no API keys
+- Make local generation always default
+- Update README, docs, config, and UI
 
-**Weeks 5-8: Alpha Launch**
-- Auto-update (Tauri updater)
-- In-app feedback trigger
-- Crash reporting
-- Onboarding flow (suggested prompts, tutorial)
+**Weeks 5-8: Local Audio Analysis**
+- Audio feature extraction (envelope, transient, spectral)
+- Sound classification heuristic
+- Analysis cache and persistence
+- Audio inspector UI
 
-**Weeks 9-12: Quality**
-- SoundScore display in generation UI
-- Quality badges (clipping, duration, loudness)
-- Reference analysis improvements
-- Prompt suggestion engine
+**Weeks 9-12: One-Shot Resynthesis**
+- Layer-based synthesis engine (noise, tonal, transient, body, tail)
+- Envelope-following resynthesis
+- Category-specific generators (kick, snare, hat, clap, perc, bass, impact)
 
 ## UX Roadmap
 
@@ -62,13 +62,18 @@
 - Empty states with helpful guidance
 - Sound comparison (A/B between variants)
 
-## Model Roadmap
+## Engine Roadmap
 
-- Week 1-2: Fix Stable Audio API provider
-- Week 3-4: Add generation timeout + retry
-- Week 5-6: Provider health checks
-- Week 7-8: Model quality A/B comparison
-- Week 9-10: Custom prompt templates
+- Week 1-4: Remove cloud dependency, rename engine, fix startup errors
+- Week 5-8: Audio analysis pipeline (RMS, peak, spectral, envelope, transient)
+- Week 9-12: Multi-layer synthesis per category
+- Week 13-16: Prompt-to-DSP control (natural language → synthesis parameters)
+- Week 17-20: Better local generation (multi-layer, genre presets, seed control)
+- Week 21-24: Recreate sound from reference (analyze → resynthesize)
+- Week 25-28: Local sample transformation (edit transients, body, tail)
+- Week 29-32: Plugin-ready architecture (separate DSP core from app)
+- Week 33-36: VST/CLAP prototype
+- Week 37-40: Beta finish (stability, sound quality, export)
 
 ## Alpha Testing Roadmap
 
@@ -78,20 +83,3 @@
 - Week 7-8: Collect + analyze feedback
 - Week 9-10: Ship fixes from top issues
 - Week 11-12: Public demo page
-
-## Weekly Plan
-
-| Week | Focus |
-|------|-------|
-| 1 | Stable Audio API implementation |
-| 2 | Generation timeout + retry UI |
-| 3 | Split commands.rs into modules |
-| 4 | Error state recovery in all views |
-| 5 | Tauri auto-update + in-app feedback |
-| 6 | Alpha tester recruitment |
-| 7 | Onboarding flow + tutorial |
-| 8 | Alpha testing sessions |
-| 9 | SoundScore display + quality badges |
-| 10 | Prompt suggestion engine |
-| 11 | Fix top alpha issues |
-| 12 | Public demo page + publish |

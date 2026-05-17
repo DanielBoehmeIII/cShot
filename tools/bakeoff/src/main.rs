@@ -7,7 +7,7 @@ fn main() {
 
     let dry_run = args.contains(&"--dry-run".to_string());
     let eval_only = args.contains(&"--eval-only".to_string());
-    let provider = get_arg_value(&args, "--provider").unwrap_or_else(|| "mock-dsp".to_string());
+    let provider = get_arg_value(&args, "--provider").unwrap_or_else(|| "cshot-engine".to_string());
     let results_dir = get_arg_value(&args, "--dir").unwrap_or_else(|| {
         let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
         format!("{}/cShot/bakeoff", home)

@@ -1,4 +1,4 @@
-use super::provider::{AudioProvider, GenerationError, GenerationRequest, GenerationResponse, ProviderCapabilities, ValidationResult};
+use super::provider::{AudioProvider, GenerationRequest, GenerationResponse, ProviderCapabilities, ValidationResult};
 use super::mock::MockProvider;
 use super::validator;
 
@@ -17,7 +17,7 @@ impl ProviderRegistry {
 
     pub fn with_defaults(mut self) -> Self {
         self.register(Box::new(MockProvider));
-        self.set_active("mock-dsp");
+        self.set_active("cshot-engine");
         self
     }
 
@@ -68,9 +68,8 @@ impl ProviderRegistry {
     }
 
     /// Generate using the active provider with automatic fallback.
-    /// 1. Try active provider (with timeout)
-    /// 2. If it fails, try any other available provider
-    /// 3. Final fallback: mock-dsp (always available)
+    /// Local Engine (cshot-engine) is always tried first.
+    /// Cloud providers are only tried if explicitly configured and selected.
     pub async fn generate_with_fallback(
         &self,
         request: GenerationRequest,
@@ -82,25 +81,19 @@ impl ProviderRegistry {
             return Err(e);
         }
 
+        // Build attempt order: cshot-engine first, then active cloud provider if any
         let attempts: Vec<&str> = {
             let mut order = Vec::new();
+            order.push("cshot-engine");
 
             if let Some(ref active) = self.active_provider_name {
-                if active != "mock-dsp" {
-                    order.push(active.as_str());
-                }
-            }
-
-            for p in &self.providers {
-                let name = p.name();
-                if name != "mock-dsp" && self.active_provider_name.as_deref() != Some(name) {
-                    if p.is_available() {
-                        order.push(name);
+                if active != "cshot-engine" {
+                    if self.providers.iter().any(|p| p.name() == active && p.is_available()) {
+                        order.push(active.as_str());
                     }
                 }
             }
 
-            order.push("mock-dsp");
             order
         };
 
@@ -113,7 +106,7 @@ impl ProviderRegistry {
                     continue;
                 }
 
-                let timeout_ms = if name == "mock-dsp" { 5000 } else { 15000 };
+                let timeout_ms = 5000;
                 let result = tokio::time::timeout(
                     std::time::Duration::from_millis(timeout_ms),
                     provider.generate(request.clone()),
@@ -125,12 +118,7 @@ impl ProviderRegistry {
                     Ok(Err(e)) => {
                         let msg = format!("Provider '{}' failed: {}", name, e);
                         errors.push(msg);
-                        match &e {
-                            GenerationError::ApiKeyMissing(_) | GenerationError::InvalidRequest(_) => {
-                                break; // Non-retryable — stop trying other providers
-                            }
-                            _ => continue, // Retryable — try next provider
-                        }
+                        continue;
                     }
                     Err(_) => {
                         errors.push(format!("Provider '{}' timed out after {}ms", name, timeout_ms));
@@ -141,7 +129,7 @@ impl ProviderRegistry {
                 let validation = validator::validate_generated_sound(&response.samples);
                 if !validation.passed && validation.has_silence {
                     errors.push(format!("Provider '{}' generated silent audio", name));
-                    continue; // Retry with fallback
+                    continue;
                 }
                 if !validation.passed {
                     errors.push(format!(

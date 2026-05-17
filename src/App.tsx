@@ -7,6 +7,7 @@ import { LoadingSpinner } from "./components/LoadingSpinner";
 import { ToastContainer } from "./components/ToastContainer";
 import { LibraryView } from "./components/LibraryView";
 import { ProviderSelector } from "./components/ProviderSelector";
+import { IntentControls } from "./components/IntentControls";
 import { useAudioPlayback } from "./hooks/useAudioPlayback";
 import { useToast } from "./hooks/useToast";
 import {
@@ -18,11 +19,19 @@ import {
   getFavorites,
   analyzeReference,
   openExportFolder,
+  recordGenerationAction,
+  undoLastAction,
+  redoLastAction,
+  canUndoAction,
+  canRedoAction,
+  generateWithIntent,
   type SoundResult,
   type VariantResult,
   type SoundMetadata,
   type ReferenceAnalysis,
   type ExportResult,
+  type CreativeIntentProfile,
+  type IntentGenerateResult,
 } from "./lib/api";
 
 type View = "generator" | "library";
@@ -54,6 +63,14 @@ export default function App() {
   const shouldAutoPlayRef = useRef(false);
   const promptRef = useRef<string>("");
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [intentEnabled, setIntentEnabled] = useState(false);
+  const [intentProfile, setIntentProfile] = useState<CreativeIntentProfile>({
+    energy: 0.5, aggression: 0.3, polish: 0.5, realism: 0.3,
+    experimentalism: 0.2, analog_feel: 0.2, cinematic_scale: 0.2,
+    density: 0.5, impact: 0.5,
+  });
 
   promptRef.current = promptText;
 
@@ -79,6 +96,7 @@ export default function App() {
       .then((result) => {
         setSound(result);
         shouldAutoPlayRef.current = true;
+        recordGenerationAction(result.id, prompt).catch(() => {});
         if (result) {
           preloadAudio(result.id);
           toastSuccess("Sound generated!");
@@ -235,6 +253,43 @@ export default function App() {
     } catch {}
   }, [preload]);
 
+  const handleIntentGenerate = useCallback(async () => {
+    if (!promptText.trim() || isGenerating) return;
+    setIsGenerating(true);
+    setError(null);
+    setSound(null);
+    setVariants([]);
+    setExportResult(null);
+    stop();
+    try {
+      const result: IntentGenerateResult = await generateWithIntent(
+        promptText,
+        intentProfile,
+        referencePath ?? undefined,
+      );
+      setSound(result.sound);
+      shouldAutoPlayRef.current = true;
+      recordGenerationAction(result.sound.id, promptText).catch(() => {});
+      if (result.sound) {
+        preloadAudio(result.sound.id);
+        toastSuccess("Intent-generated!");
+        generateVariants(promptText, result.sound.id, 4)
+          .then((variantResults) => {
+            setVariants(variantResults);
+            for (const v of variantResults) {
+              preloadAudio(v.id);
+            }
+          })
+          .catch(() => {});
+      }
+    } catch (e) {
+      setError(String(e));
+      toastError(String(e));
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [promptText, intentProfile, referencePath, isGenerating, stop, toastSuccess, toastError, preloadAudio]);
+
   const handleSuggestedPrompt = useCallback((suggestion: string) => {
     setPromptText(suggestion);
   }, []);
@@ -290,6 +345,15 @@ export default function App() {
               handleFavorite(sound.id, favorites.has(sound.id));
             }
             break;
+          case "z":
+          case "Z":
+            e.preventDefault();
+            if (e.shiftKey) {
+              handleRedo();
+            } else {
+              handleUndo();
+            }
+            break;
           case "Enter":
             e.preventDefault();
             if (currentView === "generator" && promptRef.current.trim() && !isGenerating) {
@@ -321,6 +385,44 @@ export default function App() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [currentView, sound, isGenerating, referencePath, handleExport, handleFavorite, favorites, stop, handlePlaySound]);
+
+  // Undo / Redo
+  const handleUndo = useCallback(async () => {
+    try {
+      const action = await undoLastAction();
+      if (action) {
+        toastInfo(`Undo: ${action.prompt}`);
+        if (sound?.id === action.sound_id) {
+          setSound(null);
+          setVariants([]);
+        }
+        setCanUndo(await canUndoAction());
+        setCanRedo(await canRedoAction());
+      }
+    } catch {}
+  }, [sound, toastInfo]);
+
+  const handleRedo = useCallback(async () => {
+    try {
+      const action = await redoLastAction();
+      if (action) {
+        toastInfo(`Redo: ${action.prompt}`);
+        setCanUndo(await canUndoAction());
+        setCanRedo(await canRedoAction());
+      }
+    } catch {}
+  }, [toastInfo]);
+
+  const updateUndoRedoState = useCallback(async () => {
+    try {
+      setCanUndo(await canUndoAction());
+      setCanRedo(await canRedoAction());
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    updateUndoRedoState();
+  }, [sound, updateUndoRedoState]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0A0A0F]">
@@ -371,6 +473,17 @@ export default function App() {
                 onReferenceUpload={handleReferenceUpload}
                 referencePath={referencePath}
               />
+
+              <div className="mt-4">
+                <IntentControls
+                  profile={intentProfile}
+                  onProfileChange={setIntentProfile}
+                  onGenerateWithIntent={handleIntentGenerate}
+                  isGenerating={isGenerating}
+                  isEnabled={intentEnabled}
+                  onToggle={() => setIntentEnabled((p) => !p)}
+                />
+              </div>
 
               {referenceAnalysis && (
                 <div className="mt-4 fade-slide-up">
@@ -532,7 +645,23 @@ export default function App() {
                       </div>
                     )}
 
-                    <div className="flex justify-center">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={handleUndo}
+                        disabled={!canUndo}
+                        className="rounded-lg border border-[#2A2A3F] bg-[#1E1E2E] px-3 py-2 text-[10px] font-mono text-[#636E72] hover:border-[#6C5CE7]/50 hover:text-[#DFE6E9] transition-all disabled:opacity-30"
+                        title="Undo last generation"
+                      >
+                        ↩ Undo
+                      </button>
+                      <button
+                        onClick={handleRedo}
+                        disabled={!canRedo}
+                        className="rounded-lg border border-[#2A2A3F] bg-[#1E1E2E] px-3 py-2 text-[10px] font-mono text-[#636E72] hover:border-[#6C5CE7]/50 hover:text-[#DFE6E9] transition-all disabled:opacity-30"
+                        title="Redo undone generation"
+                      >
+                        ↪ Redo
+                      </button>
                       <button
                         onClick={() => handleGenerate(promptText, referencePath ?? undefined)}
                         disabled={isGenerating}

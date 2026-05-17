@@ -1,10 +1,10 @@
 # Dataset Policy — cShot
 
-cShot does not use any external datasets for its mock DSP generation.
+cShot does not use any external datasets for its local engine generation.
 
-## Mock DSP
+## cShot Engine
 
-The default provider (`mock-dsp`) generates audio algorithmically:
+The default provider (`cshot-engine`) generates audio algorithmically:
 - Sine oscillators with envelope shaping
 - White/pink noise with filtering
 - DSP transforms (pitch shift, time stretch, saturation)

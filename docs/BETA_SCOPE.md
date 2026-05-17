@@ -85,7 +85,7 @@ The entire app is optimized for this 10-second loop:
 - **Backend:** Rust (Tauri v2) — all business logic in Rust
 - **Database:** SQLite (local, bundled via rusqlite)
 - **Audio storage:** Content-addressed WAV files on local filesystem
-- **Generation API:** ElevenLabs SFX (primary), mock-dsp (always-available fallback)
+- **Generation API:** cShot Engine (local synthesis, always available, no API key needed)
 - **No cloud services** — everything runs locally. No user accounts. No cloud sync.
 
 ### Module Boundaries
@@ -176,8 +176,8 @@ src-tauri/src/     ← Rust backend
 
 ### Pre-Release
 
-- [ ] All generation providers tested (ElevenLabs, mock-dsp)
-- [ ] Fallback chain verified (primary fails → fallback succeeds → mock-dsp last resort)
+- [ ] cShot Engine generates without any configuration
+- [ ] cShot Engine handles all sound types reliably
 - [ ] Silent output detection and remediation
 - [ ] Clipping detection and normalize fix
 - [ ] Wrong duration detection and trim

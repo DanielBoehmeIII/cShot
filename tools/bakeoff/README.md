@@ -8,8 +8,8 @@ Compare providers head-to-head on 20 test prompts (5 per category) with 5 seeds 
 # Show available providers and prompts (dry run, no API calls)
 cargo run --bin bakeoff -- --dry-run
 
-# Run bakeoff with mock provider (free, always works)
-cargo run --bin bakeoff -- --provider mock-dsp
+# Run bakeoff with cShot engine (free, always works)
+cargo run --bin bakeoff -- --provider cshot-engine
 
 # Run with specific provider (requires API key in .env)
 cargo run --bin bakeoff -- --provider elevenlabs

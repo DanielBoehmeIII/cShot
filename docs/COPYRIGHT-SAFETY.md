@@ -10,7 +10,7 @@ advice. Consult a lawyer for legal questions about your specific use case.
 ## 1. How cShot Generates Sounds
 
 cShot generates sounds using:
-- **Mock DSP synthesis**: algorithmic waveform generation (sine waves, noise,
+- **cShot Engine (local synthesis)**: algorithmic waveform generation (sine waves, noise,
   envelopes, filters). These are mathematical constructs, not reproductions
   of existing recordings.
 - **Local audio processing**: trim, normalize, fade, EQ — applied to your

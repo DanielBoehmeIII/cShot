@@ -34,3 +34,16 @@ pub fn feedback_path() -> PathBuf {
 pub fn export_dir() -> PathBuf {
     home_dir().join("Desktop")
 }
+
+pub fn export_dir_organized() -> PathBuf {
+    let now = chrono_now();
+    app_root().join("exports").join(now)
+}
+
+fn chrono_now() -> String {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
+        .to_string()
+}

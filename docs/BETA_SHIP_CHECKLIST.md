@@ -31,12 +31,12 @@
 - [ ] Error messages are user-friendly
 - [ ] Silent output handling works
 
-### 4. Provider Fallback
+### 4. Local Engine
 
-- [ ] Primary provider fails → fallback succeeds
-- [ ] mock-dsp works without any configuration
-- [ ] Missing API key shows clear error
-- [ ] Network errors are user-friendly
+- [ ] cShot Engine generates without any API key or configuration
+- [ ] Generation works immediately after fresh install
+- [ ] Cloud provider errors never block generation
+- [ ] Provider selector shows cShot Engine as default, always available
 
 ### 5. Preview / Playback
 

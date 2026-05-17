@@ -13,6 +13,7 @@ use crate::storage;
 use crate::AppState;
 
 use tauri::State;
+use rusqlite::params;
 use zip::write::FileOptions;
 
 #[derive(Clone, serde::Serialize)]
@@ -128,12 +129,17 @@ pub async fn set_active_provider(
 }
 
 #[tauri::command]
+pub async fn analyze_prompt(prompt: String) -> crate::prompt_dsp::PromptDspControls {
+    crate::prompt_dsp::parse_prompt_rich(&prompt)
+}
+
+#[tauri::command]
 pub async fn get_active_provider(
     state: State<'_, AppState>,
 ) -> Result<String, String> {
     let registry = state.provider_registry.lock().map_err(|e| e.to_string())?;
     Ok(registry.active_provider_name()
-        .unwrap_or_else(|| "mock-dsp".to_string()))
+        .unwrap_or_else(|| "cshot-engine".to_string()))
 }
 
 #[tauri::command]
@@ -171,29 +177,20 @@ pub async fn generate_sound(
     Ok(result)
 }
 
-/// Check if any non-mock provider has its API key configured.
-/// This gives a clear error early instead of failing during fallback.
+/// Check that the local engine is available.
+/// This never blocks — the local engine is always available.
+/// Cloud provider key status is only relevant in Settings, never in the generation flow.
 fn check_provider_keys() -> Result<(), String> {
     let registry = crate::generation::build_default_registry();
-    let has_real_provider = registry.available_providers()
+    let has_local_engine = registry.available_providers()
         .iter()
-        .any(|p| p.name() != "mock-dsp" && p.is_available());
+        .any(|p| p.name() == "cshot-engine");
 
-    if !has_real_provider {
-        let reasons: Vec<String> = registry.available_providers()
-            .iter()
-            .filter(|p| p.name() != "mock-dsp")
-            .filter_map(|p| p.reason_unavailable())
-            .collect();
-
-        if !reasons.is_empty() {
-            return Err(format!(
-                "No generation providers configured. {}. Set up a provider in .env or use mock-dsp.",
-                reasons.join("; ")
-            ));
-        }
+    if has_local_engine {
+        return Ok(());
     }
-    Ok(())
+
+    Err("cShot Engine is not available. This should not happen.".to_string())
 }
 
 async fn generate_with_retry(
@@ -331,6 +328,19 @@ fn save_and_return_from_response(
 }
 
 #[tauri::command]
+pub async fn generate_resynthesis_variants(
+    prompt: String,
+    count: usize,
+) -> Result<Vec<generator::VariantResult>, String> {
+    let trimmed = prompt.trim().to_string();
+    if trimmed.is_empty() {
+        return Err("Please describe the sound you want.".to_string());
+    }
+    let ctrl = crate::prompt_dsp::parse_prompt_rich(&trimmed);
+    crate::generator::generate_resynthesis_variants(&trimmed, &ctrl.sound_type, count)
+}
+
+#[tauri::command]
 pub async fn generate_variants(
     prompt: String,
     source_id: String,
@@ -344,6 +354,131 @@ pub async fn generate_variants(
 
     let sound_type = "other".to_string();
     generator::generate_variants(&prompt, &samples, &sound_type, count)
+}
+
+#[tauri::command]
+pub async fn resynthesize_sound(
+    sound_id: String,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let resynth = audio::resynthesize::resynthesize_from_analysis(&analysis);
+
+    if resynth.is_empty() {
+        return Err("Resynthesis produced empty audio".to_string());
+    }
+
+    let prompt = format!("resynthesis of {} (analysis-driven)", analysis.sound_type_hint);
+    generator::save_and_return(&resynth, &prompt, &analysis.sound_type_hint, Some("resynthesis"), 0)
+}
+
+#[derive(Clone, serde::Serialize)]
+pub struct RecreateResult {
+    pub approximations: Vec<RecreateApproximation>,
+    pub original_analysis: crate::audio::analyze::AudioAnalysis,
+}
+
+#[derive(Clone, serde::Serialize)]
+pub struct RecreateApproximation {
+    pub id: String,
+    pub sound_result: generator::SoundResult,
+    pub similarity: crate::audio::recreate::SimilarityReport,
+}
+
+#[tauri::command]
+pub async fn recreate_sound(
+    sound_id: String,
+    count: Option<usize>,
+    fidelity: Option<f32>,
+    preserve_transient: Option<bool>,
+    preserve_body: Option<bool>,
+    preserve_tail: Option<bool>,
+) -> Result<RecreateResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+
+    let approx_count = count.unwrap_or(4).clamp(1, 10);
+    let fid = fidelity.unwrap_or(0.5).clamp(0.0, 1.0);
+    let pres_t = preserve_transient.unwrap_or(true);
+    let pres_b = preserve_body.unwrap_or(true);
+    let pres_tail = preserve_tail.unwrap_or(true);
+
+    let approximations = audio::recreate::generate_approximations(
+        &samples, &analysis, approx_count, fid, pres_t, pres_b, pres_tail,
+    );
+
+    let mut results = Vec::new();
+    for approx in &approximations {
+        let prompt = format!("recreation of {} (fidelity:{:.0}%, similarity:{:.0}%)",
+            analysis.sound_type_hint, fid * 100.0, approx.similarity.overall * 100.0);
+        let sound_result = generator::save_and_return(
+            &approx.samples,
+            &prompt,
+            &analysis.sound_type_hint,
+            Some(&format!("recreate-v{}", approx.seed)),
+            approx.seed as i64,
+        )?;
+        results.push(RecreateApproximation {
+            id: approx.id.clone(),
+            sound_result,
+            similarity: approx.similarity.clone(),
+        });
+    }
+
+    Ok(RecreateResult {
+        approximations: results,
+        original_analysis: analysis,
+    })
+}
+
+#[tauri::command]
+pub async fn transform_sound(
+    sound_id: String,
+    prompt: String,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let ctrl = crate::prompt_dsp::parse_prompt_rich(&prompt);
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let st = audio::SoundType::from_str(&analysis.sound_type_hint);
+    let pitch = analysis.pitch_estimate.unwrap_or(200.0);
+    let base = audio::resynthesize::params_for_sound_type(st, pitch, analysis.duration_ms);
+    let params = ctrl.to_resynthesis_params(&base);
+    let transformed = audio::transform::transform_with_params(&samples, &params);
+
+    let ctrl = crate::prompt_dsp::parse_prompt_rich(&prompt);
+    let st = if ctrl.sound_type_score > 0.3 { ctrl.sound_type } else {
+        let a = audio::analyze::analyze_audio(&samples, 44100, 1);
+        a.sound_type_hint
+    };
+
+    let sound_result = generator::save_and_return(
+        &transformed, &prompt, &st,
+        Some("transformed"), 0,
+    )?;
+
+    // Link to parent in DB
+    if let Some(db_path) = crate::storage::database_path().to_str().map(|s| s.to_string()) {
+        if let Ok(conn) = rusqlite::Connection::open(&db_path) {
+            let _ = conn.execute(
+                "UPDATE sounds SET parent_id = ?1 WHERE id = ?2",
+                rusqlite::params![sound_id, sound_result.id],
+            );
+        }
+    }
+
+    Ok(sound_result)
 }
 
 #[tauri::command]
@@ -710,6 +845,19 @@ pub async fn set_feedback_note(
 }
 
 #[tauri::command]
+pub async fn get_audio_analysis(
+    sound_id: String,
+) -> Result<crate::audio::analyze::AudioAnalysis, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound file not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = crate::audio::analyze::analyze_audio(&samples, 44100, 1);
+    Ok(analysis)
+}
+
+#[tauri::command]
 pub async fn get_sound_quality(
     state: State<'_, AppState>,
     sound_id: String,
@@ -822,6 +970,11 @@ pub enum RepairAction {
     Brighten,
     Darken,
     Punch,
+    AddSub,
+    Saturation,
+    Soften,
+    Sharpen,
+    Compress,
 }
 
 #[tauri::command]
@@ -871,6 +1024,56 @@ pub async fn apply_repair(
         }
         RepairAction::Punch => {
             audio::dsp::apply_punch(&mut samples);
+        }
+        RepairAction::AddSub => {
+            let len = samples.len();
+            for i in 0..len {
+                let t = i as f32 / 44100.0;
+                let env = (-3.0 * t).exp();
+                let sub = (2.0 * std::f32::consts::PI * 55.0 * t).sin() * env * 0.3;
+                samples[i] = (samples[i] + sub).clamp(-1.0, 1.0);
+            }
+        }
+        RepairAction::Saturation => {
+            for s in samples.iter_mut() {
+                *s = (*s * 1.5).tanh();
+            }
+        }
+        RepairAction::Soften => {
+            let rc = 1.0 / (2.0 * std::f32::consts::PI * 3000.0);
+            let dt = 1.0 / 44100.0;
+            let alpha = dt / (rc + dt);
+            let mut prev = 0.0;
+            for sample in samples.iter_mut() {
+                prev += alpha * (*sample - prev);
+                *sample = prev;
+            }
+            for s in samples.iter_mut() { *s *= 0.7; }
+        }
+        RepairAction::Sharpen => {
+            let onset_len = (44100.0 * 0.005) as usize;
+            let threshold = samples.iter().map(|s| s.abs()).fold(0.0f32, f32::max) * 0.3;
+            for i in 10..samples.len().min(44100 / 2) {
+                if samples[i].abs() > threshold {
+                    let end = (i + onset_len).min(samples.len());
+                    for j in i..end {
+                        let t = (j - i) as f32 / onset_len as f32;
+                        samples[j] *= 1.0 + 0.5 * (1.0 - t);
+                    }
+                    break;
+                }
+            }
+        }
+        RepairAction::Compress => {
+            let threshold = 0.3;
+            let ratio = 3.0;
+            for s in samples.iter_mut() {
+                let abs = s.abs();
+                if abs > threshold {
+                    let reduction = (abs - threshold) * (1.0 - 1.0 / ratio);
+                    *s = s.signum() * (abs - reduction);
+                }
+            }
         }
     }
 
@@ -1756,4 +1959,1626 @@ fn chrono_now() -> String {
         .unwrap_or_default()
         .as_secs()
         .to_string()
+}
+
+// ─── Undo / Redo ───────────────────────────────────────
+
+#[tauri::command]
+pub async fn undo_last_action(state: State<'_, AppState>) -> Result<Option<crate::history::ActionEntry>, String> {
+    let mut history = state.history.lock().map_err(|e| e.to_string())?;
+    Ok(history.undo())
+}
+
+#[tauri::command]
+pub async fn redo_last_action(state: State<'_, AppState>) -> Result<Option<crate::history::ActionEntry>, String> {
+    let mut history = state.history.lock().map_err(|e| e.to_string())?;
+    Ok(history.redo())
+}
+
+#[tauri::command]
+pub async fn can_undo_action(state: State<'_, AppState>) -> Result<bool, String> {
+    let history = state.history.lock().map_err(|e| e.to_string())?;
+    Ok(history.can_undo())
+}
+
+#[tauri::command]
+pub async fn can_redo_action(state: State<'_, AppState>) -> Result<bool, String> {
+    let history = state.history.lock().map_err(|e| e.to_string())?;
+    Ok(history.can_redo())
+}
+
+// ─── Hybrid Reconstruction ─────────────────────────────
+
+#[derive(Clone, serde::Serialize)]
+pub struct HybridResult {
+    pub sound_result: generator::SoundResult,
+    pub analysis: crate::audio::analyze::AudioAnalysis,
+}
+
+#[tauri::command]
+pub async fn hybrid_reconstruct(
+    sound_id: String,
+    synth_blend: Option<f32>,
+    replace_transient: Option<bool>,
+    replace_body: Option<bool>,
+    replace_tail: Option<bool>,
+    regenerate_tail: Option<bool>,
+    sub_reinforce: Option<f32>,
+    preserve_transient: Option<bool>,
+    preserve_tail: Option<bool>,
+    preserve_pitch: Option<bool>,
+) -> Result<HybridResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+
+    let params = audio::hybrid::HybridParams {
+        synth_blend: synth_blend.unwrap_or(0.5),
+        replace_transient: replace_transient.unwrap_or(false),
+        replace_body: replace_body.unwrap_or(false),
+        replace_tail: replace_tail.unwrap_or(false),
+        regenerate_tail: regenerate_tail.unwrap_or(false),
+        sub_reinforce: sub_reinforce.unwrap_or(0.0),
+        transient_amount: if replace_transient.unwrap_or(false) { 1.0 } else { 0.0 },
+        body_amount: if replace_body.unwrap_or(false) { 1.0 } else { 0.0 },
+        spectral_blend: 0.0,
+        preserve_transient: preserve_transient.unwrap_or(true),
+        preserve_tail: preserve_tail.unwrap_or(true),
+        preserve_pitch: preserve_pitch.unwrap_or(true),
+        preserve_rhythm: true,
+        preserve_texture: true,
+    };
+
+    let hybridized = audio::hybrid::hybrid_reconstruct(&samples, &analysis, &params);
+
+    let prompt = format!("hybrid reconstruction of {} (blend:{:.0}%)",
+        analysis.sound_type_hint, params.synth_blend * 100.0);
+    let sound_result = generator::save_and_return(
+        &hybridized, &prompt, &analysis.sound_type_hint,
+        Some("hybrid"), 0,
+    )?;
+
+    Ok(HybridResult { sound_result, analysis })
+}
+
+// ─── Quick Compare ─────────────────────────────────────
+
+#[derive(Clone, serde::Serialize)]
+pub struct CompareResult {
+    pub current_id: String,
+    pub previous_id: Option<String>,
+    pub has_previous: bool,
+}
+
+#[tauri::command]
+pub async fn get_last_generation(state: State<'_, AppState>) -> Result<Option<crate::history::ActionEntry>, String> {
+    let history = state.history.lock().map_err(|e| e.to_string())?;
+    Ok(history.undo_stack.back().cloned())
+}
+
+#[tauri::command]
+pub async fn record_generation_action(
+    state: State<'_, AppState>,
+    sound_id: String,
+    prompt: String,
+) -> Result<(), String> {
+    let mut history = state.history.lock().map_err(|e| e.to_string())?;
+    history.push_action(crate::history::ActionEntry {
+        action_type: "generate".to_string(),
+        sound_id,
+        prompt,
+        timestamp: chrono_now(),
+    });
+    Ok(())
+}
+
+// ─── Intelligent Pack Generation ─────────────────────
+
+#[tauri::command]
+pub async fn generate_intelligent_pack(
+    genre: String,
+    sound_count: usize,
+) -> Result<audio::packs::GeneratedPack, String> {
+    let profile = audio::packs::PackProfile::for_genre(&genre);
+    let pack = audio::packs::generate_intelligent_pack(&profile, sound_count.clamp(4, 32));
+    Ok(pack)
+}
+
+#[tauri::command]
+pub async fn analyze_pack_cohesion_command(
+    sound_ids: Vec<String>,
+) -> Result<audio::packs::PackCohesion, String> {
+    let mut analyses = Vec::new();
+    let mut roles = Vec::new();
+    for id in &sound_ids {
+        let path = storage::sound_path(id);
+        if !path.exists() { continue; }
+        if let Ok(samples) = audio::read_wav(&path) {
+            let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+            let st = audio::SoundType::from_str(&analysis.sound_type_hint);
+            analyses.push(analysis);
+            roles.push(audio::packs::SoundRole::from_sound_type(st));
+        }
+    }
+    if analyses.is_empty() {
+        return Err("No valid sounds found".to_string());
+    }
+    Ok(audio::packs::analyze_pack_cohesion(&analyses, &roles))
+}
+
+// ─── Spectral Editing ────────────────────────────────
+
+#[tauri::command]
+pub async fn apply_spectral_edit(
+    sound_id: String,
+    edit_params: audio::spectral_edit::SpectralEditParams,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let mut edited = samples;
+    audio::spectral_edit::apply_spectral_edits(&mut edited, &edit_params);
+    if edited.is_empty() {
+        return Err("Spectral edit produced empty audio".to_string());
+    }
+    let prompt = format!("spectral edit of {}", analysis.sound_type_hint);
+    generator::save_and_return(&edited, &prompt, &analysis.sound_type_hint, Some("spectral-edited"), 0)
+}
+
+#[tauri::command]
+pub async fn isolate_region(
+    sound_id: String,
+    region: String,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let isolated = match region.as_str() {
+        "transient" => audio::spectral_edit::extract_transient_region(&samples),
+        "body" => audio::spectral_edit::extract_body_region(&samples),
+        "tail" => audio::spectral_edit::extract_tail_region(&samples),
+        _ => return Err("Region must be one of: transient, body, tail".to_string()),
+    };
+    if isolated.is_empty() {
+        return Err("Isolation produced empty audio".to_string());
+    }
+    let mut normalized = isolated;
+    audio::process::normalize_peak(&mut normalized, -1.0);
+    let prompt = format!("isolated {} from {}", region, analysis.sound_type_hint);
+    generator::save_and_return(&normalized, &prompt, &analysis.sound_type_hint, Some(&format!("isolated-{}", region)), 0)
+}
+
+// ─── Smart Recreation + Mutation ─────────────────────
+
+#[tauri::command]
+pub async fn mutate_sound_command(
+    sound_id: String,
+    mutation: String,
+    intensity: f32,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let result = audio::mutation::apply_mutation_preset(&samples, &analysis, &mutation, intensity.clamp(0.0, 1.0));
+    if result.samples.is_empty() {
+        return Err("Mutation produced empty audio".to_string());
+    }
+    let prompt = format!("mutation:{} intensity:{:.0}%", mutation, intensity * 100.0);
+    generator::save_and_return(&result.samples, &prompt, &analysis.sound_type_hint, Some(&format!("mutation-{}", mutation)), (intensity * 100.0) as i64)
+}
+
+#[tauri::command]
+pub async fn hybridize_sounds_command(
+    sound_id_a: String,
+    sound_id_b: String,
+    blend: f32,
+) -> Result<generator::SoundResult, String> {
+    let path_a = storage::sound_path(&sound_id_a);
+    let path_b = storage::sound_path(&sound_id_b);
+    if !path_a.exists() || !path_b.exists() {
+        return Err("One or both source sounds not found".to_string());
+    }
+    let samples_a = audio::read_wav(&path_a)?;
+    let samples_b = audio::read_wav(&path_b)?;
+    let analysis_a = audio::analyze::analyze_audio(&samples_a, 44100, 1);
+    let analysis_b = audio::analyze::analyze_audio(&samples_b, 44100, 1);
+    let (hybrid, _) = audio::mutation::hybridize_sounds(&samples_a, &analysis_a, &samples_b, &analysis_b, blend.clamp(0.0, 1.0));
+    if hybrid.is_empty() {
+        return Err("Hybridization produced empty audio".to_string());
+    }
+    let prompt = format!("hybrid {:.0}% {} + {:.0}% {}",
+        (1.0 - blend) * 100.0, analysis_a.sound_type_hint,
+        blend * 100.0, analysis_b.sound_type_hint);
+    generator::save_and_return(&hybrid, &prompt, &analysis_a.sound_type_hint, Some("hybrid"), (blend * 100.0) as i64)
+}
+
+#[tauri::command]
+pub async fn get_available_mutations() -> Vec<String> {
+    vec![
+        "recreate".to_string(),
+        "mutate".to_string(),
+        "clean-up".to_string(),
+        "modernize".to_string(),
+        "exaggerate-punch".to_string(),
+        "exaggerate-sub".to_string(),
+        "exaggerate-bright".to_string(),
+        "exaggerate-dark".to_string(),
+        "exaggerate-distortion".to_string(),
+        "exaggerate-short".to_string(),
+        "exaggerate-long".to_string(),
+        "evolve-harder".to_string(),
+        "evolve-cleaner".to_string(),
+        "evolve-warmer".to_string(),
+        "evolve-brighter".to_string(),
+        "evolve-heavier".to_string(),
+        "evolve-lighter".to_string(),
+        "evolve-longer".to_string(),
+        "evolve-shorter".to_string(),
+        "genre-trap".to_string(),
+        "genre-techno".to_string(),
+        "genre-cinematic".to_string(),
+        "genre-lo-fi".to_string(),
+        "genre-drill".to_string(),
+        "genre-house".to_string(),
+        "genre-dubstep".to_string(),
+    ]
+}
+
+// ─── Personal Taste Model ────────────────────────────
+
+#[tauri::command]
+pub async fn record_taste_action(
+    action: String,
+    sound_id: String,
+) -> Result<(), String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let (prompt, genre_hints) = if let Ok(db_path) = crate::generator::db_path() {
+        if let Ok(conn) = rusqlite::Connection::open(&db_path) {
+            if let Ok(Some(entry)) = crate::db::get_sound(&conn, &sound_id) {
+                let tags: Vec<String> = serde_json::from_str(&entry.tags).unwrap_or_default();
+                let genres: Vec<String> = tags.iter().filter(|t| {
+                    matches!(t.as_str(), "trap" | "techno" | "house" | "lo-fi" | "cinematic" | "drill" | "dubstep" | "ambient" | "electronic")
+                }).cloned().collect();
+                (entry.prompt, genres)
+            } else {
+                (String::new(), vec![])
+            }
+        } else {
+            (String::new(), vec![])
+        }
+    } else {
+        (String::new(), vec![])
+    };
+
+    let action_enum = match action.as_str() {
+        "favorite" | "fav" => audio::taste::UserAction::Favorited,
+        "export" => audio::taste::UserAction::Exported,
+        "delete" => audio::taste::UserAction::Deleted,
+        "regenerate" => audio::taste::UserAction::Regenerated,
+        "thumbs_up" => audio::taste::UserAction::ThumbsUp,
+        "thumbs_down" => audio::taste::UserAction::ThumbsDown,
+        "preview" => audio::taste::UserAction::Previewed,
+        "play" => audio::taste::UserAction::Played,
+        _ => return Err(format!("Unknown action: {}", action)),
+    };
+
+    let record = audio::taste::ActionRecord {
+        action: action_enum,
+        sound_type: analysis.sound_type_hint.clone(),
+        prompt,
+        brightness: analysis.brightness,
+        energy: analysis.rms,
+        duration_ms: analysis.duration_ms,
+        genre_hints,
+        timestamp: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs(),
+    };
+
+    let mut model = audio::taste::TasteModel::load();
+    model.record_action(record);
+    model.save();
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn get_taste_profile() -> audio::taste::TasteProfile {
+    let model = audio::taste::TasteModel::load();
+    model.profile
+}
+
+#[tauri::command]
+pub async fn get_taste_suggestions(sound_type: String) -> Vec<String> {
+    let model = audio::taste::TasteModel::load();
+    model.top_preferred_terms(10).into_iter().map(|(t, _)| t).collect()
+}
+
+#[tauri::command]
+pub async fn get_preferred_defaults(sound_type: String) -> audio::params::ExposedParams {
+    let model = audio::taste::TasteModel::load();
+    model.suggested_defaults(&sound_type)
+}
+
+#[tauri::command]
+pub async fn score_variant_by_taste(
+    sound_type: String,
+    brightness: f32,
+    energy: f32,
+) -> f32 {
+    let model = audio::taste::TasteModel::load();
+    model.score_variant(&sound_type, brightness, energy)
+}
+
+// ─── Session Persistence ────────────────────────────────
+
+#[tauri::command]
+pub async fn get_session_state() -> audio::session::SessionState {
+    let manager = audio::session::SessionManager::load();
+    manager.state().clone()
+}
+
+#[tauri::command]
+pub async fn set_active_sound_session(sound_id: String) -> Result<(), String> {
+    let mut manager = audio::session::SessionManager::load();
+    manager.set_active_sound(sound_id);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn set_last_prompt_session(prompt: String, sound_type: String) -> Result<(), String> {
+    let mut manager = audio::session::SessionManager::load();
+    manager.set_last_prompt(prompt, sound_type);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn set_view_state_session(view: String) -> Result<(), String> {
+    let mut manager = audio::session::SessionManager::load();
+    manager.set_view_state(view);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn list_presets() -> Vec<audio::session::PresetEntry> {
+    audio::session::load_presets()
+}
+
+#[tauri::command]
+pub async fn save_preset_command(
+    name: String,
+    sound_type: String,
+    params_json: String,
+    tags: Vec<String>,
+) -> Result<(), String> {
+    let preset = audio::session::PresetEntry {
+        name,
+        sound_type,
+        params_json,
+        tags,
+        created_at: chrono_now(),
+    };
+    audio::session::save_preset(&preset);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn delete_preset_command(name: String) -> Result<(), String> {
+    audio::session::delete_preset(&name);
+    Ok(())
+}
+
+// ─── Crash Safety / Integrity ───────────────────────────
+
+#[tauri::command]
+pub async fn verify_sound_integrity(sound_id: String) -> Result<bool, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Ok(false);
+    }
+    match audio::read_wav(&path) {
+        Ok(samples) => {
+            if samples.is_empty() { return Ok(false); }
+            if samples.iter().any(|s| s.is_nan() || s.is_infinite()) { return Ok(false); }
+            Ok(true)
+        }
+        Err(_) => Ok(false),
+    }
+}
+
+#[tauri::command]
+pub async fn export_sound_safe(sound_id: String, output_path: String) -> Result<(), String> {
+    let src = storage::sound_path(&sound_id);
+    if !src.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav_safe(&src)?;
+    audio::validate::validate_output_samples(&samples)?;
+    let dest = std::path::PathBuf::from(&output_path);
+
+    // Atomic write: write to temp then rename
+    let temp_path = dest.with_extension("tmp");
+    audio::write_wav(&temp_path, &samples, 44100)?;
+    std::fs::rename(&temp_path, &dest).map_err(|e| format!("Failed to write output: {}", e))?;
+
+    Ok(())
+}
+
+// ─── Identity & Onboarding ────────────────────────────
+
+#[tauri::command]
+pub async fn get_app_identity() -> String {
+    audio::identity::identity_statement()
+}
+
+#[tauri::command]
+pub async fn get_default_presets() -> Vec<audio::identity::DefaultPreset> {
+    audio::identity::default_presets()
+}
+
+#[tauri::command]
+pub async fn get_quick_start_workflows() -> Vec<audio::identity::Workflow> {
+    audio::identity::quick_start_workflows()
+}
+
+#[tauri::command]
+pub async fn get_capability_summary() -> Vec<Vec<String>> {
+    audio::identity::capability_summary().into_iter()
+        .map(|(k, v)| vec![k.to_string(), v.to_string()])
+        .collect()
+}
+
+// ─── Rapid-fire Preview ────────────────────────────────
+
+#[tauri::command]
+pub async fn get_sound_duration(sound_id: String) -> Result<f32, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    Ok(samples.len() as f32 / 44100.0 * 1000.0)
+}
+
+// ─── Parameter Exposure System ─────────────────────────
+
+#[tauri::command]
+pub async fn get_control_modes() -> Vec<String> {
+    vec!["simple".to_string(), "advanced".to_string(), "sound_designer".to_string()]
+}
+
+#[tauri::command]
+pub async fn params_from_exposed(
+    exposed: audio::params::ExposedParams,
+    sound_type: String,
+    pitch_hz: f32,
+    duration_ms: f32,
+) -> String {
+    let st = audio::SoundType::from_str(&sound_type);
+    let params = exposed.to_resynthesis_params(st, pitch_hz, duration_ms);
+    format!("{:?}", params)
+}
+
+#[tauri::command]
+pub async fn generate_with_params(
+    exposed: audio::params::ExposedParams,
+    sound_type: String,
+    pitch_hz: Option<f32>,
+    duration_ms: Option<f32>,
+) -> Result<generator::SoundResult, String> {
+    let st = audio::SoundType::from_str(&sound_type);
+    let pitch = pitch_hz.unwrap_or_else(|| match st {
+        audio::SoundType::Kick | audio::SoundType::Bass => 60.0,
+        audio::SoundType::Snare => 200.0,
+        audio::SoundType::ClosedHat => 400.0,
+        audio::SoundType::OpenHat => 300.0,
+        audio::SoundType::Clap => 180.0,
+        audio::SoundType::Tom => 120.0,
+        audio::SoundType::Perc => 300.0,
+        _ => 200.0,
+    });
+    let dur = duration_ms.unwrap_or(300.0);
+    let params = exposed.to_resynthesis_params(st, pitch, dur);
+    let samples = audio::resynthesize::resynthesize(&params);
+    if samples.is_empty() {
+        return Err("Generation produced empty audio".to_string());
+    }
+    let prompt = format!("params mode:{:?} type:{}", exposed.mode, sound_type);
+    generator::save_and_return(&samples, &prompt, &sound_type, Some("params-generated"), 0)
+}
+
+#[tauri::command]
+pub async fn get_exposed_params_defaults(mode: String) -> audio::params::ExposedParams {
+    match mode.as_str() {
+        "advanced" => audio::params::ExposedParams { mode: audio::params::ControlMode::Advanced, ..Default::default() },
+        "sound_designer" => audio::params::ExposedParams { mode: audio::params::ControlMode::SoundDesigner, ..Default::default() },
+        _ => audio::params::ExposedParams::default(),
+    }
+}
+
+// ─── Real Instrument Behavior ─────────────────────────
+
+#[tauri::command]
+pub async fn trigger_midi_note(
+    midi_note: u8,
+    velocity: u8,
+    character: Option<f32>,
+    weight: Option<f32>,
+) -> Result<generator::SoundResult, String> {
+    let (st, pitch) = audio::midi::DrumNote::from_midi_note(midi_note)
+        .unwrap_or((audio::SoundType::Perc, midi_note as f32 * 8.0));
+    let dur = match st {
+        audio::SoundType::Kick => 300.0, audio::SoundType::Snare => 350.0,
+        audio::SoundType::ClosedHat => 150.0, audio::SoundType::OpenHat => 500.0,
+        audio::SoundType::Clap => 300.0, audio::SoundType::Bass => 600.0,
+        audio::SoundType::Perc => 200.0, audio::SoundType::Fx => 800.0,
+        audio::SoundType::Tom => 400.0, audio::SoundType::Other => 300.0,
+    };
+    let mut params = audio::resynthesize::params_for_sound_type(st, pitch, dur);
+    let v = audio::midi::params_for_velocity(&params, velocity);
+    params = v;
+    if let Some(c) = character {
+        params.brightness = (params.brightness + c * 0.3).clamp(0.0, 1.0);
+    }
+    if let Some(w) = weight {
+        params.body_gain = (params.body_gain * (0.5 + w * 0.5)).clamp(0.1, 1.0);
+        params.sub_gain = (params.sub_gain + w * 0.3).clamp(0.0, 1.0);
+    }
+    let samples = audio::resynthesize::resynthesize(&params);
+    if samples.is_empty() {
+        return Err("MIDI trigger produced empty audio".to_string());
+    }
+    let prompt = format!("midi note:{} vel:{} type:{}", midi_note, velocity, st.as_str());
+    generator::save_and_return(&samples, &prompt, st.as_str(), Some("midi-trigger"), velocity as i64)
+}
+
+#[tauri::command]
+pub async fn rapid_randomize(
+    sound_id: String,
+    amount: f32,
+    count: usize,
+) -> Result<Vec<generator::SoundResult>, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let st = audio::SoundType::from_str(&analysis.sound_type_hint);
+    let pitch = analysis.pitch_estimate.unwrap_or(200.0);
+    let base_params = audio::resynthesize::params_for_sound_type(st, pitch, analysis.duration_ms);
+    let variants = audio::midi::generate_rapid_variants(&base_params, count.min(16), amount.clamp(0.1, 1.0));
+    let mut results = Vec::new();
+    for (i, v) in variants.iter().enumerate() {
+        let prompt = format!("rapid variant {} of {} amount:{:.1}", i + 1, count, amount);
+        match generator::save_and_return(v, &prompt, st.as_str(), Some("rapid-variant"), i as i64) {
+            Ok(r) => results.push(r),
+            Err(_) => continue,
+        }
+    }
+    Ok(results)
+}
+
+#[tauri::command]
+pub async fn morph_presets(
+    preset_a_id: String,
+    preset_b_id: String,
+    morph_amount: f32,
+) -> Result<generator::SoundResult, String> {
+    let path_a = storage::sound_path(&preset_a_id);
+    let path_b = storage::sound_path(&preset_b_id);
+    if !path_a.exists() || !path_b.exists() {
+        return Err("One or both source sounds not found".to_string());
+    }
+    let samples_a = audio::read_wav(&path_a)?;
+    let samples_b = audio::read_wav(&path_b)?;
+    let analysis_a = audio::analyze::analyze_audio(&samples_a, 44100, 1);
+    let analysis_b = audio::analyze::analyze_audio(&samples_b, 44100, 1);
+    let st_a = audio::SoundType::from_str(&analysis_a.sound_type_hint);
+    let st_b = audio::SoundType::from_str(&analysis_b.sound_type_hint);
+    let pitch_a = analysis_a.pitch_estimate.unwrap_or(200.0);
+    let pitch_b = analysis_b.pitch_estimate.unwrap_or(200.0);
+    let params_a = audio::resynthesize::params_for_sound_type(st_a, pitch_a, analysis_a.duration_ms);
+    let params_b = audio::resynthesize::params_for_sound_type(st_b, pitch_b, analysis_b.duration_ms);
+    let morphed = audio::midi::morph_params(&params_a, &params_b, morph_amount);
+    let samples = audio::resynthesize::resynthesize(&morphed);
+    if samples.is_empty() {
+        return Err("Morph produced empty audio".to_string());
+    }
+    let target_type = if morph_amount < 0.5 { st_a.as_str() } else { st_b.as_str() };
+    let prompt = format!("morph {:.0}% {} to {}", morph_amount * 100.0, st_a.as_str(), st_b.as_str());
+    generator::save_and_return(&samples, &prompt, target_type, Some("morphed"), (morph_amount * 100.0) as i64)
+}
+
+#[tauri::command]
+pub async fn morph_sounds_command(
+    sound_a_id: String,
+    sound_b_id: String,
+    amount: f32,
+    preserve_source_identity: Option<f32>,
+    exaggerate: Option<f32>,
+    preserve_transient: Option<f32>,
+    preserve_body: Option<f32>,
+    preserve_tail: Option<f32>,
+    transient_transfer: Option<f32>,
+    tail_transfer: Option<f32>,
+    tonal_blend: Option<f32>,
+    texture_blend: Option<f32>,
+) -> Result<(generator::SoundResult, audio::recreate::SimilarityReport), String> {
+    let path_a = storage::sound_path(&sound_a_id);
+    let path_b = storage::sound_path(&sound_b_id);
+    if !path_a.exists() || !path_b.exists() {
+        return Err("One or both source sounds not found".to_string());
+    }
+    let samples_a = audio::read_wav(&path_a)?;
+    let samples_b = audio::read_wav(&path_b)?;
+
+    let controls = audio::morph::MorphControls {
+        amount: amount.clamp(0.0, 1.0),
+        preserve_source_identity: preserve_source_identity.unwrap_or(0.5),
+        exaggerate: exaggerate.unwrap_or(0.0),
+        preserve_transient: preserve_transient.unwrap_or(1.0),
+        preserve_body: preserve_body.unwrap_or(0.5),
+        preserve_tail: preserve_tail.unwrap_or(0.5),
+        transient_transfer: transient_transfer.unwrap_or(0.5),
+        tail_transfer: tail_transfer.unwrap_or(0.5),
+        tonal_blend: tonal_blend.unwrap_or(0.5),
+        texture_blend: texture_blend.unwrap_or(0.5),
+    };
+
+    let (morphed, report) = audio::morph::morph(&samples_a, &samples_b, &controls);
+    if morphed.is_empty() {
+        return Err("Morph produced empty audio".to_string());
+    }
+
+    let analysis_a = audio::analyze::analyze_audio(&samples_a, 44100, 1);
+    let analysis_b = audio::analyze::analyze_audio(&samples_b, 44100, 1);
+    let target_type = if amount < 0.5 { analysis_a.sound_type_hint.clone() } else { analysis_b.sound_type_hint.clone() };
+    let prompt = format!("morph {:.0}% to {:.0}%", (1.0 - amount) * 100.0, amount * 100.0);
+
+    let result = generator::save_and_return(
+        &morphed, &prompt, &target_type, Some("morphed"),
+        (amount * 10000.0) as i64,
+    )?;
+
+    Ok((result, report))
+}
+
+#[tauri::command]
+pub async fn live_preview_generate(config: audio::midi::PreviewConfig) -> Result<generator::SoundResult, String> {
+    let samples = config.generate();
+    if samples.is_empty() {
+        return Err("Preview produced empty audio".to_string());
+    }
+    let prompt = format!("preview {}", config.sound_type);
+    generator::save_and_return(&samples, &prompt, &config.sound_type, Some("preview"), config.velocity as i64)
+}
+
+#[tauri::command]
+pub async fn generate_variant_from_params(
+    sound_id: String,
+    exposed: audio::params::ExposedParams,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let st = audio::SoundType::from_str(&analysis.sound_type_hint);
+    let pitch = analysis.pitch_estimate.unwrap_or(200.0);
+    let params = exposed.to_resynthesis_params(st, pitch, analysis.duration_ms);
+    let recreated = audio::resynthesize::resynthesize(&params);
+    if recreated.is_empty() {
+        return Err("Recreation produced empty audio".to_string());
+    }
+    let prompt = format!("variant from params mode:{:?}", exposed.mode);
+    generator::save_and_return(&recreated, &prompt, &analysis.sound_type_hint, Some("params-variant"), 0)
+}
+
+#[tauri::command]
+pub async fn analyze_kit_command(sound_ids: Vec<String>) -> Result<audio::packs::KitAdvice, String> {
+    if sound_ids.is_empty() {
+        return Err("No sounds provided".to_string());
+    }
+
+    let mut sounds = Vec::new();
+    for id in &sound_ids {
+        let path = storage::sound_path(id);
+        if !path.exists() {
+            return Err(format!("Sound not found: {}", id));
+        }
+        let samples = audio::read_wav(&path)?;
+        let st = audio::SoundType::from_str(&"other");
+        let role = audio::packs::SoundRole::from_sound_type(st);
+        sounds.push(audio::packs::GeneratedPackSound {
+            role,
+            name: id.clone(),
+            samples,
+            energy: 0.5,
+            params: String::new(),
+        });
+    }
+
+    let advice = audio::packs::analyze_kit_composition(&sounds);
+    Ok(advice)
+}
+
+#[tauri::command]
+pub async fn explore_stream(
+    prompt: String,
+    count: usize,
+    variation: f32,
+) -> Result<Vec<generator::VariantResult>, String> {
+    if count == 0 || count > 20 {
+        return Err("Count must be between 1 and 20".to_string());
+    }
+    let variation = variation.clamp(0.1, 1.0);
+
+    let ctrl = crate::prompt_dsp::parse_prompt_rich(&prompt);
+    let st = audio::SoundType::from_str(&ctrl.sound_type);
+    let base_seed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos() as i64;
+
+    let pitch = ctrl.pitch_hz.unwrap_or(200.0);
+    let dur = ctrl.duration_ms.unwrap_or(300.0);
+    let base_params = audio::resynthesize::params_for_sound_type(st, pitch, dur);
+
+    let mut results = Vec::new();
+    for i in 0..count {
+        let seed = base_seed.wrapping_add((i as i64 * 7919) ^ 0xABCD);
+        let randomized = base_params.clone().with_seed(seed as u64).randomize(variation);
+        let mut samples = audio::resynthesize::resynthesize(&randomized);
+
+        let parsed = crate::prompt::parse_prompt(&prompt);
+        audio::process::process_sound(&mut samples, &parsed.dsp, st);
+        if samples.is_empty() { continue; }
+
+        let result = generator::save_and_return(
+            &samples, &prompt, st.as_str(), Some("explore"), seed,
+        )?;
+
+        let tags = audio::apply_autotags(&samples, &st, Some("explore"), Some(&prompt));
+        results.push(generator::VariantResult {
+            id: result.id,
+            waveform: result.waveform,
+            sound_type: result.sound_type,
+            tags,
+            duration_ms: result.duration_ms,
+            prompt: result.prompt,
+            variant_name: format!("explore-{}", i),
+            source: "explore".to_string(),
+            model: "cshot-engine".to_string(),
+            seed,
+            score: result.score,
+            failure_labels: result.failure_labels,
+        });
+    }
+    Ok(results)
+}
+
+#[tauri::command]
+pub async fn branch_from_sound(
+    sound_id: String,
+    mutation_name: String,
+    intensity: f32,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+
+    let mutation = if mutation_name.is_empty() { "mutate" } else { &mutation_name };
+    let intensity = intensity.clamp(0.1, 1.0);
+    let result = audio::mutation::apply_mutation_preset(&samples, &analysis, mutation, intensity);
+
+    if result.samples.is_empty() {
+        return Err("Branch produced empty audio".to_string());
+    }
+
+    let prompt = format!("branch: {} from ({:.0}%)", mutation, intensity * 100.0);
+    generator::save_and_return(
+        &result.samples, &prompt, &analysis.sound_type_hint,
+        Some(&format!("branch-{}", mutation)), 0,
+    )
+}
+
+#[tauri::command]
+pub async fn recipe_roulette() -> Result<generator::SoundResult, String> {
+    let recipes = vec![
+        "punchy kick with sub",
+        "crisp snare with crack",
+        "bright closed hat tight",
+        "warm open hat wash",
+        "layered clap with reverb",
+        "deep tom with body",
+        "metallic perc with snap",
+        "sub bass with distortion",
+        "cinematic impact with tail",
+        "airy perc with sizzle",
+        "dark kick with boom",
+        "tight snare with click",
+        "noisy clap with texture",
+        "warm bass with sub",
+        "aggressive snare with crunch",
+        "smooth open hat with air",
+        "vintage kick with analog feel",
+        "raw perc with organic texture",
+    ];
+
+    let seed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos() as usize;
+
+    let idx = seed % recipes.len();
+    let prompt = recipes[idx].to_string();
+    generator::generate(&prompt, None)
+}
+
+#[tauri::command]
+pub async fn quick_compare(
+    prompt: String,
+    count: usize,
+) -> Result<Vec<generator::VariantResult>, String> {
+    let count = count.clamp(2, 8);
+    let ctrl = crate::prompt_dsp::parse_prompt_rich(&prompt);
+    let st = audio::SoundType::from_str(&ctrl.sound_type);
+    let base_seed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos() as i64;
+
+    let pitch = ctrl.pitch_hz.unwrap_or(200.0);
+    let dur = ctrl.duration_ms.unwrap_or(300.0);
+    let base_params = audio::resynthesize::params_for_sound_type(st, pitch, dur);
+
+    let variant_styles = ["brighter", "darker", "punchier", "softer", "cleaner", "warmer", "distorted", "subbier"];
+    let mut results = Vec::new();
+
+    for i in 0..count.min(variant_styles.len()) {
+        let seed = base_seed.wrapping_add((i as i64 * 1337) ^ 0xCAFE);
+        let randomized = base_params.clone().with_seed(seed as u64).randomize(0.25);
+        let params = randomized.to_variant(variant_styles[i]);
+        let mut samples = audio::resynthesize::resynthesize(&params);
+        let parsed = crate::prompt::parse_prompt(&prompt);
+        audio::process::process_sound(&mut samples, &parsed.dsp, st);
+        if samples.is_empty() { continue; }
+
+        let result = generator::save_and_return(
+            &samples, &prompt, st.as_str(), Some(variant_styles[i]), seed,
+        )?;
+
+        let tags = audio::apply_autotags(&samples, &st, Some(variant_styles[i]), Some(&prompt));
+        results.push(generator::VariantResult {
+            id: result.id,
+            waveform: result.waveform,
+            sound_type: result.sound_type,
+            tags,
+            duration_ms: result.duration_ms,
+            prompt: result.prompt,
+            variant_name: variant_styles[i].to_string(),
+            source: "compare".to_string(),
+            model: "cshot-engine".to_string(),
+            seed,
+            score: result.score,
+            failure_labels: result.failure_labels,
+        });
+    }
+    Ok(results)
+}
+
+#[derive(Clone, serde::Serialize)]
+pub struct DesignWorkflowResult {
+    pub recreation: Option<generator::SoundResult>,
+    pub mutation: Option<generator::SoundResult>,
+    pub morphed: Option<generator::SoundResult>,
+    pub branched: Vec<generator::VariantResult>,
+    pub recreation_similarity: Option<audio::recreate::SimilarityReport>,
+    pub workflow_steps: Vec<String>,
+    pub total_time_ms: f64,
+}
+
+#[tauri::command]
+pub async fn design_workflow(
+    source_sound_id: String,
+    reference_sound_id: Option<String>,
+    prompt: Option<String>,
+    do_recreate: bool,
+    do_mutate: bool,
+    do_morph: bool,
+    do_branch: bool,
+    recreate_fidelity: Option<f32>,
+    mutation_name: Option<String>,
+    mutation_intensity: Option<f32>,
+    morph_amount: Option<f32>,
+    branch_count: Option<usize>,
+) -> Result<DesignWorkflowResult, String> {
+    let start = std::time::Instant::now();
+
+    let path = storage::sound_path(&source_sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let source_samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&source_samples, 44100, 1);
+    let st = audio::SoundType::from_str(&analysis.sound_type_hint);
+    let prompt_text = prompt.unwrap_or_else(|| format!("design workflow from {}", analysis.sound_type_hint));
+
+    let mut result = DesignWorkflowResult {
+        recreation: None,
+        mutation: None,
+        morphed: None,
+        branched: Vec::new(),
+        recreation_similarity: None,
+        workflow_steps: Vec::new(),
+        total_time_ms: 0.0,
+    };
+
+    // Step 1: Recreate
+    if do_recreate {
+        let fidelity = recreate_fidelity.unwrap_or(0.7).clamp(0.1, 1.0);
+        let (recreated, _analysis, sim) = audio::recreate::recreate_single(&source_samples, fidelity);
+        if !recreated.is_empty() {
+            let saved = generator::save_and_return(
+                &recreated, &prompt_text, st.as_str(), Some("recreated"), 0,
+            )?;
+            result.recreation = Some(saved);
+            result.recreation_similarity = Some(sim);
+            result.workflow_steps.push("recreation".to_string());
+        }
+    }
+
+    // Step 2: Mutate the recreation
+    if do_mutate {
+        let samples = result.recreation.as_ref()
+            .and_then(|r| {
+                let p = storage::sound_path(&r.id);
+                audio::read_wav(&p).ok()
+            })
+            .unwrap_or_else(|| source_samples.clone());
+
+        let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+        let mutation = mutation_name.as_deref().unwrap_or("mutate");
+        let intensity = mutation_intensity.unwrap_or(0.5).clamp(0.1, 1.0);
+        let mutated = audio::mutation::apply_mutation_preset(&samples, &analysis, mutation, intensity);
+
+        if !mutated.samples.is_empty() {
+            let saved = generator::save_and_return(
+                &mutated.samples, &format!("{} mutated", prompt_text), st.as_str(),
+                Some(&format!("mutated-{}", mutation)), 0,
+            )?;
+            result.mutation = Some(saved);
+            result.workflow_steps.push(format!("mutation: {}", mutation));
+        }
+    }
+
+    // Step 3: Morph with reference
+    if do_morph {
+        if let Some(ref_id) = &reference_sound_id {
+            let ref_path = storage::sound_path(ref_id);
+            if ref_path.exists() {
+                if let Ok(ref_samples) = audio::read_wav(&ref_path) {
+                    let amt = morph_amount.unwrap_or(0.5).clamp(0.0, 1.0);
+                    let controls = audio::morph::MorphControls {
+                        amount: amt,
+                        ..Default::default()
+                    };
+                    let (morphed, _report) = audio::morph::morph(&source_samples, &ref_samples, &controls);
+                    if !morphed.is_empty() {
+                        let saved = generator::save_and_return(
+                            &morphed, &format!("morphed {:.0}%", amt * 100.0), st.as_str(),
+                            Some("morphed"), (amt * 100.0) as i64,
+                        )?;
+                        result.morphed = Some(saved);
+                        result.workflow_steps.push(format!("morph: {:.0}%", amt * 100.0));
+                    }
+                }
+            }
+        }
+    }
+
+    // Step 4: Branch
+    if do_branch {
+        let count = branch_count.unwrap_or(4).clamp(1, 8);
+        let variants = generator::generate_smart_variants(
+            &prompt_text, st.as_str(), count, 1, 0.5,
+        )?;
+        result.branched = variants;
+        result.workflow_steps.push(format!("branch: {} variants", count));
+    }
+
+    result.total_time_ms = start.elapsed().as_secs_f64() * 1000.0;
+    Ok(result)
+}
+
+// ─── Creative Intent Commands ───────────────────────────
+
+#[derive(Clone, serde::Serialize)]
+pub struct IntentGenerateResult {
+    pub sound: generator::SoundResult,
+    pub profile: audio::creative_intent::CreativeIntentProfile,
+    pub params_summary: String,
+}
+
+#[tauri::command]
+pub async fn generate_with_intent(
+    prompt: String,
+    intent_profile: audio::creative_intent::CreativeIntentProfile,
+    reference_path: Option<String>,
+) -> Result<IntentGenerateResult, String> {
+    let reference_samples = if let Some(ref_path) = &reference_path {
+        let path = std::path::PathBuf::from(ref_path);
+        if path.exists() {
+            Some(audio::read_wav(&path)?)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    let analysis = reference_samples.as_ref().map(|s| audio::analyze::analyze_audio(s, 44100, 1));
+
+    let (sound_type, pitch_hz, duration_ms) = if let Some(a) = &analysis {
+        let st = audio::SoundType::from_str(&a.sound_type_hint);
+        let pitch = a.pitch_estimate.unwrap_or(200.0);
+        (st, pitch, a.duration_ms)
+    } else {
+        let parsed = crate::prompt_dsp::parse_prompt_rich(&prompt);
+        let st = audio::SoundType::from_str(&parsed.sound_type);
+        let pitch = 200.0;
+        let duration = 300.0;
+        (st, pitch, duration)
+    };
+
+    let coordinated = audio::creative_intent::generate_with_intent(sound_type, pitch_hz, duration_ms, &intent_profile);
+    let full_prompt = format!("{} [intent: energy={:.1} aggression={:.1} polish={:.1} realism={:.1} experimental={:.1} analog={:.1} cinematic={:.1} density={:.1} impact={:.1}]",
+        prompt,
+        intent_profile.energy, intent_profile.aggression, intent_profile.polish,
+        intent_profile.realism, intent_profile.experimentalism, intent_profile.analog_feel,
+        intent_profile.cinematic_scale, intent_profile.density, intent_profile.impact,
+    );
+
+    let mut samples = audio::resynthesize::resynthesize(&coordinated.resynthesis);
+
+    let humanize_params = &coordinated.humanize;
+    if humanize_params.analog_drift > 0.001 || humanize_params.instability > 0.001 {
+        audio::humanize::humanize(&mut samples, humanize_params, 42);
+    }
+
+    let mut transform_params = coordinated.transform;
+    if let Some(sat) = transform_params.saturation_drive {
+        if sat > 1.01 {
+            audio::dsp::apply_saturation_multi_stage(&mut samples, sat);
+        }
+        transform_params.saturation_drive = None;
+    }
+    audio::transform::apply_dsp_transforms(&mut samples, &transform_params);
+    audio::process::normalize_peak(&mut samples, -1.0);
+
+    let sound = generator::save_and_return(
+        &samples, &full_prompt, sound_type.as_str(),
+        Some("intent-generated"), (intent_profile.energy * 100.0) as i64,
+    )?;
+
+    let params_summary = format!(
+        "brightness:{:.2} sat:{:.2} click:{:.2} attack:{:.1}ms body:{:.2} sub:{:.2} noise:{:.2} dur:{:.0}ms tail:{:.0}ms",
+        coordinated.resynthesis.brightness,
+        coordinated.resynthesis.saturation_drive,
+        coordinated.resynthesis.click_amount,
+        coordinated.resynthesis.attack_ms,
+        coordinated.resynthesis.body_gain,
+        coordinated.resynthesis.sub_gain,
+        coordinated.resynthesis.noise_amount,
+        coordinated.resynthesis.duration_ms,
+        coordinated.resynthesis.tail_ms,
+    );
+
+    Ok(IntentGenerateResult {
+        sound,
+        profile: intent_profile,
+        params_summary,
+    })
+}
+
+#[tauri::command]
+pub async fn get_intent_presets() -> Vec<(&'static str, audio::creative_intent::CreativeIntentProfile)> {
+    vec![
+        ("neutral", audio::creative_intent::CreativeIntentProfile::default()),
+        ("punchy_drum", audio::creative_intent::CreativeIntentProfile::preset("punchy_drum")),
+        ("cinematic_boom", audio::creative_intent::CreativeIntentProfile::preset("cinematic_boom")),
+        ("lo_fi_warm", audio::creative_intent::CreativeIntentProfile::preset("lo_fi_warm")),
+        ("aggressive_dubstep", audio::creative_intent::CreativeIntentProfile::preset("aggressive_dubstep")),
+        ("clean_precision", audio::creative_intent::CreativeIntentProfile::preset("clean_precision")),
+        ("ambient_texture", audio::creative_intent::CreativeIntentProfile::preset("ambient_texture")),
+        ("hard_trap", audio::creative_intent::CreativeIntentProfile::preset("hard_trap")),
+        ("experimental_glitch", audio::creative_intent::CreativeIntentProfile::preset("experimental_glitch")),
+        ("bass_massive", audio::creative_intent::CreativeIntentProfile::preset("bass_massive")),
+        ("folk_acoustic", audio::creative_intent::CreativeIntentProfile::preset("folk_acoustic")),
+        ("cyberpunk", audio::creative_intent::CreativeIntentProfile::preset("cyberpunk")),
+        ("orchestral_epic", audio::creative_intent::CreativeIntentProfile::preset("orchestral_epic")),
+        ("minimal_techno", audio::creative_intent::CreativeIntentProfile::preset("minimal_techno")),
+        ("retro_video_game", audio::creative_intent::CreativeIntentProfile::preset("retro_video_game")),
+        ("jazz_brush", audio::creative_intent::CreativeIntentProfile::preset("jazz_brush")),
+    ]
+}
+
+#[tauri::command]
+pub async fn blend_intent_profiles(
+    profile_a: audio::creative_intent::CreativeIntentProfile,
+    profile_b: audio::creative_intent::CreativeIntentProfile,
+    blend: f32,
+) -> audio::creative_intent::CreativeIntentProfile {
+    audio::creative_intent::CreativeIntentProfile::blend(&profile_a, &profile_b, blend)
+}
+
+// ─── Advanced Recreation Commands ────────────────────────
+
+#[tauri::command]
+pub async fn recreate_advanced_command(
+    sound_id: String,
+    config: audio::recreate::AdvancedRecreationConfig,
+) -> Result<(generator::SoundResult, audio::recreate::SimilarityReport), String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let (recreated, sim) = audio::recreate::recreate_advanced(&samples, &config);
+    if recreated.is_empty() {
+        return Err("Recreation produced empty audio".to_string());
+    }
+
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let prompt = format!("advanced recreation: {} (fidelity:{:.1})", config.mode.label(), config.fidelity);
+    let sound = generator::save_and_return(
+        &recreated, &prompt, &analysis.sound_type_hint,
+        Some(&format!("recreate-{}", config.mode.label())), 0,
+    )?;
+    Ok((sound, sim))
+}
+
+// ─── Semantic Query Command ─────────────────────────────
+
+#[tauri::command]
+pub async fn parse_natural_language_query(query: String) -> crate::semantic_library::SemanticQuery {
+    crate::semantic_library::parse_natural_language_query(&query)
+}
+
+#[tauri::command]
+pub async fn semantic_search(
+    state: State<'_, AppState>,
+    query: String,
+) -> Result<Vec<crate::semantic_library::SimilarSound>, String> {
+    let conn = state.db.lock().map_err(|e| e.to_string())?;
+    let all = crate::db::list_all_sounds(&conn).map_err(|e| e.to_string())?;
+    let parsed = crate::semantic_library::parse_natural_language_query(&query);
+    Ok(crate::semantic_library::search_by_semantic_query(&all, &parsed, 20))
+}
+
+// ─── Audio Intelligence Commands ─────────────────────────
+
+#[tauri::command]
+pub async fn analyze_audio_intelligence(sound_id: String) -> Result<audio::audio_intelligence::AudioIntelligenceReport, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    Ok(audio::audio_intelligence::analyze_intelligence(&samples, &analysis))
+}
+
+#[tauri::command]
+pub async fn score_for_ranking_command(sound_id: String) -> Result<f32, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    Ok(audio::audio_intelligence::score_for_ranking(&analysis, &samples))
+}
+
+#[tauri::command]
+pub async fn recommendation_score_command(sound_id: String) -> Result<f32, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    Ok(audio::audio_intelligence::recommendation_score(&analysis, &samples))
+}
+
+// ─── Library Optimization Commands ──────────────────────
+
+#[derive(Clone, serde::Serialize)]
+pub struct LibraryOptimizationStats {
+    pub total_count: i64,
+    pub favorite_count: i64,
+    pub avg_duration_ms: f64,
+    pub unique_types: Vec<(String, i64)>,
+    pub total_size_bytes: i64,
+    pub estimated_import_count: i64,
+}
+
+#[tauri::command]
+pub async fn get_library_optimization_stats(state: State<'_, AppState>) -> Result<LibraryOptimizationStats, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let total_count: i64 = db.query_row("SELECT COUNT(*) FROM sounds", [], |r| r.get(0)).unwrap_or(0);
+    let favorite_count: i64 = db.query_row("SELECT COUNT(*) FROM sounds WHERE is_favorite=1", [], |r| r.get(0)).unwrap_or(0);
+    let avg_duration_ms: f64 = db.query_row("SELECT COALESCE(AVG(duration_ms), 0) FROM sounds", [], |r| r.get(0)).unwrap_or(0.0);
+    let total_size: i64 = db.query_row("SELECT COALESCE(SUM(rms * 1000), 0) FROM sounds", [], |r| r.get(0)).unwrap_or(0);
+    let estimated_import: i64 = db.query_row("SELECT COUNT(*) FROM imported_samples", [], |r| r.get(0)).unwrap_or(0);
+
+    let mut stmt = db.prepare("SELECT sound_type, COUNT(*) as c FROM sounds WHERE sound_type IS NOT NULL AND sound_type != '' GROUP BY sound_type ORDER BY c DESC").map_err(|e| e.to_string())?;
+    let unique_types: Vec<(String, i64)> = stmt.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?)))
+        .map_err(|e| e.to_string())?
+        .filter_map(|r| r.ok())
+        .collect();
+
+    Ok(LibraryOptimizationStats {
+        total_count,
+        favorite_count,
+        avg_duration_ms,
+        unique_types,
+        total_size_bytes: total_size,
+        estimated_import_count: estimated_import,
+    })
+}
+
+#[tauri::command]
+pub async fn get_library_cache(state: State<'_, AppState>, key: String) -> Result<Option<String>, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let result = db.query_row(
+        "SELECT value FROM library_cache WHERE key = ?1", params![key],
+        |r| r.get::<_, String>(0),
+    ).ok();
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn set_library_cache(state: State<'_, AppState>, key: String, value: String) -> Result<(), String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    db.execute(
+        "INSERT OR REPLACE INTO library_cache (key, value, updated_at) VALUES (?1, ?2, datetime('now'))",
+        params![key, value],
+    ).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+// ─── Workflow Automation Commands ───────────────────────
+
+#[tauri::command]
+pub async fn auto_tag_sound(sound_id: String) -> Result<audio::workflow::AutoTags, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    Ok(audio::workflow::infer_tags(&samples, &analysis))
+}
+
+#[tauri::command]
+pub async fn suggest_pack_command(sound_ids: Vec<String>) -> Result<audio::workflow::PackSuggestion, String> {
+    if sound_ids.is_empty() {
+        return Err("No sounds provided".to_string());
+    }
+    let mut analyses = Vec::new();
+    for sid in &sound_ids {
+        let path = storage::sound_path(sid);
+        if path.exists() {
+            if let Ok(samples) = audio::read_wav(&path) {
+                analyses.push(audio::analyze::analyze_audio(&samples, 44100, 1));
+            }
+        }
+    }
+    if analyses.is_empty() {
+        return Err("No valid sounds found".to_string());
+    }
+    Ok(audio::workflow::suggest_pack(&analyses))
+}
+
+#[tauri::command]
+pub async fn suggest_filename_command(sound_id: String) -> Result<String, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let tags = audio::workflow::infer_tags(&samples, &analysis);
+    Ok(audio::workflow::suggest_filename(&analysis, &tags))
+}
+
+// ─── Stress Test & Validation Commands ──────────────────
+
+#[tauri::command]
+pub async fn run_stress_test(iterations: usize) -> audio::stress_test::StressTestResult {
+    audio::stress_test::run_stress_test(iterations)
+}
+
+#[tauri::command]
+pub async fn validate_export_command(sound_id: String) -> Result<audio::stress_test::ExportValidation, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    Ok(audio::stress_test::validate_export(&samples, 44100))
+}
+
+#[tauri::command]
+pub async fn batch_validate_exports(sound_ids: Vec<String>) -> Result<Vec<(String, audio::stress_test::ExportValidation)>, String> {
+    let mut results = Vec::new();
+    for sid in sound_ids {
+        let path = storage::sound_path(&sid);
+        if path.exists() {
+            if let Ok(samples) = audio::read_wav(&path) {
+                let validation = audio::stress_test::validate_export(&samples, 44100);
+                results.push((sid, validation));
+            }
+        }
+    }
+    Ok(results)
+}
+
+// ─── Workflow Speed: Quick Branch ───────────────────────
+
+#[tauri::command]
+pub async fn quick_branch(
+    sound_id: String,
+    prompt_modification: Option<String>,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+
+    let (result_samples, branch_label) = if let Some(mod_prompt) = &prompt_modification {
+        let ctrl = crate::prompt_dsp::parse_prompt_rich(mod_prompt);
+        let fusion = audio::recreate::recreate_with_prompt(&samples, &ctrl);
+        (fusion.fusion_sound, format!("branch:{}", mod_prompt))
+    } else {
+        let seed = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos() as i64;
+        let mut p = audio::recreate::params_from_analysis(&analysis, &samples);
+        p = p.with_seed(seed as u64).randomize(0.1);
+        let branched = audio::resynthesize::resynthesize(&p);
+        (branched, "quick-branch".to_string())
+    };
+
+    if result_samples.is_empty() {
+        return Err("Branch produced empty audio".to_string());
+    }
+
+    let prompt = format!("branch of {} - {}", analysis.sound_type_hint, branch_label);
+    generator::save_and_return(
+        &result_samples, &prompt, &analysis.sound_type_hint,
+        Some(&branch_label), 0,
+    )
+}
+
+#[tauri::command]
+pub async fn batch_favorite(
+    sound_ids: Vec<String>,
+    favorite: bool,
+) -> Result<usize, String> {
+    use crate::favorites::SoundMetadata;
+    let mut store = crate::favorites::FavoritesStore::load();
+    let mut count = 0usize;
+    for id in &sound_ids {
+        if favorite {
+            let meta = SoundMetadata {
+                id: id.clone(),
+                prompt: String::new(),
+                sound_type: String::new(),
+                duration_ms: 0.0,
+                created_at: String::new(),
+                source: String::new(),
+                model: String::new(),
+                seed: 0,
+                variant_name: None,
+            };
+            store.toggle(id, meta);
+        } else {
+            if store.is_favorited(id) {
+                let meta = SoundMetadata {
+                    id: id.clone(),
+                    prompt: String::new(),
+                    sound_type: String::new(),
+                    duration_ms: 0.0,
+                    created_at: String::new(),
+                    source: String::new(),
+                    model: String::new(),
+                    seed: 0,
+                    variant_name: None,
+                };
+                store.toggle(id, meta);
+            }
+        }
+        count += 1;
+    }
+    Ok(count)
+}
+
+#[tauri::command]
+pub async fn batch_export(
+    state: State<'_, AppState>,
+    sound_ids: Vec<String>,
+    export_dir: Option<String>,
+) -> Result<Vec<String>, String> {
+    let dir = if let Some(d) = export_dir {
+        std::path::PathBuf::from(&d)
+    } else {
+        crate::storage::export_dir()
+    };
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let mut exported = Vec::new();
+
+    for id in &sound_ids {
+        let path = storage::sound_path(id);
+        if !path.exists() { continue; }
+        let samples = audio::read_wav(&path)?;
+        let meta = crate::db::get_sound(&db, id)
+            .map_err(|e| e.to_string())?
+            .unwrap_or(db::SoundEntry {
+                id: id.clone(), prompt: String::new(), sound_type: "other".to_string(),
+                duration_ms: 0.0, sample_rate: 44100, rms: 0.0, peak: 0.0,
+                spectral_centroid: 0.0, tags: "[]".to_string(), is_favorite: false,
+                source: String::new(), variant_name: None, created_at: String::new(),
+                model: "cshot-engine".to_string(), seed: 0,
+            });
+        let name = format!("{}-{}.wav", meta.sound_type, &id[..8]);
+        let out_path = dir.join(&name);
+        audio::write_wav(&out_path, &samples, 44100)?;
+        exported.push(out_path.to_string_lossy().to_string());
+    }
+
+    Ok(exported)
+}
+
+#[tauri::command]
+pub async fn get_recent_prompts(limit: Option<usize>) -> Vec<crate::audio::session::RecentEntry> {
+    let store = crate::audio::session::RecentsStore::load();
+    store.recent_prompts(limit.unwrap_or(20)).into_iter().cloned().collect()
+}
+
+// ─── Instrument Preset Commands ─────────────────────────
+
+#[tauri::command]
+pub async fn get_builtin_presets() -> Vec<audio::instrument::InstrumentPreset> {
+    audio::instrument::InstrumentPreset::builtin_presets()
+}
+
+#[tauri::command]
+pub async fn apply_preset_macro(
+    preset: audio::instrument::InstrumentPreset,
+    macro_state: audio::instrument::MorphMacroState,
+) -> audio::instrument::InstrumentPreset {
+    let params = preset.apply_macro(&macro_state);
+    let mut updated = preset;
+    updated.params = params;
+    updated
+}
+
+// ─── Sound Sculpting Commands ───────────────────────────
+
+#[tauri::command]
+pub async fn sculpt_sound(
+    sound_id: String,
+    controls: audio::sculpt::SculptControls,
+) -> Result<generator::SoundResult, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let mut samples = audio::read_wav(&path)?;
+    audio::sculpt::apply_sculpt(&mut samples, &controls);
+    if samples.is_empty() {
+        return Err("Sculpting produced empty audio".to_string());
+    }
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+    let prompt = format!("sculpted transient:{:.1} tail:{:.1} brightness:{:.1} distortion:{:.1} density:{:.1} tonal_noise:{:.1}",
+        controls.transient_intensity, controls.tail_length, controls.brightness,
+        controls.distortion, controls.density, controls.tonal_noise_balance);
+    generator::save_and_return(&samples, &prompt, &analysis.sound_type_hint, Some("sculpted"), 0)
+}
+
+#[tauri::command]
+pub async fn sculpt_preview(
+    sound_id: String,
+    controls: audio::sculpt::SculptControls,
+) -> Result<Vec<f32>, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    Ok(audio::sculpt::generate_sculpt_preview(&samples, &controls))
+}
+
+// ─── Evolution Commands ─────────────────────────────────
+
+#[tauri::command]
+pub async fn evolve_sound_command(
+    state: State<'_, AppState>,
+    sound_id: String,
+    config: audio::evolution::EvolutionConfig,
+    target_direction: Option<String>,
+    direction_intensity: Option<f32>,
+) -> Result<audio::evolution::EvolutionState, String> {
+    let path = storage::sound_path(&sound_id);
+    if !path.exists() {
+        return Err("Source sound not found".to_string());
+    }
+    let samples = audio::read_wav(&path)?;
+    let analysis = audio::analyze::analyze_audio(&samples, 44100, 1);
+
+    let prompt = {
+        let db = state.db.lock().map_err(|e| e.to_string())?;
+        crate::db::get_sound(&db, &sound_id)
+            .map_err(|e| e.to_string())?
+            .map(|s| s.prompt)
+            .unwrap_or_else(|| "evolved sound".to_string())
+    };
+
+    let request = audio::evolution::EvolveStepRequest {
+        parent_samples: samples,
+        parent_analysis: analysis,
+        parent_prompt: prompt,
+        parent_id: sound_id,
+        config,
+        target_direction,
+        direction_intensity: direction_intensity.unwrap_or(0.5),
+    };
+
+    let state = audio::evolution::run_evolution(&request);
+    Ok(state)
+}
+
+#[tauri::command]
+pub async fn save_evolution_member(
+    member: audio::evolution::EvolutionMember,
+    sound_type: String,
+    prompt: String,
+) -> Result<generator::SoundResult, String> {
+    if member.samples.is_empty() {
+        return Err("Evolution member has no audio data".to_string());
+    }
+    let label = if member.is_elite { "evolution-elite" } else { "evolution-member" };
+    generator::save_and_return(
+        &member.samples, &prompt, &sound_type,
+        Some(label), member.generation as i64,
+    )
 }

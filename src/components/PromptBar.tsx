@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { PromptChips } from "./PromptChips";
 
 interface PromptBarProps {
   prompt: string;
@@ -169,6 +170,8 @@ export function PromptBar({
           </button>
         </div>
       )}
+
+      <PromptChips prompt={prompt} />
 
       <div>
         <p className="text-[10px] text-[#636E72] font-mono uppercase tracking-wider mb-2 px-1">

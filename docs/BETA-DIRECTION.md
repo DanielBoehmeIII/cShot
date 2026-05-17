@@ -11,7 +11,7 @@
 
 ## What Alpha Failed to Prove
 
-1. **Sound quality is sufficient.** Mock DSP sounds are functional but not
+1. **Sound quality is sufficient.** cShot Engine sounds are functional but not
    "wow" — the magic moment requires better audio.
 2. **Reference upload is intuitive.** Users don't naturally try uploading.
 3. **The price point.** No one has paid. Willingness to pay is unknown.
@@ -26,7 +26,7 @@ is: you type, you hear, you use.
 ## What to Build Next (8-Week Roadmap)
 
 ### Weeks 1-2: Sound Quality
-- Improve mock DSP output (better envelopes, more variety, type-specific
+- Improve cShot Engine output (better envelopes, more variety, type-specific
   synthesis parameters)
 - Add saturation and filtering to the DSP pipeline
 
@@ -50,7 +50,7 @@ is: you type, you hear, you use.
 - Pack builder (deferred to post-beta)
 - Bakeoff (developer tool, not user-facing)
 - Embeddings/semantic search (nice but not essential)
-- Provider abstraction beyond mock + one real provider
+- Provider abstraction beyond local engine + optional cloud providers
 
 ## Risk Register
 
@@ -58,5 +58,5 @@ is: you type, you hear, you use.
 |------|-----------|------------|
 | Sound quality not good enough | High | DSP improvement sprint |
 | Users don't return | Medium | Notifications, email, DAW integration |
-| Mock DSP can't scale | Low | Add real provider when needed |
+| Local engine quality ceiling | Medium | Multi-layer synthesis, analysis-driven generation |
 | Feature creep | High | Strict scope management |

@@ -138,3 +138,148 @@ pub fn available_descriptors(entries: &[SoundEntry]) -> Vec<(String, usize)> {
     result.sort_by(|a, b| b.1.cmp(&a.1));
     result
 }
+
+// ─── Enhanced Semantic Search ───────────────────────────
+
+pub fn parse_natural_language_query(query: &str) -> SemanticQuery {
+    let lower = query.to_lowercase();
+    let words: Vec<&str> = lower.split_whitespace().collect();
+
+    let mut target_type: Option<String> = None;
+    let mut target_descriptors: Vec<String> = Vec::new();
+    let mut target_genre: Option<String> = None;
+    let mut bpm: Option<f32> = None;
+    let mut duration_range: Option<(f32, f32)> = None;
+
+    let type_keywords = [
+        ("kick", "kick"), ("snare", "snare"), ("hat", "closed_hat"), ("hi-hat", "closed_hat"),
+        ("hihat", "closed_hat"), ("open hat", "open_hat"), ("clap", "clap"), ("tom", "tom"),
+        ("perc", "perc"), ("bass", "bass"), ("fx", "fx"), ("crash", "fx"), ("rim", "perc"),
+        ("impact", "fx"), ("sweep", "fx"), ("whoosh", "fx"), ("riser", "fx"),
+    ];
+
+    let genre_keywords = [
+        "trap", "drill", "house", "techno", "lo-fi", "lofi", "cinematic", "ambient",
+        "dubstep", "phonk", "hyperpop", "garage", "industrial", "synthwave",
+    ];
+
+    for w in &words {
+        if let Some(bpm_str) = w.strip_suffix("bpm").or_else(|| w.strip_suffix("BPM")) {
+            if let Ok(v) = bpm_str.parse::<f32>() {
+                if (60.0..=200.0).contains(&v) { bpm = Some(v); }
+            }
+        }
+        for &(kw, st) in &type_keywords {
+            if *w == kw { target_type = Some(st.to_string()); }
+        }
+        if genre_keywords.contains(w) {
+            target_genre = Some(w.to_string());
+        }
+    }
+
+    let descriptor_terms = [
+        "punchy", "punch", "hard", "soft", "gentle", "aggressive", "crack", "snap", "click",
+        "bright", "crisp", "dark", "warm", "dull", "muffled", "airy", "metallic", "thin",
+        "distorted", "crunchy", "gritty", "clean", "saturated", "noisy", "noise",
+        "short", "long", "tight", "ring", "deep", "sub", "subby", "boomy", "low",
+        "fat", "thick", "heavy", "dense", "full", "sparse",
+        "cinematic", "epic", "massive", "wide", "mono", "spacious",
+        "analog", "vintage", "digital", "tape", "raw", "smooth",
+        "glossy", "harsh", "sizzle", "round", "woody", "hollow", "tinny",
+    ];
+
+    for w in &words {
+        if descriptor_terms.contains(w) {
+            if !target_descriptors.contains(&w.to_string()) {
+                target_descriptors.push(w.to_string());
+            }
+        }
+    }
+
+    if lower.contains("short") {
+        duration_range = Some((0.0, 200.0));
+    } else if lower.contains("long") {
+        duration_range = Some((500.0, 10000.0));
+    }
+
+    SemanticQuery {
+        target_type,
+        target_descriptors,
+        target_genre,
+        bpm,
+        duration_range,
+        raw_query: query.to_string(),
+    }
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct SemanticQuery {
+    pub target_type: Option<String>,
+    pub target_descriptors: Vec<String>,
+    pub target_genre: Option<String>,
+    pub bpm: Option<f32>,
+    pub duration_range: Option<(f32, f32)>,
+    pub raw_query: String,
+}
+
+pub fn search_by_semantic_query(
+    entries: &[SoundEntry],
+    query: &SemanticQuery,
+    max_results: usize,
+) -> Vec<SimilarSound> {
+    let mut scored: Vec<SimilarSound> = entries
+        .iter()
+        .map(|entry| {
+            let mut score = 0.0f32;
+            let mut reasons = Vec::new();
+
+            if let Some(ref target_type) = query.target_type {
+                if entry.sound_type == *target_type || entry.tags.contains(target_type) {
+                    score += 3.0;
+                    reasons.push(format!("type: {}", target_type));
+                }
+            }
+
+            if let Some(ref genre) = query.target_genre {
+                let tags = extract_tags_list(&entry.tags);
+                if tags.contains(genre) || entry.prompt.to_lowercase().contains(genre) {
+                    score += 2.0;
+                    reasons.push(format!("genre: {}", genre));
+                }
+            }
+
+            let tags = extract_tags_list(&entry.tags);
+            let prompt_lower = entry.prompt.to_lowercase();
+            for desc in &query.target_descriptors {
+                if tags.contains(desc) || prompt_lower.contains(desc) {
+                    score += 1.0;
+                    if !reasons.iter().any(|r| r.contains(desc)) {
+                        reasons.push(format!("matches: {}", desc));
+                    }
+                }
+            }
+
+            if let Some((min_dur, max_dur)) = query.duration_range {
+                if entry.duration_ms >= min_dur && entry.duration_ms <= max_dur {
+                    score += 1.0;
+                    reasons.push("duration match".to_string());
+                }
+            }
+
+            SimilarSound {
+                entry: entry.clone(),
+                similarity_score: score,
+                match_reasons: reasons,
+            }
+        })
+        .collect();
+
+    scored.sort_by(|a, b| {
+        b.similarity_score
+            .partial_cmp(&a.similarity_score)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    scored.truncate(max_results);
+    scored
+}

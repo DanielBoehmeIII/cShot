@@ -9,12 +9,12 @@ pub struct MockProvider;
 #[async_trait::async_trait]
 impl AudioProvider for MockProvider {
     fn name(&self) -> &str {
-        "mock-dsp"
+        "cshot-engine"
     }
 
     fn capabilities(&self) -> ProviderCapabilities {
         ProviderCapabilities {
-            name: "Mock DSP Synthesizer",
+            name: "cShot Engine",
             supports_reference_audio: true,
             supports_prompt: true,
             max_duration_seconds: 5.0,
@@ -55,7 +55,7 @@ impl AudioProvider for MockProvider {
                 GenerationResponse {
                     samples,
                     sample_rate: 44100,
-                    provider: "mock-dsp".to_string(),
+                    provider: "cshot-engine".to_string(),
                     latency_ms,
                 }
             }

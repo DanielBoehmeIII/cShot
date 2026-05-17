@@ -37,34 +37,72 @@ export function LibraryView({
 }: LibraryViewProps) {
   const [sounds, setSounds] = useState<SoundEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [stats, setStats] = useState({ total: 0, favCount: 0 });
   const [exportState, setExportState] = useState<string | null>(null);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 25;
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const loadSounds = useCallback(async (query: string, favoritesOnly: boolean) => {
-    setIsLoading(true);
+  const loadSounds = useCallback(async (query: string, favoritesOnly: boolean, append = false) => {
+    const isAppend = append;
+    if (!isAppend) {
+      setIsLoading(true);
+      setOffset(0);
+      setHasMore(true);
+    } else {
+      setIsLoadingMore(true);
+    }
     try {
       const { invoke } = await import("@tauri-apps/api/core");
+      const currentOffset = isAppend ? offset + PAGE_SIZE : 0;
       if (query.trim()) {
         const results = await invoke<SoundEntry[]>("search_sounds", { query });
-        setSounds(results);
+        if (isAppend) {
+          setSounds(prev => [...prev, ...results]);
+        } else {
+          setSounds(results);
+        }
+        setHasMore(false);
       } else if (favoritesOnly) {
         const results = await invoke<SoundEntry[]>("get_favorites");
-        setSounds(results);
+        if (isAppend) {
+          setSounds(prev => [...prev, ...results]);
+        } else {
+          setSounds(results);
+        }
+        setHasMore(false);
       } else {
-        const results = await invoke<SoundEntry[]>("get_sound_history");
-        setSounds(results);
+        const results = await invoke<SoundEntry[]>("list_sounds", { limit: PAGE_SIZE, offset: currentOffset });
+        if (isAppend) {
+          setSounds(prev => [...prev, ...results]);
+          setOffset(currentOffset);
+        } else {
+          setSounds(results);
+          setOffset(PAGE_SIZE);
+        }
+        setHasMore(results.length === PAGE_SIZE);
       }
     } catch (e) {
       onError(`Failed to load library: ${e}`);
-      setSounds([]);
+      if (!isAppend) setSounds([]);
     } finally {
-      setIsLoading(false);
+      if (isAppend) {
+        setIsLoadingMore(false);
+      } else {
+        setIsLoading(false);
+      }
     }
-  }, [onError]);
+  }, [onError, offset]);
+
+  const handleLoadMore = useCallback(() => {
+    loadSounds(searchQuery, filterMode === "favorites", true);
+  }, [loadSounds, searchQuery, filterMode]);
 
   const refreshStats = useCallback(async () => {
     try {
@@ -443,6 +481,26 @@ export function LibraryView({
       {isLoading && sounds.length > 0 && (
         <div className="mt-4 flex justify-center">
           <div className="spinner w-5 h-5 rounded-full border-2 border-[#2A2A3F] border-t-[#6C5CE7]" />
+        </div>
+      )}
+
+      {hasMore && sounds.length > 0 && !isLoading && !searchQuery && filterMode !== "favorites" && (
+        <div className="mt-4 flex justify-center" ref={loadMoreRef}>
+          <button
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            className="rounded-lg border border-[#2A2A3F] bg-[#1E1E2E] px-6 py-2 text-[10px] font-mono text-[#636E72] hover:border-[#6C5CE7]/50 hover:text-[#DFE6E9] transition-all disabled:opacity-30"
+          >
+            {isLoadingMore ? "Loading..." : `Load More (${sounds.length} / ${stats.total})`}
+          </button>
+        </div>
+      )}
+
+      {sounds.length > 0 && stats.total > 0 && !isLoading && !searchQuery && (
+        <div className="mt-3 text-center">
+          <p className="text-[8px] text-[#2A2A3F] font-mono">
+            Showing {sounds.length} of {stats.total} sounds · {stats.favCount} favorites
+          </p>
         </div>
       )}
     </div>

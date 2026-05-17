@@ -3,6 +3,7 @@ use std::path::Path;
 pub const MAX_UPLOAD_DURATION_MS: f32 = 60_000.0;
 pub const MAX_ONE_SHOT_DURATION_MS: f32 = 5_000.0;
 pub const MIN_DURATION_MS: f32 = 10.0;
+pub const MAX_DURATION_MS: f32 = 10_000.0;
 pub const SUPPORTED_FORMATS: &[&str] = &["wav"];
 
 pub enum FileFormat {
@@ -21,6 +22,7 @@ pub fn detect_format(path: &Path) -> FileFormat {
     }
 }
 
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct UploadValidation {
     pub is_valid: bool,
     pub format_ok: bool,
@@ -50,6 +52,16 @@ pub fn validate_upload(path: &Path, file_size: u64) -> UploadValidation {
         };
     }
 
+    if file_size > 100_000_000 {
+        return UploadValidation {
+            is_valid: false,
+            format_ok: true,
+            size_ok: false,
+            duration_ok: false,
+            error: Some("File exceeds 100MB maximum upload size".to_string()),
+        };
+    }
+
     let format = detect_format(path);
     let format_ok = matches!(format, FileFormat::Wav);
     if !format_ok {
@@ -62,10 +74,7 @@ pub fn validate_upload(path: &Path, file_size: u64) -> UploadValidation {
             format_ok: false,
             size_ok: true,
             duration_ok: false,
-            error: Some(format!(
-                "Unsupported format '.{}'. Only WAV files are supported.",
-                ext
-            )),
+            error: Some(format!("Unsupported format '.{}'. Only WAV files are supported.", ext)),
         };
     }
 
@@ -73,28 +82,28 @@ pub fn validate_upload(path: &Path, file_size: u64) -> UploadValidation {
         Ok(reader) => {
             let spec = reader.spec();
             let num_samples = reader.duration() as u64;
-            let duration_ms =
-                num_samples as f32 / spec.sample_rate as f32 * 1000.0;
+            let duration_ms = num_samples as f32 / spec.sample_rate as f32 * 1000.0;
 
             let mut issues = Vec::new();
-
             if num_samples == 0 {
                 issues.push("File contains no audio data".to_string());
             }
-
-            if duration_ms > MAX_UPLOAD_DURATION_MS {
-                issues.push(format!(
-                    "File is too long ({:.0}s). Maximum upload duration is {}s.",
-                    duration_ms / 1000.0,
-                    MAX_UPLOAD_DURATION_MS as u32 / 1000
-                ));
+            if spec.sample_rate == 0 {
+                issues.push("Invalid sample rate".to_string());
             }
-
+            if spec.channels == 0 {
+                issues.push("Invalid channel count".to_string());
+            }
+            if spec.bits_per_sample != 16 && spec.bits_per_sample != 24 && spec.bits_per_sample != 32 {
+                issues.push(format!("Unsupported bit depth: {}", spec.bits_per_sample));
+            }
+            if duration_ms > MAX_UPLOAD_DURATION_MS {
+                issues.push(format!("File is too long ({:.0}s). Maximum upload duration is {}s.",
+                    duration_ms / 1000.0, MAX_UPLOAD_DURATION_MS as u32 / 1000));
+            }
             if duration_ms < MIN_DURATION_MS {
-                issues.push(format!(
-                    "File is too short ({:.0}ms). Minimum duration is {}ms.",
-                    duration_ms, MIN_DURATION_MS as u32
-                ));
+                issues.push(format!("File is too short ({:.0}ms). Minimum duration is {}ms.",
+                    duration_ms, MIN_DURATION_MS as u32));
             }
 
             if issues.is_empty() {
@@ -119,18 +128,12 @@ pub fn validate_upload(path: &Path, file_size: u64) -> UploadValidation {
             let msg = e.to_string();
             if msg.contains("no valid WAV") || msg.contains("header") {
                 UploadValidation {
-                    is_valid: false,
-                    format_ok: false,
-                    size_ok: true,
-                    duration_ok: false,
-                    error: Some("File is not a valid WAV file. The header could not be read.".to_string()),
+                    is_valid: false, format_ok: false, size_ok: true, duration_ok: false,
+                    error: Some("File is not a valid WAV file".to_string()),
                 }
             } else {
                 UploadValidation {
-                    is_valid: false,
-                    format_ok: true,
-                    size_ok: true,
-                    duration_ok: false,
+                    is_valid: false, format_ok: true, size_ok: true, duration_ok: false,
                     error: Some(format!("Could not read audio file: {}", msg)),
                 }
             }
@@ -140,17 +143,39 @@ pub fn validate_upload(path: &Path, file_size: u64) -> UploadValidation {
 
 pub fn validate_one_shot_duration(duration_ms: f32) -> Result<(), String> {
     if duration_ms > MAX_ONE_SHOT_DURATION_MS {
-        return Err(format!(
-            "Generated sound is too long ({:.0}ms). Maximum one-shot duration is {}s.",
-            duration_ms,
-            MAX_ONE_SHOT_DURATION_MS as u32 / 1000
-        ));
+        return Err(format!("Sound too long ({:.0}ms). Max {}s.", duration_ms, MAX_ONE_SHOT_DURATION_MS as u32 / 1000));
     }
     if duration_ms < MIN_DURATION_MS {
-        return Err(format!(
-            "Generated sound is too short ({:.0}ms). Minimum duration is {}ms.",
-            duration_ms, MIN_DURATION_MS as u32
-        ));
+        return Err(format!("Sound too short ({:.0}ms). Min {}ms.", duration_ms, MIN_DURATION_MS as u32));
     }
     Ok(())
+}
+
+pub fn validate_output_samples(samples: &[f32]) -> Result<(), String> {
+    if samples.is_empty() {
+        return Err("Output buffer is empty".to_string());
+    }
+    if samples.len() > (MAX_DURATION_MS / 1000.0 * 44100.0) as usize {
+        return Err(format!("Output exceeds maximum duration of {}s", MAX_DURATION_MS as u32 / 1000));
+    }
+    if samples.iter().any(|s| s.is_nan() || s.is_infinite()) {
+        return Err("Output contains NaN or Inf values".to_string());
+    }
+    Ok(())
+}
+
+pub fn is_silent_or_noise(samples: &[f32]) -> bool {
+    let peak = samples.iter().map(|s| s.abs()).fold(0.0f32, f32::max);
+    if peak < 0.001 { return true; }
+    let rms = samples.iter().map(|s| s * s).sum::<f32>() / samples.len() as f32;
+    rms < 1e-8 || rms.is_nan()
+}
+
+pub fn safe_sample_summary(samples: &[f32]) -> String {
+    if samples.is_empty() { return "empty".to_string(); }
+    let peak = samples.iter().map(|s| s.abs()).fold(0.0f32, f32::max);
+    let has_nan = samples.iter().any(|s| s.is_nan());
+    let has_inf = samples.iter().any(|s| s.is_infinite());
+    let clipped = samples.iter().filter(|s| s.abs() >= 1.0).count();
+    format!("len={} peak={:.3} nan={} inf={} clipped={}", samples.len(), peak, has_nan, has_inf, clipped)
 }

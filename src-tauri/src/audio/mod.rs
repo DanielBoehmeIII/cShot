@@ -1,14 +1,47 @@
 pub mod analyze;
+pub mod analysis_cache;
+pub mod audio_intelligence;
+pub mod creative_intent;
 pub mod dsp;
+pub mod evolution;
+pub mod humanize;
+pub mod hybrid;
+pub mod instrument;
+pub mod identity;
 pub mod io;
+pub mod midi;
 pub mod mock;
+pub mod morph;
+pub mod mutation;
+
+pub mod packs;
+pub mod params;
 pub mod process;
+pub mod recreate;
+pub mod resynthesize;
+pub mod sculpt;
+pub mod session;
+pub mod sound_designer;
+pub mod spectral_edit;
+pub mod spectral_intelligence;
+pub mod stress_test;
 pub mod synthesize;
+pub mod taste;
+pub mod transform;
 pub mod validate;
 pub mod waveform;
+pub mod workflow;
 
 #[allow(unused_imports)]
 pub use analyze::*;
+#[allow(unused_imports)]
+pub use analysis_cache::*;
+#[allow(unused_imports)]
+pub use humanize::*;
+#[allow(unused_imports)]
+pub use morph::*;
+#[allow(unused_imports)]
+pub use transform::*;
 #[allow(unused_imports)]
 pub use dsp::*;
 #[allow(unused_imports)]
@@ -18,6 +51,12 @@ pub use mock::*;
 #[allow(unused_imports)]
 pub use process::*;
 #[allow(unused_imports)]
+pub use recreate::*;
+#[allow(unused_imports)]
+pub use resynthesize::*;
+#[allow(unused_imports)]
+pub use spectral_intelligence::*;
+#[allow(unused_imports)]
 pub use synthesize::*;
 #[allow(unused_imports)]
 pub use validate::*;
@@ -26,7 +65,7 @@ pub use waveform::*;
 
 pub const SAMPLE_RATE: u32 = 44100;
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum SoundType {
     Kick,
     Snare,

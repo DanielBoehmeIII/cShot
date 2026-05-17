@@ -1,36 +1,54 @@
-# cShot Known Issues (Beta)
+# Known Limitations — cShot Beta
+
+## Sound Quality
+
+- cShot Engine (local synthesis) produces functional one-shots but quality
+  varies by category. Kicks and bass hits are the strongest; FX and
+  "other" sounds are the weakest.
+- Spectral centroid estimation is approximate — uses FFT approximation.
+- Pitch detection works best for monophonic sounds with clear fundamental.
+- Some prompts may produce unexpected sound types if keywords are ambiguous.
+
+## Audio
+
+- Mono only — stereo support is not yet implemented.
+- WAV export at 44.1kHz 16-bit only.
+- No real-time audio output (must export to hear in DAW).
+- MP3 import works but with reduced quality.
 
 ## Generation
-- Mock DSP sounds are improved but not production-grade AI quality
-- ElevenLabs provider requires API key and internet
-- Stable Audio and AudioLDM providers are stubs (not implemented)
-- No local model inference (all generation is cloud API or mock DSP)
 
-## UI
-- No undo for deleted sounds (deletion is permanent)
-- No drag-and-drop from library to DAW (button-based export only)
-- Waveform interaction is click-to-play only (no scrubbing, no zoom)
-- No tagging editor in the UI (auto-tags only)
+- Sound type classification from prompts is keyword-based and may not
+  capture complex intent.
+- Genre presets are generic templates — they don't adapt to the specific
+  prompt context.
+- Reference-conditioned generation modifies audio via DSP processing on
+  the reference rather than true style transfer.
 
-## Export
-- Default export is Desktop — no folder picker UI
-- WAV format only (no AIFF, FLAC, MP3 export)
-- Export counter handles name collisions but may create many files
-- No batch export UI beyond "Export All" variants
+## CLI & Plugin
+
+- CLI tool (`cshot-cli`) requires Tauri build environment.
+- Plugin binary (`cshot-plugin`) is a standalone test tool, not a real
+  VST3/CLAP plugin. Wrapping with nih-plug is documented but not built.
+- No MIDI input support yet.
+
+## Platform
+
+- Tested primarily on Linux and macOS.
+- Windows build requires MSVC build tools.
+- Apple Silicon (M1/M2) works, no specific ANE acceleration.
+- No auto-update mechanism.
 
 ## Library
-- Search is basic SQL LIKE query — no fuzzy matching
-- No bulk operations (select multiple, export all)
-- No "find similar" or semantic search
-- No pagination (all sounds load at once)
-- No pack management UI (CRUD exists in backend only)
 
-## Local Data
-- First run creates ~/.cshot/ directory automatically
-- No auto-cleanup of old generated sounds
-- Database backup on reset but no scheduled backups
+- Library search is basic (LIKE-based, not full-text search).
+- No batch operations beyond export-all-favorites.
+- No undo for delete operations.
+- No cloud sync.
 
-## Cross-Platform
-- Linux: tested on Ubuntu 22.04+
-- macOS: tested on Apple Silicon
-- Windows: not yet tested
+## Performance
+
+- Generating sounds with very long tails (>2s) increases CPU time.
+- Analysis of long audio files (>30s) may take several seconds.
+- Library may slow with 500+ sounds.
+- Currently all generation is single-threaded.
