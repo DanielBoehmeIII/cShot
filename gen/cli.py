@@ -274,7 +274,7 @@ def main():
     p_pr = subparsers.add_parser("prompt", help="Generate from natural language prompt (e.g. 'dark soft piano stab')")
     p_pr.add_argument("prompt", nargs="+", help="Natural language description")
     p_pr.add_argument("--count", "-n", type=int, default=1, help="Number of samples")
-    p_pr.add_argument("--out", "-o", help="Output directory")
+    p_pr.add_argument("--out", "-o", help="Output path (file.wav for single, directory for multiple)")
 
     p_prr = subparsers.add_parser("prompt-refine", help="Diagnose and refine a prompt-based generation")
     p_prr.add_argument("input_dir", help="Directory of generated files")

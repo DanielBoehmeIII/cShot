@@ -7,6 +7,11 @@ src-tauri/target/
 tools/bakeoff/target/
 outputs/
 generated_audit/
+references/
+Packs/
+Spanish Guitar/
+test_outputs/
+808.wav
 reference_analysis.json
 class_profiles.json
 __pycache__/

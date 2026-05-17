@@ -182,6 +182,64 @@ def parse_prompt(prompt: str) -> dict:
     }
 
 
+def generate_single_from_prompt(parsed: dict) -> np.ndarray:
+    """Generate a single audio sample from a parsed prompt. Returns samples array."""
+    family = parsed["family"]
+    profile_name = parsed["default_profile"]
+    overrides = dict(parsed["overrides"])
+
+    if family == "piano-gen":
+        from gen.piano_gen import synthesize_piano_stab, PIANO_PROFILES
+        pf = PIANO_PROFILES.get(profile_name, PIANO_PROFILES["acoustic"])
+        default_dur = pf["default_duration_ms"]
+        default_pitch = pf["default_pitch_hz"]
+        gen_fn = lambda dur, pitch: synthesize_piano_stab(dur, pitch, profile_name, overrides=overrides)
+    elif family == "synth-gen":
+        from gen.synth_gen import synthesize_synth, SYNTH_PROFILES
+        pf = SYNTH_PROFILES.get(profile_name, SYNTH_PROFILES["stab"])
+        default_dur = pf["default_duration_ms"]
+        default_pitch = pf["default_pitch_hz"]
+        gen_fn = lambda dur, pitch: synthesize_synth(dur, pitch, profile_name, overrides=overrides)
+    elif family == "bass-gen":
+        from gen.bass_gen import synthesize_bass, BASS_PROFILES
+        pf = BASS_PROFILES.get(profile_name, BASS_PROFILES["808"])
+        default_dur = pf["default_duration_ms"]
+        default_pitch = pf["default_pitch_hz"]
+        gen_fn = lambda dur, pitch: synthesize_bass(dur, pitch, profile_name, overrides)
+    elif family == "guitar-gen":
+        from gen.guitar_gen import synthesize_guitar_stab, GUITAR_PROFILES
+        pf = GUITAR_PROFILES.get(profile_name, GUITAR_PROFILES["nylon"])
+        default_dur = pf["default_duration_ms"]
+        default_pitch = pf["default_pitch_hz"]
+        gen_fn = lambda dur, pitch: synthesize_guitar_stab(dur, pitch, profile_name)
+    elif family == "fx-gen":
+        from gen.fx_gen import synthesize_fx, FX_PROFILES
+        pf = FX_PROFILES.get(profile_name, FX_PROFILES["impact"])
+        default_dur = pf["default_duration_ms"]
+        default_pitch = pf["default_pitch_hz"]
+        gen_fn = lambda dur, pitch: synthesize_fx(dur, pitch, profile_name, overrides)
+    elif family == "batch":
+        from gen.synthesis import SYNTHESIS_CLASSES
+        if profile_name not in SYNTHESIS_CLASSES:
+            return np.zeros(0)
+        _, synth_fn, default_dur, default_pitch = SYNTHESIS_CLASSES[profile_name]
+        gen_fn = lambda dur, pitch: synth_fn(dur, pitch)
+    else:
+        return np.zeros(0)
+
+    duration_scale = overrides.pop("duration_scale", 1.0)
+    pitch_scale = overrides.pop("pitch_scale", 1.0)
+    dur = default_dur * duration_scale
+    pitch = default_pitch * pitch_scale
+    dur_var = dur * (1.0 + (random.random() - 0.5) * 0.08)
+    if family == "piano-gen":
+        pitch_var = pitch * (1.0 + (random.random() - 0.5) * 0.02)
+    else:
+        pitch_var = pitch * (1.0 + (random.random() - 0.5) * 0.08)
+    samples = gen_fn(dur_var, pitch_var)
+    return samples
+
+
 def generate_from_prompt(parsed: dict, count: int = 1, out_dir: Path = None) -> list[Path]:
     """Generate audio from a parsed prompt."""
     family = parsed["family"]
@@ -453,13 +511,24 @@ def cmd_prompt(args):
     if parsed['overrides']:
         print(f"  → Overrides: {json.dumps(parsed['overrides'], indent=4)}")
 
-    out_dir = Path(args.out) if args.out else Path("outputs/prompt")
+    out_path = Path(args.out) if args.out else Path("outputs/prompt")
     count = args.count
-    paths = generate_from_prompt(parsed, count, out_dir)
 
-    print(f"\n  Generated {len(paths)} file(s) → {out_dir}")
-    for p in paths:
-        print(f"    {p.name}")
+    # If --out ends with .wav and count=1, write to exact file
+    if out_path.suffix.lower() == ".wav" and count == 1:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        seed = int(time.time() * 1000) % 1000000
+        random.seed(seed)
+        np.random.seed(seed % 2**32)
+        samples = generate_single_from_prompt(parsed)
+        write_wav(out_path, samples)
+        paths = [out_path]
+        print(f"\n  Generated → {out_path}")
+    else:
+        paths = generate_from_prompt(parsed, count, out_path)
+        print(f"\n  Generated {len(paths)} file(s) → {out_path}")
+        for p in paths:
+            print(f"    {p.name}")
 
     # Print feature summary
     if paths:
