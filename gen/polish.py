@@ -83,7 +83,7 @@ def validate_audio(samples: np.ndarray) -> dict:
 
 def polish_file(wav_path: Path, target_db: float = -1.0,
                 trim_db: float = -60.0, fade_ms: tuple = (3.0, 5.0),
-                in_place: bool = False) -> dict:
+                in_place: bool = True) -> dict:
     """Polish a single WAV file: validate → trim → fade → normalize.
     Returns validation result dict.
     """

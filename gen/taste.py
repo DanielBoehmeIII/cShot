@@ -29,8 +29,16 @@ def build_taste_profile() -> dict:
 
         # Infer family from file path if not stored
         if not family:
-            for fam in ["piano-gen", "synth-gen", "bass-gen", "guitar-gen", "fx-gen"]:
-                if fam in file:
+            folder_map = {
+                "piano": "piano-gen", "keys": "piano-gen", "bell": "piano-gen", "rhodes": "piano-gen",
+                "synth": "synth-gen", "pluck": "synth-gen", "stab": "synth-gen", "pad": "synth-gen", "lead": "synth-gen",
+                "bass": "bass-gen", "808": "bass-gen", "reese": "bass-gen", "sub": "bass-gen",
+                "guitar": "guitar-gen", "nylon": "guitar-gen",
+                "fx": "fx-gen", "impact": "fx-gen", "riser": "fx-gen", "glitch": "fx-gen",
+                "drums": "drums", "kick": "drums", "snare": "drums", "clap": "drums", "hat": "drums",
+            }
+            for keyword, fam in folder_map.items():
+                if keyword in file.lower():
                     family = fam
                     break
 
