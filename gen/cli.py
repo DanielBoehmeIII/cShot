@@ -84,6 +84,7 @@ from gen.presets import cmd_save_preset, cmd_preset_list, cmd_preset_generate
 from gen.polish import cmd_polish
 from gen.pack import cmd_pack, cmd_pack_audit
 from gen.similar import cmd_similar, cmd_variations
+from gen.refine_feedback import cmd_refine_feedback
 
 
 def main():
@@ -370,6 +371,12 @@ def main():
     p_var.add_argument("--spread", choices=["low", "medium", "high"], default="medium", help="Variation spread")
     p_var.add_argument("--out", "-o", help="Output directory")
 
+    # ── Refine Feedback ──
+    p_rf = subparsers.add_parser("refine-feedback", help="Refine a file using natural language feedback")
+    p_rf.add_argument("file", help="Path to the .wav file to refine")
+    p_rf.add_argument("feedback", help="Natural language feedback (e.g. 'less harsh, more warm, shorter tail')")
+    p_rf.add_argument("--out", "-o", help="Output path for refined file")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -473,6 +480,8 @@ def main():
         cmd_similar(args)
     elif args.command == "variations":
         cmd_variations(args)
+    elif args.command == "refine-feedback":
+        cmd_refine_feedback(args)
     elif args.command == "all":
         cmd_all(args)
     else:
