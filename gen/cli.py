@@ -79,7 +79,7 @@ from gen.synth_gen import cmd_synth_gen, cmd_synth_refine, SYNTH_PROFILES
 from gen.guitar_gen import cmd_guitar_gen, cmd_guitar_qa, GUITAR_PROFILES
 from gen.bass_gen import cmd_bass_gen, cmd_bass_qa, BASS_PROFILES
 from gen.fx_gen import cmd_fx_gen, cmd_fx_qa, FX_PROFILES
-from gen.prompt import cmd_prompt, cmd_prompt_refine, cmd_mvp_audit, cmd_compare_prompt, cmd_contrast_test
+from gen.prompt import cmd_prompt, cmd_prompt_refine, cmd_mvp_audit, cmd_compare_prompt, cmd_contrast_test, cmd_regenerate
 
 
 def main():
@@ -276,6 +276,13 @@ def main():
     p_pr.add_argument("prompt", nargs="+", help="Natural language description")
     p_pr.add_argument("--count", "-n", type=int, default=1, help="Number of samples")
     p_pr.add_argument("--out", "-o", help="Output path (file.wav for single, directory for multiple)")
+    p_pr.add_argument("--seed", "-s", type=int, help="Fixed seed for deterministic generation")
+
+    # ── Regenerate from metadata ──
+    p_reg = subparsers.add_parser("regenerate", help="Regenerate a file from its metadata JSON sidecar")
+    p_reg.add_argument("--metadata", "-m", required=True, help="Path to metadata JSON file")
+    p_reg.add_argument("--out", "-o", help="Output path (default uses timestamp)")
+
 
     p_prr = subparsers.add_parser("prompt-refine", help="Diagnose and refine a prompt-based generation")
     p_prr.add_argument("input_dir", help="Directory of generated files")
@@ -393,6 +400,8 @@ def main():
         cmd_ratings_summary(args)
     elif args.command == "favorites":
         cmd_favorites(args)
+    elif args.command == "regenerate":
+        cmd_regenerate(args)
     elif args.command == "all":
         cmd_all(args)
     else:

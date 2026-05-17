@@ -182,135 +182,134 @@ def parse_prompt(prompt: str) -> dict:
     }
 
 
-def generate_single_from_prompt(parsed: dict) -> np.ndarray:
-    """Generate a single audio sample from a parsed prompt. Returns samples array."""
+def _resolve_generator(parsed: dict) -> tuple:
+    """Resolve generator function and defaults from parsed prompt.
+    Returns (gen_fn, default_dur, default_pitch, family, profile_name, overrides) or raises ValueError.
+    """
     family = parsed["family"]
     profile_name = parsed["default_profile"]
-    overrides = dict(parsed["overrides"])
+    overrides = dict(parsed.get("overrides", {}))
 
     if family == "piano-gen":
         from gen.piano_gen import synthesize_piano_stab, PIANO_PROFILES
         pf = PIANO_PROFILES.get(profile_name, PIANO_PROFILES["acoustic"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
         gen_fn = lambda dur, pitch: synthesize_piano_stab(dur, pitch, profile_name, overrides=overrides)
     elif family == "synth-gen":
         from gen.synth_gen import synthesize_synth, SYNTH_PROFILES
         pf = SYNTH_PROFILES.get(profile_name, SYNTH_PROFILES["stab"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
         gen_fn = lambda dur, pitch: synthesize_synth(dur, pitch, profile_name, overrides=overrides)
     elif family == "bass-gen":
         from gen.bass_gen import synthesize_bass, BASS_PROFILES
         pf = BASS_PROFILES.get(profile_name, BASS_PROFILES["808"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
         gen_fn = lambda dur, pitch: synthesize_bass(dur, pitch, profile_name, overrides)
     elif family == "guitar-gen":
         from gen.guitar_gen import synthesize_guitar_stab, GUITAR_PROFILES
         pf = GUITAR_PROFILES.get(profile_name, GUITAR_PROFILES["nylon"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
         gen_fn = lambda dur, pitch: synthesize_guitar_stab(dur, pitch, profile_name)
     elif family == "fx-gen":
         from gen.fx_gen import synthesize_fx, FX_PROFILES
         pf = FX_PROFILES.get(profile_name, FX_PROFILES["impact"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
         gen_fn = lambda dur, pitch: synthesize_fx(dur, pitch, profile_name, overrides)
     elif family == "batch":
         from gen.synthesis import SYNTHESIS_CLASSES
         if profile_name not in SYNTHESIS_CLASSES:
-            return np.zeros(0)
+            raise ValueError(f"Unknown batch class: {profile_name}")
         _, synth_fn, default_dur, default_pitch = SYNTHESIS_CLASSES[profile_name]
+        pf = {"default_duration_ms": default_dur, "default_pitch_hz": default_pitch}
         gen_fn = lambda dur, pitch: synth_fn(dur, pitch)
     else:
-        return np.zeros(0)
+        raise ValueError(f"Unknown family: {family}")
 
-    duration_scale = overrides.pop("duration_scale", 1.0)
-    pitch_scale = overrides.pop("pitch_scale", 1.0)
-    dur = default_dur * duration_scale
-    pitch = default_pitch * pitch_scale
+    return gen_fn, pf["default_duration_ms"], pf["default_pitch_hz"], family, profile_name, overrides
+
+
+def _generate_variation(dur: float, pitch: float, family: str, gen_fn) -> tuple:
+    """Generate a single sample with randomized variation. Returns (samples, actual_dur, actual_pitch)."""
     dur_var = dur * (1.0 + (random.random() - 0.5) * 0.08)
     if family == "piano-gen":
         pitch_var = pitch * (1.0 + (random.random() - 0.5) * 0.02)
     else:
         pitch_var = pitch * (1.0 + (random.random() - 0.5) * 0.08)
     samples = gen_fn(dur_var, pitch_var)
-    return samples
+    return samples, dur_var, pitch_var
 
 
-def generate_from_prompt(parsed: dict, count: int = 1, out_dir: Path = None) -> list[Path]:
-    """Generate audio from a parsed prompt."""
-    family = parsed["family"]
-    profile_name = parsed["default_profile"]
-    overrides = parsed["overrides"]
+def _seed_from_prompt(prompt: str, index: int = 0, base_seed: int = None) -> int:
+    """Generate a deterministic seed from prompt text and index."""
+    if base_seed is not None:
+        return base_seed + index
+    prompt_hash = hash(prompt) % 1000000
+    offset = int(time.time() * 1000) % 1000000
+    return (offset + index) * 314159265 + prompt_hash
 
-    if family == "piano-gen":
-        from gen.piano_gen import synthesize_piano_stab, PIANO_PROFILES
-        pf = PIANO_PROFILES.get(profile_name, PIANO_PROFILES["acoustic"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
-        gen_fn = lambda dur, pitch: synthesize_piano_stab(dur, pitch, profile_name, overrides=overrides)
-    elif family == "synth-gen":
-        from gen.synth_gen import synthesize_synth, SYNTH_PROFILES
-        pf = SYNTH_PROFILES.get(profile_name, SYNTH_PROFILES["stab"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
-        gen_fn = lambda dur, pitch: synthesize_synth(dur, pitch, profile_name, overrides=overrides)
-    elif family == "bass-gen":
-        from gen.bass_gen import synthesize_bass, BASS_PROFILES
-        pf = BASS_PROFILES.get(profile_name, BASS_PROFILES["808"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
-        gen_fn = lambda dur, pitch: synthesize_bass(dur, pitch, profile_name, overrides)
-    elif family == "guitar-gen":
-        from gen.guitar_gen import synthesize_guitar_stab, GUITAR_PROFILES
-        pf = GUITAR_PROFILES.get(profile_name, GUITAR_PROFILES["nylon"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
-        gen_fn = lambda dur, pitch: synthesize_guitar_stab(dur, pitch, profile_name)
-    elif family == "fx-gen":
-        from gen.fx_gen import synthesize_fx, FX_PROFILES
-        pf = FX_PROFILES.get(profile_name, FX_PROFILES["impact"])
-        default_dur = pf["default_duration_ms"]
-        default_pitch = pf["default_pitch_hz"]
-        gen_fn = lambda dur, pitch: synthesize_fx(dur, pitch, profile_name, overrides)
-    elif family == "batch":
-        from gen.synthesis import SYNTHESIS_CLASSES
-        if profile_name not in SYNTHESIS_CLASSES:
-            return []
-        _, synth_fn, default_dur, default_pitch = SYNTHESIS_CLASSES[profile_name]
-        gen_fn = lambda dur, pitch: synth_fn(dur, pitch)
-    else:
-        return []
+
+def _write_metadata(wav_path: Path, parsed: dict, seed: int, dur: float, pitch: float):
+    """Write metadata JSON sidecar next to a generated WAV file."""
+    meta = {
+        "file": wav_path.name,
+        "prompt": parsed.get("raw_prompt", ""),
+        "family": parsed.get("family", ""),
+        "profile": parsed.get("default_profile", ""),
+        "adjectives": parsed.get("adjectives", []),
+        "overrides": parsed.get("overrides", {}),
+        "seed": seed,
+        "duration_ms": round(dur, 1),
+        "pitch_hz": round(pitch, 2),
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    meta_path = wav_path.with_suffix(".json")
+    with open(meta_path, "w") as f:
+        json.dump(meta, f, indent=2)
+
+
+def generate_single_from_prompt(parsed: dict, seed: int = None) -> np.ndarray:
+    """Generate a single audio sample from a parsed prompt. Returns samples array."""
+    gen_fn, default_dur, default_pitch, family, profile_name, overrides = _resolve_generator(parsed)
 
     duration_scale = overrides.pop("duration_scale", 1.0)
     pitch_scale = overrides.pop("pitch_scale", 1.0)
     dur = default_dur * duration_scale
     pitch = default_pitch * pitch_scale
 
-    seed_offset = int(time.time() * 1000) % 1000000
+    if seed is None:
+        seed = _seed_from_prompt(parsed.get("raw_prompt", "single"))
+    random.seed(seed)
+    np.random.seed(seed % 2**32)
+
+    samples, _, _ = _generate_variation(dur, pitch, family, gen_fn)
+    return samples
+
+
+def generate_from_prompt(parsed: dict, count: int = 1, out_dir: Path = None,
+                         base_seed: int = None) -> list[Path]:
+    """Generate audio from a parsed prompt with metadata sidecar.
+    
+    When count==1, generates a single file with metadata.
+    When count>1, generates N files with individual metadata sidecars.
+    Returns list of WAV file paths.
+    """
+    gen_fn, default_dur, default_pitch, family, profile_name, overrides = _resolve_generator(parsed)
+
+    duration_scale = overrides.pop("duration_scale", 1.0)
+    pitch_scale = overrides.pop("pitch_scale", 1.0)
+    dur = default_dur * duration_scale
+    pitch = default_pitch * pitch_scale
+
     out_dir = out_dir or Path("outputs/prompt")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     paths = []
     for i in range(count):
-        seed = (seed_offset + i) * 314159265 + hash(parsed["raw_prompt"]) % 1000000
+        seed = _seed_from_prompt(parsed["raw_prompt"], i, base_seed)
         random.seed(seed)
         np.random.seed(seed % 2**32)
 
-        dur_var = dur * (1.0 + (random.random() - 0.5) * 0.08)
-        # Piano: pitch-locked (minimal variation)
-        if family == "piano-gen":
-            pitch_var = pitch * (1.0 + (random.random() - 0.5) * 0.02)
-        else:
-            pitch_var = pitch * (1.0 + (random.random() - 0.5) * 0.08)
-        samples = gen_fn(dur_var, pitch_var)
+        samples, actual_dur, actual_pitch = _generate_variation(dur, pitch, family, gen_fn)
 
         safe_name = re.sub(r'[^a-z0-9]+', '_', parsed["raw_prompt"].lower())[:35].strip("_")
         out_path = out_dir / f"prompt_{safe_name}_{i+1:03d}.wav"
         write_wav(out_path, samples)
+        _write_metadata(out_path, parsed, seed, actual_dur, actual_pitch)
         paths.append(out_path)
 
     return paths
@@ -513,22 +512,40 @@ def cmd_prompt(args):
 
     out_path = Path(args.out) if args.out else Path("outputs/prompt")
     count = args.count
+    base_seed = args.seed if hasattr(args, 'seed') and args.seed is not None else None
+
+    if base_seed is not None:
+        print(f"  → Seed: {base_seed} (deterministic mode)")
+    else:
+        print(f"  → Seed: auto (random mode)")
 
     # If --out ends with .wav and count=1, write to exact file
     if out_path.suffix.lower() == ".wav" and count == 1:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        seed = int(time.time() * 1000) % 1000000
+        seed = base_seed if base_seed is not None else _seed_from_prompt(parsed["raw_prompt"])
         random.seed(seed)
         np.random.seed(seed % 2**32)
-        samples = generate_single_from_prompt(parsed)
+        gen_fn, default_dur, default_pitch, family, _, overrides = _resolve_generator(parsed)
+        duration_scale = overrides.pop("duration_scale", 1.0)
+        pitch_scale = overrides.pop("pitch_scale", 1.0)
+        dur = default_dur * duration_scale
+        pitch = default_pitch * pitch_scale
+        samples, actual_dur, actual_pitch = _generate_variation(dur, pitch, family, gen_fn)
         write_wav(out_path, samples)
+        _write_metadata(out_path, parsed, seed, actual_dur, actual_pitch)
         paths = [out_path]
-        print(f"\n  Generated → {out_path}")
+        print(f"\n  Generated → {out_path} (seed={seed})")
     else:
-        paths = generate_from_prompt(parsed, count, out_path)
+        paths = generate_from_prompt(parsed, count, out_path, base_seed=base_seed)
         print(f"\n  Generated {len(paths)} file(s) → {out_path}")
         for p in paths:
-            print(f"    {p.name}")
+            meta = p.with_suffix(".json")
+            seed_str = "unknown"
+            if meta.exists():
+                with open(meta) as mf:
+                    md = json.load(mf)
+                    seed_str = str(md.get("seed", "unknown"))
+            print(f"    {p.name} (seed={seed_str})")
 
     # Print feature summary
     if paths:
@@ -539,6 +556,31 @@ def cmd_prompt(args):
                    "stereo_correlation_mean"]:
             if k in feats:
                 print(f"    {k}: {feats[k]:.4f}")
+
+
+def cmd_regenerate(args):
+    """Regenerate a file from its metadata JSON sidecar."""
+    meta_path = Path(args.metadata)
+    if not meta_path.exists():
+        print(f"Error: {meta_path} not found", file=sys.stderr)
+        sys.exit(1)
+
+    with open(meta_path) as f:
+        meta = json.load(f)
+
+    seed = meta.get("seed")
+    if seed is None:
+        print("Error: no seed in metadata", file=sys.stderr)
+        sys.exit(1)
+
+    # Reconstruct parsed prompt from metadata
+    fake_args = type("Args", (), {
+        "prompt": [meta.get("prompt", "")],
+        "out": args.out,
+        "count": 1,
+        "seed": seed,
+    })()
+    cmd_prompt(fake_args)
 
 
 def cmd_prompt_refine(args):
