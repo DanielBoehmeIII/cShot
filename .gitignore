@@ -5,3 +5,9 @@ src-tauri/target/
 .DS_Store
 .env
 tools/bakeoff/target/
+outputs/
+generated_audit/
+reference_analysis.json
+class_profiles.json
+__pycache__/
+*.pyc

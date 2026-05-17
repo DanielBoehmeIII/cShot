@@ -2,11 +2,18 @@
 
 A desktop app for generating, recreating, editing, and transforming production-ready one-shot audio samples — entirely locally.
 
-Built with Tauri v2 + React + Rust.
+Built with Tauri v2 + React + Rust + Python synthesis engine.
+
+**Note:** The Python synthesis engine (`gen.py`) is currently the stable generation backend. See [Known Working Path](#known-working-path).
 
 ## Quick Start
 
 ```bash
+# Python generation (stable)
+pip3 install soundfile scipy numpy
+python3 gen.py oneshot clap --out outputs/clap.wav
+
+# Tauri UI (experimental)
 npm install
 npm run tauri dev
 ```
@@ -97,9 +104,16 @@ No API keys, no accounts, no cloud dependencies. cShot works immediately after i
 cShot is in **Beta** — the core workflow is stable and usable for real production.
 All generation happens locally with zero cloud dependencies.
 
-### What's in Beta
+### What's in Beta (Stable)
 
-- ✓ Local DSP engine with 5-layer resynthesis and advanced drum synthesis
+- ✓ **Python synthesis engine** (gen.py) — 10 class, reference-informed generation
+- ✓ Oneshot and batch CLI generation
+- ✓ Reference scanning, profiling, and QA comparison pipeline
+- ✓ Full audit system with feature reports and similarity scoring
+
+### What's in Beta (Experimental)
+
+- ✓ Rust/Tauri DSP engine with 5-layer resynthesis and advanced drum synthesis
 - ✓ Prompt-to-DSP mapping with 60+ descriptors and semantic graph
 - ✓ Reference recreation with multi-band similarity scoring
 - ✓ Desktop app with full generation, library, export workflow
@@ -122,26 +136,37 @@ All generation happens locally with zero cloud dependencies.
 ```
 Frontend:  React 18 + TypeScript + Vite + Tailwind
 Backend:   Rust (Tauri v2) + SQLite + DSP engine
-Engine:    cShot Engine (local synthesis, analysis, transformation)
-           ├── synthesize.rs     — Layer-based resynthesis (5 layers)
-           ├── analyze.rs        — Full audio analysis pipeline
-           ├── resynthesize.rs   — Category-specific synthesis recipes
-           ├── transform.rs      — Prompt-based + DSP transformation
-           ├── recreate.rs       — Reference recreation + similarity scoring
-           ├── prompt_dsp.rs     — NLP-to-synthesis-parameter mapping
-           ├── dsp.rs            — Filters, EQ, transient shaping
-           └── process.rs        — Repair chain + validation
+Engines:
+  Python (official):   gen.py — 10 synth classes, reference-informed, stable
+  Rust (experimental): src-tauri/src/audio/synthesize.rs — needs parity work
+    Rust engine modules:
+      synthesize.rs     — Layer-based resynthesis (5 layers)
+      analyze.rs        — Full audio analysis pipeline
+      resynthesize.rs   — Category-specific synthesis recipes
+      transform.rs      — Prompt-based + DSP transformation
+      recreate.rs       — Reference recreation + similarity scoring
+      prompt_dsp.rs     — NLP-to-synthesis-parameter mapping
+      dsp.rs            — Filters, EQ, transient shaping
+      process.rs        — Repair chain + validation
 Storage:   Content-addressed WAV files + SQLite metadata
-CLI:       cshot-cli (headless generation, analysis, benchmark)
+CLI:       python3 gen.py (stable) | cargo run --bin cshot-cli (experimental)
 Plugin:    cshot-plugin (standalone plugin prototype)
 ```
 
 ## Build
 
 ```bash
-npm run tauri build     # Desktop app
-cargo run --bin cshot-cli  # CLI tool
-cargo run --bin cshot-plugin  # Plugin prototype
+# Python generator (stable — no build needed)
+python3 gen.py oneshot clap --out outputs/clap.wav
+
+# Tauri desktop app (experimental)
+npm run tauri build
+
+# Rust CLI (experimental)
+cargo run --bin cshot-cli
+
+# Plugin prototype (experimental)
+cargo run --bin cshot-plugin
 ```
 
 ## Configuration
@@ -167,6 +192,46 @@ For optional cloud providers, see the Settings panel in the app.
 
 Generated sounds from cShot's local engine are safe for commercial use.
 See [docs/COPYRIGHT-SAFETY.md](docs/COPYRIGHT-SAFETY.md) for details.
+
+## Known Working Path
+
+The **Python synthesis engine** (`gen.py`) is the current stable generation backend. It produces better reference-grounded outputs than the Rust/Tauri engine.
+
+### Prerequisites
+
+```bash
+pip3 install soundfile scipy numpy
+```
+
+### Commands
+
+```bash
+# Single one-shot to exact path
+python3 gen.py oneshot clap --out outputs/clap.wav
+
+# Batch generate 20 claps into a directory
+python3 gen.py batch --class clap --count 20 --out outputs/claps/
+
+# Available sound classes:
+#   kick, snare, clap, closed_hat, open_hat, 808,
+#   bass_stab, impact_fx, synth_stab, guitar_stab
+
+# Full pipeline: scan references → build profiles → generate QA → compare
+python3 gen.py scan
+python3 gen.py profiles
+python3 gen.py all
+```
+
+### Output
+
+Generated WAVs are 44100 Hz, 16-bit mono, normalized to ~0.9 peak. Each sample has varied duration/pitch/gain from seed-based randomization.
+
+## Engine Status
+
+| Engine | Status | Notes |
+|--------|--------|-------|
+| **Python (`gen.py`)** | **Official** | Stable, reference-informed synthesis, ready for CLI/DAW use |
+| **Rust/Tauri** | **Experimental / Legacy** | Needs parity work; Tauri UI drives this engine — CLI generation via Python is the reliable path for now |
 
 ## License
 
