@@ -84,6 +84,7 @@ from gen.presets import cmd_save_preset, cmd_preset_list, cmd_preset_generate
 from gen.polish import cmd_polish
 from gen.pack import cmd_pack, cmd_pack_audit
 from gen.similar import cmd_similar, cmd_variations
+from gen.genre import cmd_genre, GENRE_PROFILES
 from gen.refine_feedback import cmd_refine_feedback
 
 
@@ -377,6 +378,12 @@ def main():
     p_rf.add_argument("feedback", help="Natural language feedback (e.g. 'less harsh, more warm, shorter tail')")
     p_rf.add_argument("--out", "-o", help="Output path for refined file")
 
+    # ── Genre ──
+    p_genre = subparsers.add_parser("genre", help="Generate sounds for a specific genre")
+    p_genre.add_argument("genre", help=f"Genre name ({', '.join(sorted(GENRE_PROFILES.keys()))})")
+    p_genre.add_argument("--count", "-n", type=int, default=20, help="Number of samples")
+    p_genre.add_argument("--out", "-o", help="Output directory")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -482,6 +489,8 @@ def main():
         cmd_variations(args)
     elif args.command == "refine-feedback":
         cmd_refine_feedback(args)
+    elif args.command == "genre":
+        cmd_genre(args)
     elif args.command == "all":
         cmd_all(args)
     else:
