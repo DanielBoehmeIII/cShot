@@ -1,0 +1,180 @@
+Golden Demo — Top 50 Balanced Selections
+============================================================
+
+  1. [808                 ] prompt_bass_gen_808_001.wav
+     Family: bass         | Prompt: bass gen 808
+     Score: 1.056 | RMS: 0.4022 | Peak: 0.9500 | Centroid: 2014 | Attack: 3.6ms | Dur: 0.79s
+  2. [808                 ] prompt_bass_gen_808_002.wav
+     Family: bass         | Prompt: bass gen 808
+     Score: 1.056 | RMS: 0.4040 | Peak: 0.9500 | Centroid: 1639 | Attack: 3.6ms | Dur: 0.78s
+  3. [bass_stab           ] prompt_bass_gen_reese_001.wav
+     Family: bass         | Prompt: bass gen reese
+     Score: 1.320 | RMS: 0.2505 | Peak: 0.9500 | Centroid: 4138 | Attack: 33.9ms | Dur: 0.60s
+  4. [bass_stab           ] prompt_bass_gen_reese_002.wav
+     Family: bass         | Prompt: bass gen reese
+     Score: 1.320 | RMS: 0.2513 | Peak: 0.9500 | Centroid: 4104 | Attack: 33.8ms | Dur: 0.59s
+  5. [bell                ] prompt_piano_gen_bell_001.wav
+     Family: piano        | Prompt: piano gen bell
+     Score: 1.452 | RMS: 0.1042 | Peak: 0.9500 | Centroid: 5363 | Attack: 11.1ms | Dur: 1.56s
+  6. [bell                ] prompt_piano_gen_bell_002.wav
+     Family: piano        | Prompt: piano gen bell
+     Score: 1.452 | RMS: 0.1055 | Peak: 0.9500 | Centroid: 4648 | Attack: 11.2ms | Dur: 1.52s
+  7. [bright              ] prompt_bright_pluck_001.wav
+     Family: synth        | Prompt: bright pluck
+     Score: 1.452 | RMS: 0.0701 | Peak: 0.9500 | Centroid: 10003 | Attack: 2.5ms | Dur: 0.40s
+  8. [bright              ] prompt_bright_pluck_002.wav
+     Family: synth        | Prompt: bright pluck
+     Score: 1.452 | RMS: 0.0725 | Peak: 0.9500 | Centroid: 9777 | Attack: 2.7ms | Dur: 0.41s
+  9. [bright_guitar       ] prompt_guitar_gen_bright_001.wav
+     Family: guitar       | Prompt: guitar gen bright
+     Score: 1.452 | RMS: 0.0833 | Peak: 0.9500 | Centroid: 3262 | Attack: 6.3ms | Dur: 0.82s
+ 10. [bright_guitar       ] prompt_guitar_gen_bright_002.wav
+     Family: guitar       | Prompt: guitar gen bright
+     Score: 1.452 | RMS: 0.0821 | Peak: 0.9500 | Centroid: 3427 | Attack: 8.2ms | Dur: 0.83s
+ 11. [clap                ] clap_001.wav
+     Family: drums        | Prompt: clap
+     Score: 1.452 | RMS: 0.0685 | Peak: 0.9500 | Centroid: 3148 | Attack: 12.9ms | Dur: 0.42s
+ 12. [clap                ] clap_002.wav
+     Family: drums        | Prompt: clap
+     Score: 1.452 | RMS: 0.0731 | Peak: 0.9500 | Centroid: 3329 | Attack: 24.3ms | Dur: 0.33s
+ 13. [clean               ] prompt_clean_pluck_001.wav
+     Family: synth        | Prompt: clean pluck
+     Score: 1.452 | RMS: 0.1111 | Peak: 0.9500 | Centroid: 3489 | Attack: 3.3ms | Dur: 0.39s
+ 14. [clean               ] prompt_clean_pluck_002.wav
+     Family: synth        | Prompt: clean pluck
+     Score: 1.452 | RMS: 0.1011 | Peak: 0.9500 | Centroid: 3902 | Attack: 2.5ms | Dur: 0.40s
+ 15. [dark                ] prompt_dark_pluck_001.wav
+     Family: synth        | Prompt: dark pluck
+     Score: 1.320 | RMS: 0.1245 | Peak: 0.9500 | Centroid: 1755 | Attack: 1.2ms | Dur: 0.39s
+ 16. [dark                ] prompt_dark_pluck_002.wav
+     Family: synth        | Prompt: dark pluck
+     Score: 1.320 | RMS: 0.1229 | Peak: 0.9500 | Centroid: 1688 | Attack: 1.0ms | Dur: 0.40s
+ 17. [distorted           ] prompt_distorted_pluck_001.wav
+     Family: synth        | Prompt: distorted pluck
+     Score: 1.452 | RMS: 0.1383 | Peak: 0.9500 | Centroid: 4429 | Attack: 2.7ms | Dur: 0.40s
+ 18. [distorted           ] prompt_distorted_pluck_002.wav
+     Family: synth        | Prompt: distorted pluck
+     Score: 1.452 | RMS: 0.1394 | Peak: 0.9500 | Centroid: 4506 | Attack: 2.6ms | Dur: 0.39s
+ 19. [distorted_bass      ] prompt_bass_gen_distorted_001.wav
+     Family: bass         | Prompt: bass gen distorted
+     Score: 1.056 | RMS: 0.4041 | Peak: 0.9500 | Centroid: 1512 | Attack: 3.6ms | Dur: 0.79s
+ 20. [distorted_bass      ] prompt_bass_gen_distorted_002.wav
+     Family: bass         | Prompt: bass gen distorted
+     Score: 1.056 | RMS: 0.4012 | Peak: 0.9500 | Centroid: 2180 | Attack: 3.6ms | Dur: 0.79s
+ 21. [fm_bass             ] prompt_bass_gen_fm_001.wav
+     Family: bass         | Prompt: bass gen fm
+     Score: 1.056 | RMS: 0.3960 | Peak: 0.9500 | Centroid: 2135 | Attack: 3.6ms | Dur: 0.83s
+ 22. [fm_bass             ] prompt_bass_gen_fm_002.wav
+     Family: bass         | Prompt: bass gen fm
+     Score: 1.056 | RMS: 0.4046 | Peak: 0.9500 | Centroid: 1241 | Attack: 3.6ms | Dur: 0.79s
+ 23. [fx                  ] prompt_fx_gen_impact_001.wav
+     Family: fx           | Prompt: fx gen impact
+     Score: 1.320 | RMS: 0.2223 | Peak: 0.9500 | Centroid: 4304 | Attack: 2.4ms | Dur: 1.53s
+ 24. [fx                  ] prompt_fx_gen_impact_002.wav
+     Family: fx           | Prompt: fx gen impact
+     Score: 1.320 | RMS: 0.2212 | Peak: 0.9500 | Centroid: 4537 | Attack: 2.4ms | Dur: 1.55s
+ 25. [glitch              ] prompt_fx_gen_glitch_001.wav
+     Family: fx           | Prompt: fx gen glitch
+     Score: 0.960 | RMS: 0.3379 | Peak: 0.9500 | Centroid: 9858 | Attack: 1.0ms | Dur: 0.50s
+ 26. [glitch              ] prompt_fx_gen_glitch_002.wav
+     Family: fx           | Prompt: fx gen glitch
+     Score: 0.960 | RMS: 0.3368 | Peak: 0.9500 | Centroid: 9651 | Attack: 1.0ms | Dur: 0.49s
+ 27. [guitar              ] prompt_guitar_gen_nylon_001.wav
+     Family: guitar       | Prompt: guitar gen nylon
+     Score: 1.452 | RMS: 0.0929 | Peak: 0.9500 | Centroid: 3144 | Attack: 5.8ms | Dur: 0.83s
+ 28. [guitar              ] prompt_guitar_gen_nylon_002.wav
+     Family: guitar       | Prompt: guitar gen nylon
+     Score: 1.452 | RMS: 0.0895 | Peak: 0.9500 | Centroid: 3373 | Attack: 6.0ms | Dur: 0.78s
+ 29. [hat                 ] hat_001.wav
+     Family: drums        | Prompt: hat
+     Score: 1.320 | RMS: 0.0872 | Peak: 0.9500 | Centroid: 9125 | Attack: 0.5ms | Dur: 0.10s
+ 30. [hat                 ] hat_002.wav
+     Family: drums        | Prompt: hat
+     Score: 1.320 | RMS: 0.0877 | Peak: 0.9500 | Centroid: 9348 | Attack: 0.9ms | Dur: 0.10s
+ 31. [kick                ] kick_001.wav
+     Family: drums        | Prompt: kick
+     Score: 1.200 | RMS: 0.1702 | Peak: 0.9500 | Centroid: 3462 | Attack: 0.6ms | Dur: 0.26s
+ 32. [kick                ] kick_002.wav
+     Family: drums        | Prompt: kick
+     Score: 1.200 | RMS: 0.1618 | Peak: 0.9500 | Centroid: 3450 | Attack: 0.6ms | Dur: 0.29s
+ 33. [lead                ] prompt_synth_gen_lead_001.wav
+     Family: synth        | Prompt: synth gen lead
+     Score: 1.320 | RMS: 0.1247 | Peak: 0.9500 | Centroid: 6723 | Attack: 12.6ms | Dur: 0.82s
+ 34. [lead                ] prompt_synth_gen_lead_002.wav
+     Family: synth        | Prompt: synth gen lead
+     Score: 1.320 | RMS: 0.1292 | Peak: 0.9500 | Centroid: 6447 | Attack: 2.6ms | Dur: 0.81s
+ 35. [lo_fi               ] prompt_lo_fi_pluck_001.wav
+     Family: synth        | Prompt: lo fi pluck
+     Score: 1.452 | RMS: 0.1412 | Peak: 0.9500 | Centroid: 1923 | Attack: 2.7ms | Dur: 0.39s
+ 36. [lo_fi               ] prompt_lo_fi_pluck_004.wav
+     Family: synth        | Prompt: lo fi pluck
+     Score: 1.452 | RMS: 0.1396 | Peak: 0.9500 | Centroid: 1933 | Attack: 2.3ms | Dur: 0.41s
+ 37. [narrow              ] prompt_narrow_pluck_001.wav
+     Family: synth        | Prompt: narrow pluck
+     Score: 1.320 | RMS: 0.1194 | Peak: 0.9500 | Centroid: 4325 | Attack: 1.1ms | Dur: 0.39s
+ 38. [narrow              ] prompt_narrow_pluck_002.wav
+     Family: synth        | Prompt: narrow pluck
+     Score: 1.320 | RMS: 0.1196 | Peak: 0.9500 | Centroid: 4431 | Attack: 1.0ms | Dur: 0.40s
+ 39. [pad                 ] prompt_synth_gen_pad_001.wav
+     Family: synth        | Prompt: synth gen pad
+     Score: 1.200 | RMS: 0.1737 | Peak: 0.9500 | Centroid: 3789 | Attack: 94.6ms | Dur: 2.05s
+ 40. [pad                 ] prompt_synth_gen_pad_002.wav
+     Family: synth        | Prompt: synth gen pad
+     Score: 1.200 | RMS: 0.1641 | Peak: 0.9500 | Centroid: 3936 | Attack: 131.3ms | Dur: 2.03s
+ 41. [piano               ] prompt_piano_gen_acoustic_001.wav
+     Family: piano        | Prompt: piano gen acoustic
+     Score: 1.452 | RMS: 0.0820 | Peak: 0.9500 | Centroid: 3332 | Attack: 11.9ms | Dur: 0.78s
+ 42. [piano               ] prompt_piano_gen_acoustic_002.wav
+     Family: piano        | Prompt: piano gen acoustic
+     Score: 1.452 | RMS: 0.0851 | Peak: 0.9500 | Centroid: 3441 | Attack: 8.1ms | Dur: 0.80s
+ 43. [pluck               ] prompt_synth_gen_pluck_001.wav
+     Family: synth        | Prompt: synth gen pluck
+     Score: 1.320 | RMS: 0.1173 | Peak: 0.9500 | Centroid: 4168 | Attack: 1.1ms | Dur: 0.40s
+ 44. [pluck               ] prompt_synth_gen_pluck_002.wav
+     Family: synth        | Prompt: synth gen pluck
+     Score: 1.320 | RMS: 0.1206 | Peak: 0.9500 | Centroid: 4267 | Attack: 1.0ms | Dur: 0.40s
+ 45. [punchy              ] prompt_punchy_pluck_001.wav
+     Family: synth        | Prompt: punchy pluck
+     Score: 1.452 | RMS: 0.1398 | Peak: 0.9500 | Centroid: 4374 | Attack: 2.5ms | Dur: 0.39s
+ 46. [punchy              ] prompt_punchy_pluck_002.wav
+     Family: synth        | Prompt: punchy pluck
+     Score: 1.452 | RMS: 0.1431 | Peak: 0.9500 | Centroid: 4337 | Attack: 2.6ms | Dur: 0.41s
+ 47. [rhodes              ] prompt_piano_gen_rhodes_001.wav
+     Family: piano        | Prompt: piano gen rhodes
+     Score: 1.452 | RMS: 0.1043 | Peak: 0.9500 | Centroid: 4273 | Attack: 11.2ms | Dur: 1.55s
+ 48. [rhodes              ] prompt_piano_gen_rhodes_002.wav
+     Family: piano        | Prompt: piano gen rhodes
+     Score: 1.452 | RMS: 0.1080 | Peak: 0.9500 | Centroid: 5045 | Attack: 11.1ms | Dur: 1.45s
+ 49. [riser               ] prompt_fx_gen_riser_001.wav
+     Family: fx           | Prompt: fx gen riser
+     Score: 1.320 | RMS: 0.2036 | Peak: 0.9500 | Centroid: 9154 | Attack: 1412.5ms | Dur: 1.99s
+ 50. [riser               ] prompt_fx_gen_riser_002.wav
+     Family: fx           | Prompt: fx gen riser
+     Score: 1.320 | RMS: 0.2079 | Peak: 0.9500 | Centroid: 9510 | Attack: 1453.3ms | Dur: 2.01s
+
+Category distribution:
+  808                 : 2 files
+  bass_stab           : 2 files
+  bell                : 2 files
+  bright              : 2 files
+  bright_guitar       : 2 files
+  clap                : 2 files
+  clean               : 2 files
+  dark                : 2 files
+  distorted           : 2 files
+  distorted_bass      : 2 files
+  fm_bass             : 2 files
+  fx                  : 2 files
+  glitch              : 2 files
+  guitar              : 2 files
+  hat                 : 2 files
+  kick                : 2 files
+  lead                : 2 files
+  lo_fi               : 2 files
+  narrow              : 2 files
+  pad                 : 2 files
+  piano               : 2 files
+  pluck               : 2 files
+  punchy              : 2 files
+  rhodes              : 2 files
+  riser               : 2 files

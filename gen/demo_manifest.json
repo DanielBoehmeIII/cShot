@@ -1,0 +1,4441 @@
+{
+  "generated_at": "2026-05-17T16:15:15",
+  "total_candidates": 170,
+  "top_n": 50,
+  "categories": [
+    "808",
+    "bass_stab",
+    "bell",
+    "bright",
+    "bright_guitar",
+    "clap",
+    "clean",
+    "dark",
+    "distorted",
+    "distorted_bass",
+    "fm_bass",
+    "fx",
+    "glitch",
+    "guitar",
+    "hat",
+    "kick",
+    "lead",
+    "lo_fi",
+    "narrow",
+    "pad",
+    "piano",
+    "pluck",
+    "punchy",
+    "rhodes",
+    "riser",
+    "snare",
+    "soft",
+    "synth",
+    "wide"
+  ],
+  "selection_strategy": "top-2-per-category-then-best-remaining",
+  "entries": [
+    {
+      "file": "_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_001.wav",
+      "category": "bright",
+      "prompt": "bright pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_001.wav",
+      "seed": 4171795370,
+      "sample_rate": 44100,
+      "duration_s": 0.399,
+      "features": {
+        "rms": 0.070127,
+        "peak": 0.95,
+        "spectral_centroid": 10002.85,
+        "attack_ms": 2.45,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.399
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_002.wav",
+      "category": "bright",
+      "prompt": "bright pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_002.wav",
+      "seed": 725883427,
+      "sample_rate": 44100,
+      "duration_s": 0.415,
+      "features": {
+        "rms": 0.072548,
+        "peak": 0.95,
+        "spectral_centroid": 9777.27,
+        "attack_ms": 2.68,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.415
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_003.wav",
+      "category": "bright",
+      "prompt": "bright pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_003.wav",
+      "seed": 721964379,
+      "sample_rate": 44100,
+      "duration_s": 0.415,
+      "features": {
+        "rms": 0.060658,
+        "peak": 0.95,
+        "spectral_centroid": 10071.36,
+        "attack_ms": 14.24,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.415
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_004.wav",
+      "category": "bright",
+      "prompt": "bright pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_004.wav",
+      "seed": 1408605357,
+      "sample_rate": 44100,
+      "duration_s": 0.41,
+      "features": {
+        "rms": 0.056725,
+        "peak": 0.95,
+        "spectral_centroid": 9877.35,
+        "attack_ms": 5.19,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.41
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_005.wav",
+      "category": "bright",
+      "prompt": "bright pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_005.wav",
+      "seed": 965949020,
+      "sample_rate": 44100,
+      "duration_s": 0.408,
+      "features": {
+        "rms": 0.057161,
+        "peak": 0.95,
+        "spectral_centroid": 9929.64,
+        "attack_ms": 6.94,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.408
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_001.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_001.wav",
+      "seed": 3329217768,
+      "sample_rate": 44100,
+      "duration_s": 0.39,
+      "features": {
+        "rms": 0.111122,
+        "peak": 0.95,
+        "spectral_centroid": 3489.42,
+        "attack_ms": 3.27,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.39
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_002.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_002.wav",
+      "seed": 2853546096,
+      "sample_rate": 44100,
+      "duration_s": 0.404,
+      "features": {
+        "rms": 0.101064,
+        "peak": 0.95,
+        "spectral_centroid": 3901.59,
+        "attack_ms": 2.52,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.404
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_003.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_003.wav",
+      "seed": 3367135385,
+      "sample_rate": 44100,
+      "duration_s": 0.397,
+      "features": {
+        "rms": 0.107876,
+        "peak": 0.95,
+        "spectral_centroid": 3737.28,
+        "attack_ms": 2.59,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.397
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_004.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_004.wav",
+      "seed": 2452703000,
+      "sample_rate": 44100,
+      "duration_s": 0.403,
+      "features": {
+        "rms": 0.108217,
+        "peak": 0.95,
+        "spectral_centroid": 3665.02,
+        "attack_ms": 2.99,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.403
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_005.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_005.wav",
+      "seed": 2288486145,
+      "sample_rate": 44100,
+      "duration_s": 0.395,
+      "features": {
+        "rms": 0.110234,
+        "peak": 0.95,
+        "spectral_centroid": 3741.44,
+        "attack_ms": 2.59,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.395
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_001.wav",
+      "category": "distorted",
+      "prompt": "distorted pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_001.wav",
+      "seed": 1353803258,
+      "sample_rate": 44100,
+      "duration_s": 0.403,
+      "features": {
+        "rms": 0.13828,
+        "peak": 0.95,
+        "spectral_centroid": 4429.18,
+        "attack_ms": 2.72,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.403
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_002.wav",
+      "category": "distorted",
+      "prompt": "distorted pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_002.wav",
+      "seed": 193291011,
+      "sample_rate": 44100,
+      "duration_s": 0.385,
+      "features": {
+        "rms": 0.139352,
+        "peak": 0.95,
+        "spectral_centroid": 4506.43,
+        "attack_ms": 2.63,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.385
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_003.wav",
+      "category": "distorted",
+      "prompt": "distorted pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_003.wav",
+      "seed": 3390010054,
+      "sample_rate": 44100,
+      "duration_s": 0.407,
+      "features": {
+        "rms": 0.142062,
+        "peak": 0.95,
+        "spectral_centroid": 4344.96,
+        "attack_ms": 2.74,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.407
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_004.wav",
+      "category": "distorted",
+      "prompt": "distorted pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_004.wav",
+      "seed": 556392406,
+      "sample_rate": 44100,
+      "duration_s": 0.391,
+      "features": {
+        "rms": 0.141195,
+        "peak": 0.95,
+        "spectral_centroid": 4273.82,
+        "attack_ms": 2.74,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.391
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_005.wav",
+      "category": "distorted",
+      "prompt": "distorted pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_005.wav",
+      "seed": 1789968426,
+      "sample_rate": 44100,
+      "duration_s": 0.41,
+      "features": {
+        "rms": 0.138988,
+        "peak": 0.95,
+        "spectral_centroid": 4768.51,
+        "attack_ms": 2.52,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.41
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_001.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_001.wav",
+      "seed": 3329217768,
+      "sample_rate": 44100,
+      "duration_s": 0.397,
+      "features": {
+        "rms": 0.106159,
+        "peak": 0.95,
+        "spectral_centroid": 3553.41,
+        "attack_ms": 2.61,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.397
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_002.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_002.wav",
+      "seed": 2853546096,
+      "sample_rate": 44100,
+      "duration_s": 0.406,
+      "features": {
+        "rms": 0.106443,
+        "peak": 0.95,
+        "spectral_centroid": 3550.16,
+        "attack_ms": 2.52,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.406
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_003.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_003.wav",
+      "seed": 3367135385,
+      "sample_rate": 44100,
+      "duration_s": 0.387,
+      "features": {
+        "rms": 0.109882,
+        "peak": 0.95,
+        "spectral_centroid": 3708.52,
+        "attack_ms": 3.11,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.387
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_004.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_004.wav",
+      "seed": 2452703000,
+      "sample_rate": 44100,
+      "duration_s": 0.392,
+      "features": {
+        "rms": 0.107805,
+        "peak": 0.95,
+        "spectral_centroid": 3551.41,
+        "attack_ms": 2.54,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.392
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_005.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/clean/prompt_clean_pluck_005.wav",
+      "seed": 2288486145,
+      "sample_rate": 44100,
+      "duration_s": 0.416,
+      "features": {
+        "rms": 0.10672,
+        "peak": 0.95,
+        "spectral_centroid": 3530.97,
+        "attack_ms": 3.13,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.416
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_001.wav",
+      "category": "lo_fi",
+      "prompt": "lo fi pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_001.wav",
+      "seed": 1908513387,
+      "sample_rate": 44100,
+      "duration_s": 0.391,
+      "features": {
+        "rms": 0.141178,
+        "peak": 0.95,
+        "spectral_centroid": 1922.83,
+        "attack_ms": 2.7,
+        "hpr": 0.0016,
+        "noise_floor": 0.0,
+        "duration_s": 0.391
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_004.wav",
+      "category": "lo_fi",
+      "prompt": "lo fi pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_004.wav",
+      "seed": 1427606166,
+      "sample_rate": 44100,
+      "duration_s": 0.41,
+      "features": {
+        "rms": 0.139637,
+        "peak": 0.95,
+        "spectral_centroid": 1933.08,
+        "attack_ms": 2.31,
+        "hpr": 0.0022,
+        "noise_floor": 0.0,
+        "duration_s": 0.41
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_001.wav",
+      "category": "wide",
+      "prompt": "wide pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_001.wav",
+      "seed": 2981187450,
+      "sample_rate": 44100,
+      "duration_s": 0.412,
+      "features": {
+        "rms": 0.092253,
+        "peak": 0.95,
+        "spectral_centroid": 3959.63,
+        "attack_ms": 3.67,
+        "hpr": 0.0006,
+        "noise_floor": 0.0,
+        "duration_s": 0.412
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_002.wav",
+      "category": "wide",
+      "prompt": "wide pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_002.wav",
+      "seed": 517289446,
+      "sample_rate": 44100,
+      "duration_s": 0.406,
+      "features": {
+        "rms": 0.088487,
+        "peak": 0.95,
+        "spectral_centroid": 3810.52,
+        "attack_ms": 3.7,
+        "hpr": 0.0004,
+        "noise_floor": 0.0,
+        "duration_s": 0.406
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_003.wav",
+      "category": "wide",
+      "prompt": "wide pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_003.wav",
+      "seed": 3044255209,
+      "sample_rate": 44100,
+      "duration_s": 0.408,
+      "features": {
+        "rms": 0.086106,
+        "peak": 0.95,
+        "spectral_centroid": 4007.12,
+        "attack_ms": 3.67,
+        "hpr": 0.0004,
+        "noise_floor": 0.0,
+        "duration_s": 0.408
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_004.wav",
+      "category": "wide",
+      "prompt": "wide pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_004.wav",
+      "seed": 3174040648,
+      "sample_rate": 44100,
+      "duration_s": 0.4,
+      "features": {
+        "rms": 0.092728,
+        "peak": 0.95,
+        "spectral_centroid": 4036.03,
+        "attack_ms": 2.63,
+        "hpr": 0.0004,
+        "noise_floor": 0.0,
+        "duration_s": 0.4
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_005.wav",
+      "category": "wide",
+      "prompt": "wide pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/wide/prompt_wide_pluck_005.wav",
+      "seed": 3152003699,
+      "sample_rate": 44100,
+      "duration_s": 0.385,
+      "features": {
+        "rms": 0.092025,
+        "peak": 0.95,
+        "spectral_centroid": 3742.94,
+        "attack_ms": 3.83,
+        "hpr": 0.0004,
+        "noise_floor": 0.0,
+        "duration_s": 0.385
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_001.wav",
+      "category": "punchy",
+      "prompt": "punchy pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_001.wav",
+      "seed": 99278758,
+      "sample_rate": 44100,
+      "duration_s": 0.388,
+      "features": {
+        "rms": 0.139794,
+        "peak": 0.95,
+        "spectral_centroid": 4373.5,
+        "attack_ms": 2.49,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.388
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_002.wav",
+      "category": "punchy",
+      "prompt": "punchy pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_002.wav",
+      "seed": 2602856910,
+      "sample_rate": 44100,
+      "duration_s": 0.409,
+      "features": {
+        "rms": 0.143069,
+        "peak": 0.95,
+        "spectral_centroid": 4336.62,
+        "attack_ms": 2.59,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.409
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_003.wav",
+      "category": "punchy",
+      "prompt": "punchy pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_003.wav",
+      "seed": 2625101041,
+      "sample_rate": 44100,
+      "duration_s": 0.405,
+      "features": {
+        "rms": 0.144669,
+        "peak": 0.95,
+        "spectral_centroid": 4317.68,
+        "attack_ms": 2.72,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.405
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_004.wav",
+      "category": "punchy",
+      "prompt": "punchy pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_004.wav",
+      "seed": 261054274,
+      "sample_rate": 44100,
+      "duration_s": 0.39,
+      "features": {
+        "rms": 0.149645,
+        "peak": 0.95,
+        "spectral_centroid": 4532.63,
+        "attack_ms": 2.47,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.39
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_005.wav",
+      "category": "punchy",
+      "prompt": "punchy pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_005.wav",
+      "seed": 2455927655,
+      "sample_rate": 44100,
+      "duration_s": 0.402,
+      "features": {
+        "rms": 0.146353,
+        "peak": 0.95,
+        "spectral_centroid": 4378.05,
+        "attack_ms": 2.59,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.402
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_001.wav",
+      "category": "soft",
+      "prompt": "soft pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_001.wav",
+      "seed": 1935189524,
+      "sample_rate": 44100,
+      "duration_s": 0.404,
+      "features": {
+        "rms": 0.139914,
+        "peak": 0.95,
+        "spectral_centroid": 4037.15,
+        "attack_ms": 26.94,
+        "hpr": 0.8485,
+        "noise_floor": 0.0,
+        "duration_s": 0.404
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_002.wav",
+      "category": "soft",
+      "prompt": "soft pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_002.wav",
+      "seed": 1235511366,
+      "sample_rate": 44100,
+      "duration_s": 0.391,
+      "features": {
+        "rms": 0.14169,
+        "peak": 0.95,
+        "spectral_centroid": 4237.79,
+        "attack_ms": 28.75,
+        "hpr": 0.8201,
+        "noise_floor": 0.0,
+        "duration_s": 0.391
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_003.wav",
+      "category": "soft",
+      "prompt": "soft pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_003.wav",
+      "seed": 4023097152,
+      "sample_rate": 44100,
+      "duration_s": 0.404,
+      "features": {
+        "rms": 0.139282,
+        "peak": 0.95,
+        "spectral_centroid": 4176.27,
+        "attack_ms": 26.64,
+        "hpr": 0.8128,
+        "noise_floor": 0.0,
+        "duration_s": 0.404
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_004.wav",
+      "category": "soft",
+      "prompt": "soft pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_004.wav",
+      "seed": 278588478,
+      "sample_rate": 44100,
+      "duration_s": 0.393,
+      "features": {
+        "rms": 0.145205,
+        "peak": 0.95,
+        "spectral_centroid": 4224.91,
+        "attack_ms": 27.37,
+        "hpr": 0.7229,
+        "noise_floor": 0.0,
+        "duration_s": 0.393
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_005.wav",
+      "category": "soft",
+      "prompt": "soft pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/soft/prompt_soft_pluck_005.wav",
+      "seed": 262804775,
+      "sample_rate": 44100,
+      "duration_s": 0.387,
+      "features": {
+        "rms": 0.15048,
+        "peak": 0.95,
+        "spectral_centroid": 3920.84,
+        "attack_ms": 27.53,
+        "hpr": 0.8202,
+        "noise_floor": 0.0,
+        "duration_s": 0.387
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bell/prompt_piano_gen_bell_001.wav",
+      "category": "bell",
+      "prompt": "piano gen bell",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_001.wav",
+      "seed": 1114363749,
+      "sample_rate": 44100,
+      "duration_s": 1.56,
+      "features": {
+        "rms": 0.104242,
+        "peak": 0.95,
+        "spectral_centroid": 5363.32,
+        "attack_ms": 11.09,
+        "hpr": 0.9022,
+        "noise_floor": 0.000709,
+        "duration_s": 1.56
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bell/prompt_piano_gen_bell_002.wav",
+      "category": "bell",
+      "prompt": "piano gen bell",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_002.wav",
+      "seed": 2823260826,
+      "sample_rate": 44100,
+      "duration_s": 1.519,
+      "features": {
+        "rms": 0.105521,
+        "peak": 0.95,
+        "spectral_centroid": 4647.9,
+        "attack_ms": 11.25,
+        "hpr": 0.8245,
+        "noise_floor": 0.000709,
+        "duration_s": 1.519
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bell/prompt_piano_gen_bell_003.wav",
+      "category": "bell",
+      "prompt": "piano gen bell",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_003.wav",
+      "seed": 2538596428,
+      "sample_rate": 44100,
+      "duration_s": 1.465,
+      "features": {
+        "rms": 0.107342,
+        "peak": 0.95,
+        "spectral_centroid": 4846.58,
+        "attack_ms": 11.11,
+        "hpr": 0.8987,
+        "noise_floor": 0.000741,
+        "duration_s": 1.465
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bell/prompt_piano_gen_bell_004.wav",
+      "category": "bell",
+      "prompt": "piano gen bell",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_004.wav",
+      "seed": 3230060889,
+      "sample_rate": 44100,
+      "duration_s": 1.462,
+      "features": {
+        "rms": 0.107421,
+        "peak": 0.95,
+        "spectral_centroid": 4734.49,
+        "attack_ms": 11.16,
+        "hpr": 0.8719,
+        "noise_floor": 0.000741,
+        "duration_s": 1.462
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bell/prompt_piano_gen_bell_005.wav",
+      "category": "bell",
+      "prompt": "piano gen bell",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_005.wav",
+      "seed": 262925877,
+      "sample_rate": 44100,
+      "duration_s": 1.502,
+      "features": {
+        "rms": 0.106009,
+        "peak": 0.95,
+        "spectral_centroid": 4689.62,
+        "attack_ms": 11.18,
+        "hpr": 0.8673,
+        "noise_floor": 0.000741,
+        "duration_s": 1.502
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bright_guitar/prompt_guitar_gen_bright_001.wav",
+      "category": "bright_guitar",
+      "prompt": "guitar gen bright",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/bright_guitar/prompt_guitar_gen_bright_001.wav",
+      "seed": 434956856,
+      "sample_rate": 44100,
+      "duration_s": 0.823,
+      "features": {
+        "rms": 0.083293,
+        "peak": 0.95,
+        "spectral_centroid": 3262.15,
+        "attack_ms": 6.3,
+        "hpr": 0.7601,
+        "noise_floor": 0.000387,
+        "duration_s": 0.823
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bright_guitar/prompt_guitar_gen_bright_002.wav",
+      "category": "bright_guitar",
+      "prompt": "guitar gen bright",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/bright_guitar/prompt_guitar_gen_bright_002.wav",
+      "seed": 3826612642,
+      "sample_rate": 44100,
+      "duration_s": 0.829,
+      "features": {
+        "rms": 0.0821,
+        "peak": 0.95,
+        "spectral_centroid": 3427.33,
+        "attack_ms": 8.19,
+        "hpr": 0.8154,
+        "noise_floor": 0.000483,
+        "duration_s": 0.829
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bright_guitar/prompt_guitar_gen_bright_003.wav",
+      "category": "bright_guitar",
+      "prompt": "guitar gen bright",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/bright_guitar/prompt_guitar_gen_bright_003.wav",
+      "seed": 3988230477,
+      "sample_rate": 44100,
+      "duration_s": 0.772,
+      "features": {
+        "rms": 0.087405,
+        "peak": 0.95,
+        "spectral_centroid": 3653.82,
+        "attack_ms": 11.02,
+        "hpr": 0.862,
+        "noise_floor": 0.000387,
+        "duration_s": 0.772
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bright_guitar/prompt_guitar_gen_bright_004.wav",
+      "category": "bright_guitar",
+      "prompt": "guitar gen bright",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/bright_guitar/prompt_guitar_gen_bright_004.wav",
+      "seed": 11318057,
+      "sample_rate": 44100,
+      "duration_s": 0.782,
+      "features": {
+        "rms": 0.100854,
+        "peak": 0.95,
+        "spectral_centroid": 3250.98,
+        "attack_ms": 6.92,
+        "hpr": 0.8352,
+        "noise_floor": 0.000483,
+        "duration_s": 0.782
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bright_guitar/prompt_guitar_gen_bright_005.wav",
+      "category": "bright_guitar",
+      "prompt": "guitar gen bright",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/bright_guitar/prompt_guitar_gen_bright_005.wav",
+      "seed": 2428464079,
+      "sample_rate": 44100,
+      "duration_s": 0.793,
+      "features": {
+        "rms": 0.105742,
+        "peak": 0.95,
+        "spectral_centroid": 3285.48,
+        "attack_ms": 5.46,
+        "hpr": 0.8353,
+        "noise_floor": 0.000548,
+        "duration_s": 0.793
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "clap/clap_001.wav",
+      "category": "clap",
+      "prompt": "clap",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/clap/clap_001.wav",
+      "seed": 2989103974,
+      "sample_rate": 44100,
+      "duration_s": 0.423,
+      "features": {
+        "rms": 0.068489,
+        "peak": 0.95,
+        "spectral_centroid": 3147.75,
+        "attack_ms": 12.88,
+        "hpr": 0.0784,
+        "noise_floor": 0.0,
+        "duration_s": 0.423
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "clap/clap_002.wav",
+      "category": "clap",
+      "prompt": "clap",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/clap/clap_002.wav",
+      "seed": 1925821894,
+      "sample_rate": 44100,
+      "duration_s": 0.328,
+      "features": {
+        "rms": 0.073122,
+        "peak": 0.95,
+        "spectral_centroid": 3329.39,
+        "attack_ms": 24.29,
+        "hpr": 0.1003,
+        "noise_floor": 0.0,
+        "duration_s": 0.328
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "clap/clap_003.wav",
+      "category": "clap",
+      "prompt": "clap",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/clap/clap_003.wav",
+      "seed": 4274099938,
+      "sample_rate": 44100,
+      "duration_s": 0.371,
+      "features": {
+        "rms": 0.051364,
+        "peak": 0.95,
+        "spectral_centroid": 3286.47,
+        "attack_ms": 11.04,
+        "hpr": 0.0889,
+        "noise_floor": 0.0,
+        "duration_s": 0.371
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "clap/clap_004.wav",
+      "category": "clap",
+      "prompt": "clap",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/clap/clap_004.wav",
+      "seed": 1061559761,
+      "sample_rate": 44100,
+      "duration_s": 0.335,
+      "features": {
+        "rms": 0.083182,
+        "peak": 0.95,
+        "spectral_centroid": 3044.96,
+        "attack_ms": 27.07,
+        "hpr": 0.0926,
+        "noise_floor": 0.0,
+        "duration_s": 0.335
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "clap/clap_005.wav",
+      "category": "clap",
+      "prompt": "clap",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/clap/clap_005.wav",
+      "seed": 3177018372,
+      "sample_rate": 44100,
+      "duration_s": 0.358,
+      "features": {
+        "rms": 0.050541,
+        "peak": 0.95,
+        "spectral_centroid": 3111.44,
+        "attack_ms": 9.93,
+        "hpr": 0.0951,
+        "noise_floor": 0.0,
+        "duration_s": 0.358
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_001.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_001.wav",
+      "seed": 1339252243,
+      "sample_rate": 44100,
+      "duration_s": 0.828,
+      "features": {
+        "rms": 0.092911,
+        "peak": 0.95,
+        "spectral_centroid": 3143.79,
+        "attack_ms": 5.85,
+        "hpr": 0.8508,
+        "noise_floor": 0.000451,
+        "duration_s": 0.828
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_002.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_002.wav",
+      "seed": 3241872269,
+      "sample_rate": 44100,
+      "duration_s": 0.776,
+      "features": {
+        "rms": 0.089461,
+        "peak": 0.95,
+        "spectral_centroid": 3373.34,
+        "attack_ms": 6.03,
+        "hpr": 0.8273,
+        "noise_floor": 0.00029,
+        "duration_s": 0.776
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_003.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_003.wav",
+      "seed": 2960004825,
+      "sample_rate": 44100,
+      "duration_s": 0.801,
+      "features": {
+        "rms": 0.081375,
+        "peak": 0.95,
+        "spectral_centroid": 3630.63,
+        "attack_ms": 5.76,
+        "hpr": 0.7868,
+        "noise_floor": 0.000354,
+        "duration_s": 0.801
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_004.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_004.wav",
+      "seed": 2118693955,
+      "sample_rate": 44100,
+      "duration_s": 0.81,
+      "features": {
+        "rms": 0.08888,
+        "peak": 0.95,
+        "spectral_centroid": 3327.73,
+        "attack_ms": 7.98,
+        "hpr": 0.8293,
+        "noise_floor": 0.000354,
+        "duration_s": 0.81
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_005.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_005.wav",
+      "seed": 1976694447,
+      "sample_rate": 44100,
+      "duration_s": 0.78,
+      "features": {
+        "rms": 0.086885,
+        "peak": 0.95,
+        "spectral_centroid": 3455.96,
+        "attack_ms": 11.56,
+        "hpr": 0.7849,
+        "noise_floor": 0.000451,
+        "duration_s": 0.78
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_006.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_006.wav",
+      "seed": 826713791,
+      "sample_rate": 44100,
+      "duration_s": 0.801,
+      "features": {
+        "rms": 0.103113,
+        "peak": 0.95,
+        "spectral_centroid": 3266.72,
+        "attack_ms": 5.33,
+        "hpr": 0.7451,
+        "noise_floor": 0.000676,
+        "duration_s": 0.801
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_007.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_007.wav",
+      "seed": 33923720,
+      "sample_rate": 44100,
+      "duration_s": 0.772,
+      "features": {
+        "rms": 0.094474,
+        "peak": 0.95,
+        "spectral_centroid": 3444.03,
+        "attack_ms": 9.89,
+        "hpr": 0.7963,
+        "noise_floor": 0.000612,
+        "duration_s": 0.772
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_008.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_008.wav",
+      "seed": 4135267878,
+      "sample_rate": 44100,
+      "duration_s": 0.779,
+      "features": {
+        "rms": 0.093261,
+        "peak": 0.95,
+        "spectral_centroid": 3430.58,
+        "attack_ms": 6.49,
+        "hpr": 0.8057,
+        "noise_floor": 0.000612,
+        "duration_s": 0.779
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_009.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_009.wav",
+      "seed": 149224844,
+      "sample_rate": 44100,
+      "duration_s": 0.811,
+      "features": {
+        "rms": 0.078599,
+        "peak": 0.95,
+        "spectral_centroid": 3110.16,
+        "attack_ms": 7.05,
+        "hpr": 0.8065,
+        "noise_floor": 0.000419,
+        "duration_s": 0.811
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_010.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_010.wav",
+      "seed": 3270062248,
+      "sample_rate": 44100,
+      "duration_s": 0.809,
+      "features": {
+        "rms": 0.086904,
+        "peak": 0.95,
+        "spectral_centroid": 3381.54,
+        "attack_ms": 8.1,
+        "hpr": 0.8385,
+        "noise_floor": 0.000354,
+        "duration_s": 0.809
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_001.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_001.wav",
+      "seed": 2952067617,
+      "sample_rate": 44100,
+      "duration_s": 0.783,
+      "features": {
+        "rms": 0.081979,
+        "peak": 0.95,
+        "spectral_centroid": 3331.89,
+        "attack_ms": 11.86,
+        "hpr": 0.8745,
+        "noise_floor": 0.000387,
+        "duration_s": 0.783
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_002.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_002.wav",
+      "seed": 4167083222,
+      "sample_rate": 44100,
+      "duration_s": 0.796,
+      "features": {
+        "rms": 0.085142,
+        "peak": 0.95,
+        "spectral_centroid": 3440.74,
+        "attack_ms": 8.12,
+        "hpr": 0.851,
+        "noise_floor": 0.000354,
+        "duration_s": 0.796
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_003.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_003.wav",
+      "seed": 16089169,
+      "sample_rate": 44100,
+      "duration_s": 0.813,
+      "features": {
+        "rms": 0.100612,
+        "peak": 0.95,
+        "spectral_centroid": 3549.82,
+        "attack_ms": 5.62,
+        "hpr": 0.8335,
+        "noise_floor": 0.000419,
+        "duration_s": 0.813
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_004.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_004.wav",
+      "seed": 1628400766,
+      "sample_rate": 44100,
+      "duration_s": 0.784,
+      "features": {
+        "rms": 0.091533,
+        "peak": 0.95,
+        "spectral_centroid": 3107.11,
+        "attack_ms": 6.92,
+        "hpr": 0.8127,
+        "noise_floor": 0.000419,
+        "duration_s": 0.784
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_005.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_005.wav",
+      "seed": 556860184,
+      "sample_rate": 44100,
+      "duration_s": 0.78,
+      "features": {
+        "rms": 0.084483,
+        "peak": 0.95,
+        "spectral_centroid": 3320.29,
+        "attack_ms": 5.15,
+        "hpr": 0.7738,
+        "noise_floor": 0.000612,
+        "duration_s": 0.78
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_006.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_006.wav",
+      "seed": 1248628743,
+      "sample_rate": 44100,
+      "duration_s": 0.798,
+      "features": {
+        "rms": 0.092211,
+        "peak": 0.95,
+        "spectral_centroid": 3319.16,
+        "attack_ms": 6.35,
+        "hpr": 0.8146,
+        "noise_floor": 0.000515,
+        "duration_s": 0.798
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_007.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_007.wav",
+      "seed": 2680145240,
+      "sample_rate": 44100,
+      "duration_s": 0.81,
+      "features": {
+        "rms": 0.076542,
+        "peak": 0.95,
+        "spectral_centroid": 3180.55,
+        "attack_ms": 5.22,
+        "hpr": 0.7549,
+        "noise_floor": 0.00058,
+        "duration_s": 0.81
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_008.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_008.wav",
+      "seed": 1299239573,
+      "sample_rate": 44100,
+      "duration_s": 0.811,
+      "features": {
+        "rms": 0.090752,
+        "peak": 0.95,
+        "spectral_centroid": 3238.66,
+        "attack_ms": 7.14,
+        "hpr": 0.8557,
+        "noise_floor": 0.000258,
+        "duration_s": 0.811
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_009.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_009.wav",
+      "seed": 919858281,
+      "sample_rate": 44100,
+      "duration_s": 0.827,
+      "features": {
+        "rms": 0.088132,
+        "peak": 0.95,
+        "spectral_centroid": 2953.33,
+        "attack_ms": 11.93,
+        "hpr": 0.8563,
+        "noise_floor": 0.000322,
+        "duration_s": 0.827
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_010.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_010.wav",
+      "seed": 1544825652,
+      "sample_rate": 44100,
+      "duration_s": 0.824,
+      "features": {
+        "rms": 0.078414,
+        "peak": 0.95,
+        "spectral_centroid": 3333.33,
+        "attack_ms": 5.33,
+        "hpr": 0.7834,
+        "noise_floor": 0.000354,
+        "duration_s": 0.824
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "rhodes/prompt_piano_gen_rhodes_001.wav",
+      "category": "rhodes",
+      "prompt": "piano gen rhodes",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/rhodes/prompt_piano_gen_rhodes_001.wav",
+      "seed": 4120955425,
+      "sample_rate": 44100,
+      "duration_s": 1.554,
+      "features": {
+        "rms": 0.104338,
+        "peak": 0.95,
+        "spectral_centroid": 4272.88,
+        "attack_ms": 11.2,
+        "hpr": 0.844,
+        "noise_floor": 0.000709,
+        "duration_s": 1.554
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "rhodes/prompt_piano_gen_rhodes_002.wav",
+      "category": "rhodes",
+      "prompt": "piano gen rhodes",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/rhodes/prompt_piano_gen_rhodes_002.wav",
+      "seed": 1077924646,
+      "sample_rate": 44100,
+      "duration_s": 1.447,
+      "features": {
+        "rms": 0.108043,
+        "peak": 0.95,
+        "spectral_centroid": 5045.02,
+        "attack_ms": 11.07,
+        "hpr": 0.9075,
+        "noise_floor": 0.000741,
+        "duration_s": 1.447
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "rhodes/prompt_piano_gen_rhodes_003.wav",
+      "category": "rhodes",
+      "prompt": "piano gen rhodes",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/rhodes/prompt_piano_gen_rhodes_003.wav",
+      "seed": 2972039449,
+      "sample_rate": 44100,
+      "duration_s": 1.533,
+      "features": {
+        "rms": 0.105064,
+        "peak": 0.95,
+        "spectral_centroid": 4873.18,
+        "attack_ms": 11.09,
+        "hpr": 0.9023,
+        "noise_floor": 0.000709,
+        "duration_s": 1.533
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "rhodes/prompt_piano_gen_rhodes_004.wav",
+      "category": "rhodes",
+      "prompt": "piano gen rhodes",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/rhodes/prompt_piano_gen_rhodes_004.wav",
+      "seed": 519789280,
+      "sample_rate": 44100,
+      "duration_s": 1.526,
+      "features": {
+        "rms": 0.105139,
+        "peak": 0.95,
+        "spectral_centroid": 4585.78,
+        "attack_ms": 11.18,
+        "hpr": 0.8594,
+        "noise_floor": 0.000709,
+        "duration_s": 1.526
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "rhodes/prompt_piano_gen_rhodes_005.wav",
+      "category": "rhodes",
+      "prompt": "piano gen rhodes",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/rhodes/prompt_piano_gen_rhodes_005.wav",
+      "seed": 1232920931,
+      "sample_rate": 44100,
+      "duration_s": 1.462,
+      "features": {
+        "rms": 0.107443,
+        "peak": 0.95,
+        "spectral_centroid": 4685.04,
+        "attack_ms": 11.09,
+        "hpr": 0.9033,
+        "noise_floor": 0.000741,
+        "duration_s": 1.462
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_001.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_001.wav",
+      "seed": 2187833771,
+      "sample_rate": 44100,
+      "duration_s": 0.61,
+      "features": {
+        "rms": 0.131971,
+        "peak": 0.95,
+        "spectral_centroid": 5190.22,
+        "attack_ms": 3.97,
+        "hpr": 0.6404,
+        "noise_floor": 0.004929,
+        "duration_s": 0.61
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_002.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_002.wav",
+      "seed": 954189117,
+      "sample_rate": 44100,
+      "duration_s": 0.617,
+      "features": {
+        "rms": 0.132329,
+        "peak": 0.95,
+        "spectral_centroid": 5441.33,
+        "attack_ms": 3.92,
+        "hpr": 0.5334,
+        "noise_floor": 0.004993,
+        "duration_s": 0.617
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_003.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_003.wav",
+      "seed": 1185365786,
+      "sample_rate": 44100,
+      "duration_s": 0.595,
+      "features": {
+        "rms": 0.137141,
+        "peak": 0.95,
+        "spectral_centroid": 5595.55,
+        "attack_ms": 3.99,
+        "hpr": 0.5514,
+        "noise_floor": 0.004784,
+        "duration_s": 0.595
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_004.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_004.wav",
+      "seed": 2340437127,
+      "sample_rate": 44100,
+      "duration_s": 0.58,
+      "features": {
+        "rms": 0.138108,
+        "peak": 0.95,
+        "spectral_centroid": 5352.3,
+        "attack_ms": 3.81,
+        "hpr": 0.6341,
+        "noise_floor": 0.004542,
+        "duration_s": 0.58
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_005.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_005.wav",
+      "seed": 897827739,
+      "sample_rate": 44100,
+      "duration_s": 0.61,
+      "features": {
+        "rms": 0.135222,
+        "peak": 0.95,
+        "spectral_centroid": 5497.42,
+        "attack_ms": 3.99,
+        "hpr": 0.5746,
+        "noise_floor": 0.004864,
+        "duration_s": 0.61
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_006.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_006.wav",
+      "seed": 882531471,
+      "sample_rate": 44100,
+      "duration_s": 0.581,
+      "features": {
+        "rms": 0.13778,
+        "peak": 0.95,
+        "spectral_centroid": 5163.97,
+        "attack_ms": 3.95,
+        "hpr": 0.6503,
+        "noise_floor": 0.004832,
+        "duration_s": 0.581
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_008.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_008.wav",
+      "seed": 3231224643,
+      "sample_rate": 44100,
+      "duration_s": 0.588,
+      "features": {
+        "rms": 0.137019,
+        "peak": 0.95,
+        "spectral_centroid": 5286.62,
+        "attack_ms": 3.99,
+        "hpr": 0.637,
+        "noise_floor": 0.004832,
+        "duration_s": 0.588
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_010.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_010.wav",
+      "seed": 859872011,
+      "sample_rate": 44100,
+      "duration_s": 0.578,
+      "features": {
+        "rms": 0.135811,
+        "peak": 0.95,
+        "spectral_centroid": 5149.44,
+        "attack_ms": 4.06,
+        "hpr": 0.6692,
+        "noise_floor": 0.0048,
+        "duration_s": 0.578
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_001.wav",
+      "category": "dark",
+      "prompt": "dark pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_001.wav",
+      "seed": 3392884110,
+      "sample_rate": 44100,
+      "duration_s": 0.388,
+      "features": {
+        "rms": 0.124484,
+        "peak": 0.95,
+        "spectral_centroid": 1754.59,
+        "attack_ms": 1.18,
+        "hpr": 0.0003,
+        "noise_floor": 0.0,
+        "duration_s": 0.388
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_002.wav",
+      "category": "dark",
+      "prompt": "dark pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_002.wav",
+      "seed": 1696677715,
+      "sample_rate": 44100,
+      "duration_s": 0.402,
+      "features": {
+        "rms": 0.122901,
+        "peak": 0.95,
+        "spectral_centroid": 1688.43,
+        "attack_ms": 1.04,
+        "hpr": 0.0003,
+        "noise_floor": 0.0,
+        "duration_s": 0.402
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_003.wav",
+      "category": "dark",
+      "prompt": "dark pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_003.wav",
+      "seed": 1790401868,
+      "sample_rate": 44100,
+      "duration_s": 0.411,
+      "features": {
+        "rms": 0.12187,
+        "peak": 0.95,
+        "spectral_centroid": 1666.12,
+        "attack_ms": 1.09,
+        "hpr": 0.0005,
+        "noise_floor": 0.0,
+        "duration_s": 0.411
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_004.wav",
+      "category": "dark",
+      "prompt": "dark pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_004.wav",
+      "seed": 4014845159,
+      "sample_rate": 44100,
+      "duration_s": 0.384,
+      "features": {
+        "rms": 0.124231,
+        "peak": 0.95,
+        "spectral_centroid": 1721.37,
+        "attack_ms": 1.16,
+        "hpr": 0.0004,
+        "noise_floor": 0.0,
+        "duration_s": 0.384
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_005.wav",
+      "category": "dark",
+      "prompt": "dark pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_005.wav",
+      "seed": 3719138291,
+      "sample_rate": 44100,
+      "duration_s": 0.41,
+      "features": {
+        "rms": 0.124093,
+        "peak": 0.95,
+        "spectral_centroid": 1788.36,
+        "attack_ms": 1.04,
+        "hpr": 0.0004,
+        "noise_floor": 0.0,
+        "duration_s": 0.41
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_002.wav",
+      "category": "lo_fi",
+      "prompt": "lo fi pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_002.wav",
+      "seed": 1540808651,
+      "sample_rate": 44100,
+      "duration_s": 0.389,
+      "features": {
+        "rms": 0.142584,
+        "peak": 0.95,
+        "spectral_centroid": 1835.09,
+        "attack_ms": 1.09,
+        "hpr": 0.0017,
+        "noise_floor": 0.0,
+        "duration_s": 0.389
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_003.wav",
+      "category": "lo_fi",
+      "prompt": "lo fi pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_003.wav",
+      "seed": 3912924955,
+      "sample_rate": 44100,
+      "duration_s": 0.393,
+      "features": {
+        "rms": 0.135304,
+        "peak": 0.95,
+        "spectral_centroid": 2064.55,
+        "attack_ms": 1.11,
+        "hpr": 0.0023,
+        "noise_floor": 0.0,
+        "duration_s": 0.393
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_005.wav",
+      "category": "lo_fi",
+      "prompt": "lo fi pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_005.wav",
+      "seed": 31686697,
+      "sample_rate": 44100,
+      "duration_s": 0.389,
+      "features": {
+        "rms": 0.140852,
+        "peak": 0.95,
+        "spectral_centroid": 2062.06,
+        "attack_ms": 0.98,
+        "hpr": 0.003,
+        "noise_floor": 0.0,
+        "duration_s": 0.389
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_001.wav",
+      "category": "narrow",
+      "prompt": "narrow pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_001.wav",
+      "seed": 1589010826,
+      "sample_rate": 44100,
+      "duration_s": 0.389,
+      "features": {
+        "rms": 0.119426,
+        "peak": 0.95,
+        "spectral_centroid": 4325.17,
+        "attack_ms": 1.07,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.389
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_002.wav",
+      "category": "narrow",
+      "prompt": "narrow pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_002.wav",
+      "seed": 1679100166,
+      "sample_rate": 44100,
+      "duration_s": 0.4,
+      "features": {
+        "rms": 0.11962,
+        "peak": 0.95,
+        "spectral_centroid": 4431.46,
+        "attack_ms": 1.02,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.4
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_003.wav",
+      "category": "narrow",
+      "prompt": "narrow pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_003.wav",
+      "seed": 433326131,
+      "sample_rate": 44100,
+      "duration_s": 0.406,
+      "features": {
+        "rms": 0.11857,
+        "peak": 0.95,
+        "spectral_centroid": 4327.61,
+        "attack_ms": 1.02,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.406
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_004.wav",
+      "category": "narrow",
+      "prompt": "narrow pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_004.wav",
+      "seed": 2524491688,
+      "sample_rate": 44100,
+      "duration_s": 0.406,
+      "features": {
+        "rms": 0.115482,
+        "peak": 0.95,
+        "spectral_centroid": 4362.47,
+        "attack_ms": 1.22,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.406
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_005.wav",
+      "category": "narrow",
+      "prompt": "narrow pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_005.wav",
+      "seed": 454546393,
+      "sample_rate": 44100,
+      "duration_s": 0.414,
+      "features": {
+        "rms": 0.114855,
+        "peak": 0.95,
+        "spectral_centroid": 4629.62,
+        "attack_ms": 1.04,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.414
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "bass_stab/prompt_bass_gen_reese_001.wav",
+      "category": "bass_stab",
+      "prompt": "bass gen reese",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/bass_stab/prompt_bass_gen_reese_001.wav",
+      "seed": 2437932159,
+      "sample_rate": 44100,
+      "duration_s": 0.605,
+      "features": {
+        "rms": 0.250532,
+        "peak": 0.95,
+        "spectral_centroid": 4138.0,
+        "attack_ms": 33.9,
+        "hpr": 0.9509,
+        "noise_floor": 0.01456,
+        "duration_s": 0.605
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "bass_stab/prompt_bass_gen_reese_002.wav",
+      "category": "bass_stab",
+      "prompt": "bass gen reese",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/bass_stab/prompt_bass_gen_reese_002.wav",
+      "seed": 1107662429,
+      "sample_rate": 44100,
+      "duration_s": 0.591,
+      "features": {
+        "rms": 0.251287,
+        "peak": 0.95,
+        "spectral_centroid": 4104.15,
+        "attack_ms": 33.79,
+        "hpr": 0.9517,
+        "noise_floor": 0.014946,
+        "duration_s": 0.591
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "bass_stab/prompt_bass_gen_reese_003.wav",
+      "category": "bass_stab",
+      "prompt": "bass gen reese",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/bass_stab/prompt_bass_gen_reese_003.wav",
+      "seed": 2474010234,
+      "sample_rate": 44100,
+      "duration_s": 0.61,
+      "features": {
+        "rms": 0.251815,
+        "peak": 0.95,
+        "spectral_centroid": 4065.59,
+        "attack_ms": 35.06,
+        "hpr": 0.9512,
+        "noise_floor": 0.01514,
+        "duration_s": 0.61
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "bass_stab/prompt_bass_gen_reese_004.wav",
+      "category": "bass_stab",
+      "prompt": "bass gen reese",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/bass_stab/prompt_bass_gen_reese_004.wav",
+      "seed": 2335910941,
+      "sample_rate": 44100,
+      "duration_s": 0.608,
+      "features": {
+        "rms": 0.249939,
+        "peak": 0.95,
+        "spectral_centroid": 4144.74,
+        "attack_ms": 33.99,
+        "hpr": 0.9512,
+        "noise_floor": 0.014463,
+        "duration_s": 0.608
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "bass_stab/prompt_bass_gen_reese_005.wav",
+      "category": "bass_stab",
+      "prompt": "bass gen reese",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/bass_stab/prompt_bass_gen_reese_005.wav",
+      "seed": 204036085,
+      "sample_rate": 44100,
+      "duration_s": 0.584,
+      "features": {
+        "rms": 0.252304,
+        "peak": 0.95,
+        "spectral_centroid": 4142.83,
+        "attack_ms": 33.72,
+        "hpr": 0.9526,
+        "noise_floor": 0.014946,
+        "duration_s": 0.584
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_001.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_001.wav",
+      "seed": 1800280721,
+      "sample_rate": 44100,
+      "duration_s": 1.529,
+      "features": {
+        "rms": 0.222268,
+        "peak": 0.95,
+        "spectral_centroid": 4304.39,
+        "attack_ms": 2.38,
+        "hpr": 0.999,
+        "noise_floor": 0.013046,
+        "duration_s": 1.529
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_002.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_002.wav",
+      "seed": 1776721001,
+      "sample_rate": 44100,
+      "duration_s": 1.55,
+      "features": {
+        "rms": 0.221218,
+        "peak": 0.95,
+        "spectral_centroid": 4537.31,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.016657,
+        "duration_s": 1.55
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_003.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_003.wav",
+      "seed": 2430739794,
+      "sample_rate": 44100,
+      "duration_s": 1.467,
+      "features": {
+        "rms": 0.229627,
+        "peak": 0.95,
+        "spectral_centroid": 4817.73,
+        "attack_ms": 2.38,
+        "hpr": 0.999,
+        "noise_floor": 0.019618,
+        "duration_s": 1.467
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_004.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_004.wav",
+      "seed": 1303212661,
+      "sample_rate": 44100,
+      "duration_s": 1.495,
+      "features": {
+        "rms": 0.227313,
+        "peak": 0.95,
+        "spectral_centroid": 5290.82,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.01965,
+        "duration_s": 1.495
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_005.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_005.wav",
+      "seed": 2755200701,
+      "sample_rate": 44100,
+      "duration_s": 1.467,
+      "features": {
+        "rms": 0.228348,
+        "peak": 0.95,
+        "spectral_centroid": 4347.61,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.013336,
+        "duration_s": 1.467
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_006.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_006.wav",
+      "seed": 1106691199,
+      "sample_rate": 44100,
+      "duration_s": 1.466,
+      "features": {
+        "rms": 0.229258,
+        "peak": 0.95,
+        "spectral_centroid": 4602.5,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.018139,
+        "duration_s": 1.466
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_008.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_008.wav",
+      "seed": 1237864125,
+      "sample_rate": 44100,
+      "duration_s": 1.441,
+      "features": {
+        "rms": 0.231435,
+        "peak": 0.95,
+        "spectral_centroid": 4563.42,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.015366,
+        "duration_s": 1.441
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_009.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_009.wav",
+      "seed": 853375862,
+      "sample_rate": 44100,
+      "duration_s": 1.519,
+      "features": {
+        "rms": 0.223694,
+        "peak": 0.95,
+        "spectral_centroid": 4456.27,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.015076,
+        "duration_s": 1.519
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_010.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_010.wav",
+      "seed": 362357616,
+      "sample_rate": 44100,
+      "duration_s": 1.477,
+      "features": {
+        "rms": 0.229197,
+        "peak": 0.95,
+        "spectral_centroid": 5362.22,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.019328,
+        "duration_s": 1.477
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "hat/hat_001.wav",
+      "category": "hat",
+      "prompt": "hat",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/hat/hat_001.wav",
+      "seed": 3905737570,
+      "sample_rate": 44100,
+      "duration_s": 0.097,
+      "features": {
+        "rms": 0.087168,
+        "peak": 0.95,
+        "spectral_centroid": 9125.31,
+        "attack_ms": 0.54,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.097
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "hat/hat_002.wav",
+      "category": "hat",
+      "prompt": "hat",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/hat/hat_002.wav",
+      "seed": 2860347467,
+      "sample_rate": 44100,
+      "duration_s": 0.104,
+      "features": {
+        "rms": 0.087683,
+        "peak": 0.95,
+        "spectral_centroid": 9348.32,
+        "attack_ms": 0.88,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.104
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "hat/hat_003.wav",
+      "category": "hat",
+      "prompt": "hat",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/hat/hat_003.wav",
+      "seed": 2306691761,
+      "sample_rate": 44100,
+      "duration_s": 0.095,
+      "features": {
+        "rms": 0.087425,
+        "peak": 0.95,
+        "spectral_centroid": 8963.84,
+        "attack_ms": 0.88,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.095
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "hat/hat_004.wav",
+      "category": "hat",
+      "prompt": "hat",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/hat/hat_004.wav",
+      "seed": 366418270,
+      "sample_rate": 44100,
+      "duration_s": 0.114,
+      "features": {
+        "rms": 0.063688,
+        "peak": 0.95,
+        "spectral_centroid": 9641.1,
+        "attack_ms": 0.02,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.114
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "hat/hat_005.wav",
+      "category": "hat",
+      "prompt": "hat",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/hat/hat_005.wav",
+      "seed": 1676895030,
+      "sample_rate": 44100,
+      "duration_s": 0.104,
+      "features": {
+        "rms": 0.086577,
+        "peak": 0.95,
+        "spectral_centroid": 9178.18,
+        "attack_ms": 0.0,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.104
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "lead/prompt_synth_gen_lead_001.wav",
+      "category": "lead",
+      "prompt": "synth gen lead",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/lead/prompt_synth_gen_lead_001.wav",
+      "seed": 316940879,
+      "sample_rate": 44100,
+      "duration_s": 0.817,
+      "features": {
+        "rms": 0.124741,
+        "peak": 0.95,
+        "spectral_centroid": 6723.49,
+        "attack_ms": 12.59,
+        "hpr": 0.7215,
+        "noise_floor": 0.00636,
+        "duration_s": 0.817
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "lead/prompt_synth_gen_lead_002.wav",
+      "category": "lead",
+      "prompt": "synth gen lead",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/lead/prompt_synth_gen_lead_002.wav",
+      "seed": 3363390476,
+      "sample_rate": 44100,
+      "duration_s": 0.806,
+      "features": {
+        "rms": 0.129197,
+        "peak": 0.95,
+        "spectral_centroid": 6446.75,
+        "attack_ms": 2.56,
+        "hpr": 0.8547,
+        "noise_floor": 0.006387,
+        "duration_s": 0.806
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "lead/prompt_synth_gen_lead_003.wav",
+      "category": "lead",
+      "prompt": "synth gen lead",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/lead/prompt_synth_gen_lead_003.wav",
+      "seed": 3988774281,
+      "sample_rate": 44100,
+      "duration_s": 0.786,
+      "features": {
+        "rms": 0.116746,
+        "peak": 0.95,
+        "spectral_centroid": 6235.56,
+        "attack_ms": 12.86,
+        "hpr": 0.8405,
+        "noise_floor": 0.005851,
+        "duration_s": 0.786
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "lead/prompt_synth_gen_lead_004.wav",
+      "category": "lead",
+      "prompt": "synth gen lead",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/lead/prompt_synth_gen_lead_004.wav",
+      "seed": 2155436676,
+      "sample_rate": 44100,
+      "duration_s": 0.816,
+      "features": {
+        "rms": 0.119046,
+        "peak": 0.95,
+        "spectral_centroid": 6729.71,
+        "attack_ms": 12.47,
+        "hpr": 0.8168,
+        "noise_floor": 0.006,
+        "duration_s": 0.816
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "lead/prompt_synth_gen_lead_005.wav",
+      "category": "lead",
+      "prompt": "synth gen lead",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/lead/prompt_synth_gen_lead_005.wav",
+      "seed": 1815269848,
+      "sample_rate": 44100,
+      "duration_s": 0.829,
+      "features": {
+        "rms": 0.131332,
+        "peak": 0.95,
+        "spectral_centroid": 6740.04,
+        "attack_ms": 12.74,
+        "hpr": 0.8249,
+        "noise_floor": 0.006669,
+        "duration_s": 0.829
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "pluck/prompt_synth_gen_pluck_001.wav",
+      "category": "pluck",
+      "prompt": "synth gen pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pluck/prompt_synth_gen_pluck_001.wav",
+      "seed": 2406151104,
+      "sample_rate": 44100,
+      "duration_s": 0.397,
+      "features": {
+        "rms": 0.117287,
+        "peak": 0.95,
+        "spectral_centroid": 4167.53,
+        "attack_ms": 1.09,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.397
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "pluck/prompt_synth_gen_pluck_002.wav",
+      "category": "pluck",
+      "prompt": "synth gen pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pluck/prompt_synth_gen_pluck_002.wav",
+      "seed": 650443620,
+      "sample_rate": 44100,
+      "duration_s": 0.399,
+      "features": {
+        "rms": 0.120581,
+        "peak": 0.95,
+        "spectral_centroid": 4266.81,
+        "attack_ms": 1.02,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.399
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "pluck/prompt_synth_gen_pluck_003.wav",
+      "category": "pluck",
+      "prompt": "synth gen pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pluck/prompt_synth_gen_pluck_003.wav",
+      "seed": 774865275,
+      "sample_rate": 44100,
+      "duration_s": 0.407,
+      "features": {
+        "rms": 0.115581,
+        "peak": 0.95,
+        "spectral_centroid": 4272.27,
+        "attack_ms": 1.07,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.407
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "pluck/prompt_synth_gen_pluck_004.wav",
+      "category": "pluck",
+      "prompt": "synth gen pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pluck/prompt_synth_gen_pluck_004.wav",
+      "seed": 2823813160,
+      "sample_rate": 44100,
+      "duration_s": 0.399,
+      "features": {
+        "rms": 0.118432,
+        "peak": 0.95,
+        "spectral_centroid": 4655.75,
+        "attack_ms": 1.11,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.399
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "pluck/prompt_synth_gen_pluck_005.wav",
+      "category": "pluck",
+      "prompt": "synth gen pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pluck/prompt_synth_gen_pluck_005.wav",
+      "seed": 3142098328,
+      "sample_rate": 44100,
+      "duration_s": 0.414,
+      "features": {
+        "rms": 0.113902,
+        "peak": 0.95,
+        "spectral_centroid": 4472.63,
+        "attack_ms": 1.04,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.414
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "riser/prompt_fx_gen_riser_001.wav",
+      "category": "riser",
+      "prompt": "fx gen riser",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/riser/prompt_fx_gen_riser_001.wav",
+      "seed": 2797110299,
+      "sample_rate": 44100,
+      "duration_s": 1.993,
+      "features": {
+        "rms": 0.203622,
+        "peak": 0.95,
+        "spectral_centroid": 9153.95,
+        "attack_ms": 1412.49,
+        "hpr": 0.9984,
+        "noise_floor": 0.004673,
+        "duration_s": 1.993
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "riser/prompt_fx_gen_riser_002.wav",
+      "category": "riser",
+      "prompt": "fx gen riser",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/riser/prompt_fx_gen_riser_002.wav",
+      "seed": 4169989528,
+      "sample_rate": 44100,
+      "duration_s": 2.006,
+      "features": {
+        "rms": 0.207919,
+        "peak": 0.95,
+        "spectral_centroid": 9510.1,
+        "attack_ms": 1453.29,
+        "hpr": 0.9984,
+        "noise_floor": 0.004707,
+        "duration_s": 2.006
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "riser/prompt_fx_gen_riser_003.wav",
+      "category": "riser",
+      "prompt": "fx gen riser",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/riser/prompt_fx_gen_riser_003.wav",
+      "seed": 3431690982,
+      "sample_rate": 44100,
+      "duration_s": 2.066,
+      "features": {
+        "rms": 0.202549,
+        "peak": 0.95,
+        "spectral_centroid": 9210.61,
+        "attack_ms": 1476.19,
+        "hpr": 0.9986,
+        "noise_floor": 0.004707,
+        "duration_s": 2.066
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "riser/prompt_fx_gen_riser_004.wav",
+      "category": "riser",
+      "prompt": "fx gen riser",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/riser/prompt_fx_gen_riser_004.wav",
+      "seed": 3684362542,
+      "sample_rate": 44100,
+      "duration_s": 2.066,
+      "features": {
+        "rms": 0.200998,
+        "peak": 0.95,
+        "spectral_centroid": 9424.63,
+        "attack_ms": 1464.65,
+        "hpr": 0.9984,
+        "noise_floor": 0.00457,
+        "duration_s": 2.066
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "riser/prompt_fx_gen_riser_005.wav",
+      "category": "riser",
+      "prompt": "fx gen riser",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/riser/prompt_fx_gen_riser_005.wav",
+      "seed": 3802909105,
+      "sample_rate": 44100,
+      "duration_s": 1.924,
+      "features": {
+        "rms": 0.200816,
+        "peak": 0.95,
+        "spectral_centroid": 9123.91,
+        "attack_ms": 1397.05,
+        "hpr": 0.9985,
+        "noise_floor": 0.004536,
+        "duration_s": 1.924
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_007.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_007.wav",
+      "seed": 64079200,
+      "sample_rate": 44100,
+      "duration_s": 0.62,
+      "features": {
+        "rms": 0.137357,
+        "peak": 0.95,
+        "spectral_centroid": 5459.73,
+        "attack_ms": 3.79,
+        "hpr": 0.6873,
+        "noise_floor": 0.005251,
+        "duration_s": 0.62
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "synth/prompt_synth_gen_stab_009.wav",
+      "category": "synth",
+      "prompt": "synth gen stab",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/synth/prompt_synth_gen_stab_009.wav",
+      "seed": 4160161789,
+      "sample_rate": 44100,
+      "duration_s": 0.59,
+      "features": {
+        "rms": 0.135447,
+        "peak": 0.95,
+        "spectral_centroid": 5252.44,
+        "attack_ms": 3.9,
+        "hpr": 0.6947,
+        "noise_floor": 0.005025,
+        "duration_s": 0.59
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_007.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_007.wav",
+      "seed": 2664325222,
+      "sample_rate": 44100,
+      "duration_s": 1.515,
+      "features": {
+        "rms": 0.223563,
+        "peak": 0.95,
+        "spectral_centroid": 4219.5,
+        "attack_ms": 1.93,
+        "hpr": 0.9989,
+        "noise_floor": 0.018877,
+        "duration_s": 1.515
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "kick/kick_001.wav",
+      "category": "kick",
+      "prompt": "kick",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/kick/kick_001.wav",
+      "seed": 3194056324,
+      "sample_rate": 44100,
+      "duration_s": 0.257,
+      "features": {
+        "rms": 0.170188,
+        "peak": 0.95,
+        "spectral_centroid": 3462.46,
+        "attack_ms": 0.61,
+        "hpr": 0.737,
+        "noise_floor": 0.019231,
+        "duration_s": 0.257
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "kick/kick_002.wav",
+      "category": "kick",
+      "prompt": "kick",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/kick/kick_002.wav",
+      "seed": 1937085771,
+      "sample_rate": 44100,
+      "duration_s": 0.286,
+      "features": {
+        "rms": 0.161815,
+        "peak": 0.95,
+        "spectral_centroid": 3450.19,
+        "attack_ms": 0.61,
+        "hpr": 0.7358,
+        "noise_floor": 0.015549,
+        "duration_s": 0.286
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "kick/kick_003.wav",
+      "category": "kick",
+      "prompt": "kick",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/kick/kick_003.wav",
+      "seed": 1089546868,
+      "sample_rate": 44100,
+      "duration_s": 0.248,
+      "features": {
+        "rms": 0.17526,
+        "peak": 0.95,
+        "spectral_centroid": 3563.78,
+        "attack_ms": 0.61,
+        "hpr": 0.7836,
+        "noise_floor": 0.017749,
+        "duration_s": 0.248
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "kick/kick_004.wav",
+      "category": "kick",
+      "prompt": "kick",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/kick/kick_004.wav",
+      "seed": 2718724032,
+      "sample_rate": 44100,
+      "duration_s": 0.303,
+      "features": {
+        "rms": 0.157103,
+        "peak": 0.95,
+        "spectral_centroid": 3443.02,
+        "attack_ms": 0.61,
+        "hpr": 0.7326,
+        "noise_floor": 0.016268,
+        "duration_s": 0.303
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "kick/kick_005.wav",
+      "category": "kick",
+      "prompt": "kick",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/kick/kick_005.wav",
+      "seed": 4199468742,
+      "sample_rate": 44100,
+      "duration_s": 0.304,
+      "features": {
+        "rms": 0.159066,
+        "peak": 0.95,
+        "spectral_centroid": 3483.79,
+        "attack_ms": 0.61,
+        "hpr": 0.7674,
+        "noise_floor": 0.016503,
+        "duration_s": 0.304
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "pad/prompt_synth_gen_pad_001.wav",
+      "category": "pad",
+      "prompt": "synth gen pad",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pad/prompt_synth_gen_pad_001.wav",
+      "seed": 4252019179,
+      "sample_rate": 44100,
+      "duration_s": 2.054,
+      "features": {
+        "rms": 0.17367,
+        "peak": 0.95,
+        "spectral_centroid": 3789.4,
+        "attack_ms": 94.6,
+        "hpr": 0.5548,
+        "noise_floor": 0.012746,
+        "duration_s": 2.054
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "pad/prompt_synth_gen_pad_002.wav",
+      "category": "pad",
+      "prompt": "synth gen pad",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pad/prompt_synth_gen_pad_002.wav",
+      "seed": 2189121659,
+      "sample_rate": 44100,
+      "duration_s": 2.029,
+      "features": {
+        "rms": 0.164081,
+        "peak": 0.95,
+        "spectral_centroid": 3935.83,
+        "attack_ms": 131.29,
+        "hpr": 0.5745,
+        "noise_floor": 0.012085,
+        "duration_s": 2.029
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "pad/prompt_synth_gen_pad_003.wav",
+      "category": "pad",
+      "prompt": "synth gen pad",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pad/prompt_synth_gen_pad_003.wav",
+      "seed": 3051784816,
+      "sample_rate": 44100,
+      "duration_s": 2.053,
+      "features": {
+        "rms": 0.163956,
+        "peak": 0.95,
+        "spectral_centroid": 3796.18,
+        "attack_ms": 92.77,
+        "hpr": 0.6008,
+        "noise_floor": 0.012441,
+        "duration_s": 2.053
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "pad/prompt_synth_gen_pad_004.wav",
+      "category": "pad",
+      "prompt": "synth gen pad",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pad/prompt_synth_gen_pad_004.wav",
+      "seed": 2921940572,
+      "sample_rate": 44100,
+      "duration_s": 1.982,
+      "features": {
+        "rms": 0.178074,
+        "peak": 0.95,
+        "spectral_centroid": 3426.9,
+        "attack_ms": 94.99,
+        "hpr": 0.7127,
+        "noise_floor": 0.013694,
+        "duration_s": 1.982
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "pad/prompt_synth_gen_pad_005.wav",
+      "category": "pad",
+      "prompt": "synth gen pad",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pad/prompt_synth_gen_pad_005.wav",
+      "seed": 3663049433,
+      "sample_rate": 44100,
+      "duration_s": 2.065,
+      "features": {
+        "rms": 0.179163,
+        "peak": 0.95,
+        "spectral_centroid": 3862.26,
+        "attack_ms": 149.59,
+        "hpr": 0.512,
+        "noise_floor": 0.012784,
+        "duration_s": 2.065
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "snare/snare_001.wav",
+      "category": "snare",
+      "prompt": "snare",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/snare/snare_001.wav",
+      "seed": 1700078789,
+      "sample_rate": 44100,
+      "duration_s": 0.332,
+      "features": {
+        "rms": 0.182324,
+        "peak": 0.95,
+        "spectral_centroid": 2393.83,
+        "attack_ms": 0.59,
+        "hpr": 0.9557,
+        "noise_floor": 0.009141,
+        "duration_s": 0.332
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "snare/snare_002.wav",
+      "category": "snare",
+      "prompt": "snare",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/snare/snare_002.wav",
+      "seed": 1321310079,
+      "sample_rate": 44100,
+      "duration_s": 0.366,
+      "features": {
+        "rms": 0.175204,
+        "peak": 0.95,
+        "spectral_centroid": 2780.2,
+        "attack_ms": 0.93,
+        "hpr": 0.9501,
+        "noise_floor": 0.007197,
+        "duration_s": 0.366
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "snare/snare_003.wav",
+      "category": "snare",
+      "prompt": "snare",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/snare/snare_003.wav",
+      "seed": 3094631070,
+      "sample_rate": 44100,
+      "duration_s": 0.307,
+      "features": {
+        "rms": 0.188738,
+        "peak": 0.95,
+        "spectral_centroid": 2450.71,
+        "attack_ms": 0.59,
+        "hpr": 0.9477,
+        "noise_floor": 0.011017,
+        "duration_s": 0.307
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "snare/snare_004.wav",
+      "category": "snare",
+      "prompt": "snare",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/snare/snare_004.wav",
+      "seed": 78978267,
+      "sample_rate": 44100,
+      "duration_s": 0.352,
+      "features": {
+        "rms": 0.182329,
+        "peak": 0.95,
+        "spectral_centroid": 3111.17,
+        "attack_ms": 0.59,
+        "hpr": 0.8987,
+        "noise_floor": 0.007947,
+        "duration_s": 0.352
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "snare/snare_005.wav",
+      "category": "snare",
+      "prompt": "snare",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/snare/snare_005.wav",
+      "seed": 1655034191,
+      "sample_rate": 44100,
+      "duration_s": 0.315,
+      "features": {
+        "rms": 0.191021,
+        "peak": 0.95,
+        "spectral_centroid": 3170.03,
+        "attack_ms": 0.59,
+        "hpr": 0.93,
+        "noise_floor": 0.010318,
+        "duration_s": 0.315
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "808/prompt_bass_gen_808_001.wav",
+      "category": "808",
+      "prompt": "bass gen 808",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/808/prompt_bass_gen_808_001.wav",
+      "seed": 1435873577,
+      "sample_rate": 44100,
+      "duration_s": 0.786,
+      "features": {
+        "rms": 0.402204,
+        "peak": 0.95,
+        "spectral_centroid": 2014.39,
+        "attack_ms": 3.63,
+        "hpr": 0.9981,
+        "noise_floor": 0.037817,
+        "duration_s": 0.786
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "808/prompt_bass_gen_808_002.wav",
+      "category": "808",
+      "prompt": "bass gen 808",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/808/prompt_bass_gen_808_002.wav",
+      "seed": 428730189,
+      "sample_rate": 44100,
+      "duration_s": 0.783,
+      "features": {
+        "rms": 0.404007,
+        "peak": 0.95,
+        "spectral_centroid": 1638.59,
+        "attack_ms": 3.63,
+        "hpr": 0.9984,
+        "noise_floor": 0.038622,
+        "duration_s": 0.783
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "808/prompt_bass_gen_808_003.wav",
+      "category": "808",
+      "prompt": "bass gen 808",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/808/prompt_bass_gen_808_003.wav",
+      "seed": 3503587586,
+      "sample_rate": 44100,
+      "duration_s": 0.83,
+      "features": {
+        "rms": 0.398957,
+        "peak": 0.95,
+        "spectral_centroid": 1161.3,
+        "attack_ms": 3.63,
+        "hpr": 0.9987,
+        "noise_floor": 0.039589,
+        "duration_s": 0.83
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "808/prompt_bass_gen_808_004.wav",
+      "category": "808",
+      "prompt": "bass gen 808",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/808/prompt_bass_gen_808_004.wav",
+      "seed": 799467389,
+      "sample_rate": 44100,
+      "duration_s": 0.773,
+      "features": {
+        "rms": 0.407895,
+        "peak": 0.95,
+        "spectral_centroid": 478.84,
+        "attack_ms": 3.63,
+        "hpr": 0.9989,
+        "noise_floor": 0.038204,
+        "duration_s": 0.773
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "808/prompt_bass_gen_808_005.wav",
+      "category": "808",
+      "prompt": "bass gen 808",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/808/prompt_bass_gen_808_005.wav",
+      "seed": 47327667,
+      "sample_rate": 44100,
+      "duration_s": 0.783,
+      "features": {
+        "rms": 0.401713,
+        "peak": 0.95,
+        "spectral_centroid": 2150.14,
+        "attack_ms": 3.63,
+        "hpr": 0.998,
+        "noise_floor": 0.038407,
+        "duration_s": 0.783
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "distorted_bass/prompt_bass_gen_distorted_001.wav",
+      "category": "distorted_bass",
+      "prompt": "bass gen distorted",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/distorted_bass/prompt_bass_gen_distorted_001.wav",
+      "seed": 1456210384,
+      "sample_rate": 44100,
+      "duration_s": 0.785,
+      "features": {
+        "rms": 0.404085,
+        "peak": 0.95,
+        "spectral_centroid": 1512.45,
+        "attack_ms": 3.63,
+        "hpr": 0.9985,
+        "noise_floor": 0.038655,
+        "duration_s": 0.785
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "distorted_bass/prompt_bass_gen_distorted_002.wav",
+      "category": "distorted_bass",
+      "prompt": "bass gen distorted",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/distorted_bass/prompt_bass_gen_distorted_002.wav",
+      "seed": 338164578,
+      "sample_rate": 44100,
+      "duration_s": 0.785,
+      "features": {
+        "rms": 0.401223,
+        "peak": 0.95,
+        "spectral_centroid": 2180.15,
+        "attack_ms": 3.63,
+        "hpr": 0.998,
+        "noise_floor": 0.037785,
+        "duration_s": 0.785
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "distorted_bass/prompt_bass_gen_distorted_003.wav",
+      "category": "distorted_bass",
+      "prompt": "bass gen distorted",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/distorted_bass/prompt_bass_gen_distorted_003.wav",
+      "seed": 1423795359,
+      "sample_rate": 44100,
+      "duration_s": 0.82,
+      "features": {
+        "rms": 0.400597,
+        "peak": 0.95,
+        "spectral_centroid": 975.4,
+        "attack_ms": 3.63,
+        "hpr": 0.9988,
+        "noise_floor": 0.039363,
+        "duration_s": 0.82
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "distorted_bass/prompt_bass_gen_distorted_004.wav",
+      "category": "distorted_bass",
+      "prompt": "bass gen distorted",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/distorted_bass/prompt_bass_gen_distorted_004.wav",
+      "seed": 1495132715,
+      "sample_rate": 44100,
+      "duration_s": 0.787,
+      "features": {
+        "rms": 0.401178,
+        "peak": 0.95,
+        "spectral_centroid": 2159.13,
+        "attack_ms": 3.63,
+        "hpr": 0.998,
+        "noise_floor": 0.037946,
+        "duration_s": 0.787
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "distorted_bass/prompt_bass_gen_distorted_005.wav",
+      "category": "distorted_bass",
+      "prompt": "bass gen distorted",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/distorted_bass/prompt_bass_gen_distorted_005.wav",
+      "seed": 269942041,
+      "sample_rate": 44100,
+      "duration_s": 0.776,
+      "features": {
+        "rms": 0.403567,
+        "peak": 0.95,
+        "spectral_centroid": 2016.28,
+        "attack_ms": 3.63,
+        "hpr": 0.9981,
+        "noise_floor": 0.037753,
+        "duration_s": 0.776
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fm_bass/prompt_bass_gen_fm_001.wav",
+      "category": "fm_bass",
+      "prompt": "bass gen fm",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/fm_bass/prompt_bass_gen_fm_001.wav",
+      "seed": 2544820090,
+      "sample_rate": 44100,
+      "duration_s": 0.827,
+      "features": {
+        "rms": 0.395954,
+        "peak": 0.95,
+        "spectral_centroid": 2135.12,
+        "attack_ms": 3.63,
+        "hpr": 0.998,
+        "noise_floor": 0.039331,
+        "duration_s": 0.827
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fm_bass/prompt_bass_gen_fm_002.wav",
+      "category": "fm_bass",
+      "prompt": "bass gen fm",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/fm_bass/prompt_bass_gen_fm_002.wav",
+      "seed": 3444585310,
+      "sample_rate": 44100,
+      "duration_s": 0.787,
+      "features": {
+        "rms": 0.404557,
+        "peak": 0.95,
+        "spectral_centroid": 1240.97,
+        "attack_ms": 3.63,
+        "hpr": 0.9987,
+        "noise_floor": 0.038622,
+        "duration_s": 0.787
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fm_bass/prompt_bass_gen_fm_003.wav",
+      "category": "fm_bass",
+      "prompt": "bass gen fm",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/fm_bass/prompt_bass_gen_fm_003.wav",
+      "seed": 247346601,
+      "sample_rate": 44100,
+      "duration_s": 0.782,
+      "features": {
+        "rms": 0.401635,
+        "peak": 0.95,
+        "spectral_centroid": 2181.56,
+        "attack_ms": 3.63,
+        "hpr": 0.9979,
+        "noise_floor": 0.038268,
+        "duration_s": 0.782
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fm_bass/prompt_bass_gen_fm_004.wav",
+      "category": "fm_bass",
+      "prompt": "bass gen fm",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/fm_bass/prompt_bass_gen_fm_004.wav",
+      "seed": 1533183367,
+      "sample_rate": 44100,
+      "duration_s": 0.83,
+      "features": {
+        "rms": 0.398849,
+        "peak": 0.95,
+        "spectral_centroid": 1167.13,
+        "attack_ms": 3.63,
+        "hpr": 0.9987,
+        "noise_floor": 0.039814,
+        "duration_s": 0.83
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fm_bass/prompt_bass_gen_fm_005.wav",
+      "category": "fm_bass",
+      "prompt": "bass gen fm",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/fm_bass/prompt_bass_gen_fm_005.wav",
+      "seed": 3515243325,
+      "sample_rate": 44100,
+      "duration_s": 0.831,
+      "features": {
+        "rms": 0.397626,
+        "peak": 0.95,
+        "spectral_centroid": 1639.37,
+        "attack_ms": 3.63,
+        "hpr": 0.9985,
+        "noise_floor": 0.039569,
+        "duration_s": 0.831
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "glitch/prompt_fx_gen_glitch_001.wav",
+      "category": "glitch",
+      "prompt": "fx gen glitch",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_001.wav",
+      "seed": 3354975124,
+      "sample_rate": 44100,
+      "duration_s": 0.503,
+      "features": {
+        "rms": 0.337876,
+        "peak": 0.95,
+        "spectral_centroid": 9858.37,
+        "attack_ms": 1.0,
+        "hpr": 0.9364,
+        "noise_floor": 0.043921,
+        "duration_s": 0.503
+      },
+      "quality_score": 0.96
+    },
+    {
+      "file": "glitch/prompt_fx_gen_glitch_002.wav",
+      "category": "glitch",
+      "prompt": "fx gen glitch",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_002.wav",
+      "seed": 3466429621,
+      "sample_rate": 44100,
+      "duration_s": 0.489,
+      "features": {
+        "rms": 0.336778,
+        "peak": 0.95,
+        "spectral_centroid": 9650.63,
+        "attack_ms": 1.0,
+        "hpr": 0.9285,
+        "noise_floor": 0.044755,
+        "duration_s": 0.489
+      },
+      "quality_score": 0.96
+    },
+    {
+      "file": "glitch/prompt_fx_gen_glitch_003.wav",
+      "category": "glitch",
+      "prompt": "fx gen glitch",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_003.wav",
+      "seed": 2550899815,
+      "sample_rate": 44100,
+      "duration_s": 0.507,
+      "features": {
+        "rms": 0.339616,
+        "peak": 0.95,
+        "spectral_centroid": 9660.28,
+        "attack_ms": 1.0,
+        "hpr": 0.9002,
+        "noise_floor": 0.045407,
+        "duration_s": 0.507
+      },
+      "quality_score": 0.96
+    },
+    {
+      "file": "glitch/prompt_fx_gen_glitch_004.wav",
+      "category": "glitch",
+      "prompt": "fx gen glitch",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_004.wav",
+      "seed": 1188762588,
+      "sample_rate": 44100,
+      "duration_s": 0.511,
+      "features": {
+        "rms": 0.339448,
+        "peak": 0.95,
+        "spectral_centroid": 9643.29,
+        "attack_ms": 1.0,
+        "hpr": 0.9,
+        "noise_floor": 0.045422,
+        "duration_s": 0.511
+      },
+      "quality_score": 0.96
+    },
+    {
+      "file": "glitch/prompt_fx_gen_glitch_005.wav",
+      "category": "glitch",
+      "prompt": "fx gen glitch",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_005.wav",
+      "seed": 4279560393,
+      "sample_rate": 44100,
+      "duration_s": 0.499,
+      "features": {
+        "rms": 0.338751,
+        "peak": 0.95,
+        "spectral_centroid": 9820.15,
+        "attack_ms": 1.0,
+        "hpr": 0.9413,
+        "noise_floor": 0.045262,
+        "duration_s": 0.499
+      },
+      "quality_score": 0.96
+    }
+  ],
+  "top_entries": [
+    {
+      "file": "808/prompt_bass_gen_808_001.wav",
+      "category": "808",
+      "prompt": "bass gen 808",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/808/prompt_bass_gen_808_001.wav",
+      "seed": 1435873577,
+      "sample_rate": 44100,
+      "duration_s": 0.786,
+      "features": {
+        "rms": 0.402204,
+        "peak": 0.95,
+        "spectral_centroid": 2014.39,
+        "attack_ms": 3.63,
+        "hpr": 0.9981,
+        "noise_floor": 0.037817,
+        "duration_s": 0.786
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "808/prompt_bass_gen_808_002.wav",
+      "category": "808",
+      "prompt": "bass gen 808",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/808/prompt_bass_gen_808_002.wav",
+      "seed": 428730189,
+      "sample_rate": 44100,
+      "duration_s": 0.783,
+      "features": {
+        "rms": 0.404007,
+        "peak": 0.95,
+        "spectral_centroid": 1638.59,
+        "attack_ms": 3.63,
+        "hpr": 0.9984,
+        "noise_floor": 0.038622,
+        "duration_s": 0.783
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "bass_stab/prompt_bass_gen_reese_001.wav",
+      "category": "bass_stab",
+      "prompt": "bass gen reese",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/bass_stab/prompt_bass_gen_reese_001.wav",
+      "seed": 2437932159,
+      "sample_rate": 44100,
+      "duration_s": 0.605,
+      "features": {
+        "rms": 0.250532,
+        "peak": 0.95,
+        "spectral_centroid": 4138.0,
+        "attack_ms": 33.9,
+        "hpr": 0.9509,
+        "noise_floor": 0.01456,
+        "duration_s": 0.605
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "bass_stab/prompt_bass_gen_reese_002.wav",
+      "category": "bass_stab",
+      "prompt": "bass gen reese",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/bass_stab/prompt_bass_gen_reese_002.wav",
+      "seed": 1107662429,
+      "sample_rate": 44100,
+      "duration_s": 0.591,
+      "features": {
+        "rms": 0.251287,
+        "peak": 0.95,
+        "spectral_centroid": 4104.15,
+        "attack_ms": 33.79,
+        "hpr": 0.9517,
+        "noise_floor": 0.014946,
+        "duration_s": 0.591
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "bell/prompt_piano_gen_bell_001.wav",
+      "category": "bell",
+      "prompt": "piano gen bell",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_001.wav",
+      "seed": 1114363749,
+      "sample_rate": 44100,
+      "duration_s": 1.56,
+      "features": {
+        "rms": 0.104242,
+        "peak": 0.95,
+        "spectral_centroid": 5363.32,
+        "attack_ms": 11.09,
+        "hpr": 0.9022,
+        "noise_floor": 0.000709,
+        "duration_s": 1.56
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bell/prompt_piano_gen_bell_002.wav",
+      "category": "bell",
+      "prompt": "piano gen bell",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_002.wav",
+      "seed": 2823260826,
+      "sample_rate": 44100,
+      "duration_s": 1.519,
+      "features": {
+        "rms": 0.105521,
+        "peak": 0.95,
+        "spectral_centroid": 4647.9,
+        "attack_ms": 11.25,
+        "hpr": 0.8245,
+        "noise_floor": 0.000709,
+        "duration_s": 1.519
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_001.wav",
+      "category": "bright",
+      "prompt": "bright pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_001.wav",
+      "seed": 4171795370,
+      "sample_rate": 44100,
+      "duration_s": 0.399,
+      "features": {
+        "rms": 0.070127,
+        "peak": 0.95,
+        "spectral_centroid": 10002.85,
+        "attack_ms": 2.45,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.399
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_002.wav",
+      "category": "bright",
+      "prompt": "bright pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/bright/prompt_bright_pluck_002.wav",
+      "seed": 725883427,
+      "sample_rate": 44100,
+      "duration_s": 0.415,
+      "features": {
+        "rms": 0.072548,
+        "peak": 0.95,
+        "spectral_centroid": 9777.27,
+        "attack_ms": 2.68,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.415
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bright_guitar/prompt_guitar_gen_bright_001.wav",
+      "category": "bright_guitar",
+      "prompt": "guitar gen bright",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/bright_guitar/prompt_guitar_gen_bright_001.wav",
+      "seed": 434956856,
+      "sample_rate": 44100,
+      "duration_s": 0.823,
+      "features": {
+        "rms": 0.083293,
+        "peak": 0.95,
+        "spectral_centroid": 3262.15,
+        "attack_ms": 6.3,
+        "hpr": 0.7601,
+        "noise_floor": 0.000387,
+        "duration_s": 0.823
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "bright_guitar/prompt_guitar_gen_bright_002.wav",
+      "category": "bright_guitar",
+      "prompt": "guitar gen bright",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/bright_guitar/prompt_guitar_gen_bright_002.wav",
+      "seed": 3826612642,
+      "sample_rate": 44100,
+      "duration_s": 0.829,
+      "features": {
+        "rms": 0.0821,
+        "peak": 0.95,
+        "spectral_centroid": 3427.33,
+        "attack_ms": 8.19,
+        "hpr": 0.8154,
+        "noise_floor": 0.000483,
+        "duration_s": 0.829
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "clap/clap_001.wav",
+      "category": "clap",
+      "prompt": "clap",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/clap/clap_001.wav",
+      "seed": 2989103974,
+      "sample_rate": 44100,
+      "duration_s": 0.423,
+      "features": {
+        "rms": 0.068489,
+        "peak": 0.95,
+        "spectral_centroid": 3147.75,
+        "attack_ms": 12.88,
+        "hpr": 0.0784,
+        "noise_floor": 0.0,
+        "duration_s": 0.423
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "clap/clap_002.wav",
+      "category": "clap",
+      "prompt": "clap",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/clap/clap_002.wav",
+      "seed": 1925821894,
+      "sample_rate": 44100,
+      "duration_s": 0.328,
+      "features": {
+        "rms": 0.073122,
+        "peak": 0.95,
+        "spectral_centroid": 3329.39,
+        "attack_ms": 24.29,
+        "hpr": 0.1003,
+        "noise_floor": 0.0,
+        "duration_s": 0.328
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_001.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_001.wav",
+      "seed": 3329217768,
+      "sample_rate": 44100,
+      "duration_s": 0.39,
+      "features": {
+        "rms": 0.111122,
+        "peak": 0.95,
+        "spectral_centroid": 3489.42,
+        "attack_ms": 3.27,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.39
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_002.wav",
+      "category": "clean",
+      "prompt": "clean pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/clean/prompt_clean_pluck_002.wav",
+      "seed": 2853546096,
+      "sample_rate": 44100,
+      "duration_s": 0.404,
+      "features": {
+        "rms": 0.101064,
+        "peak": 0.95,
+        "spectral_centroid": 3901.59,
+        "attack_ms": 2.52,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.404
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_001.wav",
+      "category": "dark",
+      "prompt": "dark pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_001.wav",
+      "seed": 3392884110,
+      "sample_rate": 44100,
+      "duration_s": 0.388,
+      "features": {
+        "rms": 0.124484,
+        "peak": 0.95,
+        "spectral_centroid": 1754.59,
+        "attack_ms": 1.18,
+        "hpr": 0.0003,
+        "noise_floor": 0.0,
+        "duration_s": 0.388
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_002.wav",
+      "category": "dark",
+      "prompt": "dark pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/bright_vs_dark/dark/prompt_dark_pluck_002.wav",
+      "seed": 1696677715,
+      "sample_rate": 44100,
+      "duration_s": 0.402,
+      "features": {
+        "rms": 0.122901,
+        "peak": 0.95,
+        "spectral_centroid": 1688.43,
+        "attack_ms": 1.04,
+        "hpr": 0.0003,
+        "noise_floor": 0.0,
+        "duration_s": 0.402
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_001.wav",
+      "category": "distorted",
+      "prompt": "distorted pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_001.wav",
+      "seed": 1353803258,
+      "sample_rate": 44100,
+      "duration_s": 0.403,
+      "features": {
+        "rms": 0.13828,
+        "peak": 0.95,
+        "spectral_centroid": 4429.18,
+        "attack_ms": 2.72,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.403
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_002.wav",
+      "category": "distorted",
+      "prompt": "distorted pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/clean_vs_distorted/distorted/prompt_distorted_pluck_002.wav",
+      "seed": 193291011,
+      "sample_rate": 44100,
+      "duration_s": 0.385,
+      "features": {
+        "rms": 0.139352,
+        "peak": 0.95,
+        "spectral_centroid": 4506.43,
+        "attack_ms": 2.63,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.385
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "distorted_bass/prompt_bass_gen_distorted_001.wav",
+      "category": "distorted_bass",
+      "prompt": "bass gen distorted",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/distorted_bass/prompt_bass_gen_distorted_001.wav",
+      "seed": 1456210384,
+      "sample_rate": 44100,
+      "duration_s": 0.785,
+      "features": {
+        "rms": 0.404085,
+        "peak": 0.95,
+        "spectral_centroid": 1512.45,
+        "attack_ms": 3.63,
+        "hpr": 0.9985,
+        "noise_floor": 0.038655,
+        "duration_s": 0.785
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "distorted_bass/prompt_bass_gen_distorted_002.wav",
+      "category": "distorted_bass",
+      "prompt": "bass gen distorted",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/distorted_bass/prompt_bass_gen_distorted_002.wav",
+      "seed": 338164578,
+      "sample_rate": 44100,
+      "duration_s": 0.785,
+      "features": {
+        "rms": 0.401223,
+        "peak": 0.95,
+        "spectral_centroid": 2180.15,
+        "attack_ms": 3.63,
+        "hpr": 0.998,
+        "noise_floor": 0.037785,
+        "duration_s": 0.785
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fm_bass/prompt_bass_gen_fm_001.wav",
+      "category": "fm_bass",
+      "prompt": "bass gen fm",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/fm_bass/prompt_bass_gen_fm_001.wav",
+      "seed": 2544820090,
+      "sample_rate": 44100,
+      "duration_s": 0.827,
+      "features": {
+        "rms": 0.395954,
+        "peak": 0.95,
+        "spectral_centroid": 2135.12,
+        "attack_ms": 3.63,
+        "hpr": 0.998,
+        "noise_floor": 0.039331,
+        "duration_s": 0.827
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fm_bass/prompt_bass_gen_fm_002.wav",
+      "category": "fm_bass",
+      "prompt": "bass gen fm",
+      "family": "bass",
+      "path": "outputs/golden_demo_candidates/fm_bass/prompt_bass_gen_fm_002.wav",
+      "seed": 3444585310,
+      "sample_rate": 44100,
+      "duration_s": 0.787,
+      "features": {
+        "rms": 0.404557,
+        "peak": 0.95,
+        "spectral_centroid": 1240.97,
+        "attack_ms": 3.63,
+        "hpr": 0.9987,
+        "noise_floor": 0.038622,
+        "duration_s": 0.787
+      },
+      "quality_score": 1.056
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_001.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_001.wav",
+      "seed": 1800280721,
+      "sample_rate": 44100,
+      "duration_s": 1.529,
+      "features": {
+        "rms": 0.222268,
+        "peak": 0.95,
+        "spectral_centroid": 4304.39,
+        "attack_ms": 2.38,
+        "hpr": 0.999,
+        "noise_floor": 0.013046,
+        "duration_s": 1.529
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "fx/prompt_fx_gen_impact_002.wav",
+      "category": "fx",
+      "prompt": "fx gen impact",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/fx/prompt_fx_gen_impact_002.wav",
+      "seed": 1776721001,
+      "sample_rate": 44100,
+      "duration_s": 1.55,
+      "features": {
+        "rms": 0.221218,
+        "peak": 0.95,
+        "spectral_centroid": 4537.31,
+        "attack_ms": 2.38,
+        "hpr": 0.9991,
+        "noise_floor": 0.016657,
+        "duration_s": 1.55
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "glitch/prompt_fx_gen_glitch_001.wav",
+      "category": "glitch",
+      "prompt": "fx gen glitch",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_001.wav",
+      "seed": 3354975124,
+      "sample_rate": 44100,
+      "duration_s": 0.503,
+      "features": {
+        "rms": 0.337876,
+        "peak": 0.95,
+        "spectral_centroid": 9858.37,
+        "attack_ms": 1.0,
+        "hpr": 0.9364,
+        "noise_floor": 0.043921,
+        "duration_s": 0.503
+      },
+      "quality_score": 0.96
+    },
+    {
+      "file": "glitch/prompt_fx_gen_glitch_002.wav",
+      "category": "glitch",
+      "prompt": "fx gen glitch",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_002.wav",
+      "seed": 3466429621,
+      "sample_rate": 44100,
+      "duration_s": 0.489,
+      "features": {
+        "rms": 0.336778,
+        "peak": 0.95,
+        "spectral_centroid": 9650.63,
+        "attack_ms": 1.0,
+        "hpr": 0.9285,
+        "noise_floor": 0.044755,
+        "duration_s": 0.489
+      },
+      "quality_score": 0.96
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_001.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_001.wav",
+      "seed": 1339252243,
+      "sample_rate": 44100,
+      "duration_s": 0.828,
+      "features": {
+        "rms": 0.092911,
+        "peak": 0.95,
+        "spectral_centroid": 3143.79,
+        "attack_ms": 5.85,
+        "hpr": 0.8508,
+        "noise_floor": 0.000451,
+        "duration_s": 0.828
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "guitar/prompt_guitar_gen_nylon_002.wav",
+      "category": "guitar",
+      "prompt": "guitar gen nylon",
+      "family": "guitar",
+      "path": "outputs/golden_demo_candidates/guitar/prompt_guitar_gen_nylon_002.wav",
+      "seed": 3241872269,
+      "sample_rate": 44100,
+      "duration_s": 0.776,
+      "features": {
+        "rms": 0.089461,
+        "peak": 0.95,
+        "spectral_centroid": 3373.34,
+        "attack_ms": 6.03,
+        "hpr": 0.8273,
+        "noise_floor": 0.00029,
+        "duration_s": 0.776
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "hat/hat_001.wav",
+      "category": "hat",
+      "prompt": "hat",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/hat/hat_001.wav",
+      "seed": 3905737570,
+      "sample_rate": 44100,
+      "duration_s": 0.097,
+      "features": {
+        "rms": 0.087168,
+        "peak": 0.95,
+        "spectral_centroid": 9125.31,
+        "attack_ms": 0.54,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.097
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "hat/hat_002.wav",
+      "category": "hat",
+      "prompt": "hat",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/hat/hat_002.wav",
+      "seed": 2860347467,
+      "sample_rate": 44100,
+      "duration_s": 0.104,
+      "features": {
+        "rms": 0.087683,
+        "peak": 0.95,
+        "spectral_centroid": 9348.32,
+        "attack_ms": 0.88,
+        "hpr": 0.0,
+        "noise_floor": 0.0,
+        "duration_s": 0.104
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "kick/kick_001.wav",
+      "category": "kick",
+      "prompt": "kick",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/kick/kick_001.wav",
+      "seed": 3194056324,
+      "sample_rate": 44100,
+      "duration_s": 0.257,
+      "features": {
+        "rms": 0.170188,
+        "peak": 0.95,
+        "spectral_centroid": 3462.46,
+        "attack_ms": 0.61,
+        "hpr": 0.737,
+        "noise_floor": 0.019231,
+        "duration_s": 0.257
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "kick/kick_002.wav",
+      "category": "kick",
+      "prompt": "kick",
+      "family": "drums",
+      "path": "outputs/golden_demo_candidates/kick/kick_002.wav",
+      "seed": 1937085771,
+      "sample_rate": 44100,
+      "duration_s": 0.286,
+      "features": {
+        "rms": 0.161815,
+        "peak": 0.95,
+        "spectral_centroid": 3450.19,
+        "attack_ms": 0.61,
+        "hpr": 0.7358,
+        "noise_floor": 0.015549,
+        "duration_s": 0.286
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "lead/prompt_synth_gen_lead_001.wav",
+      "category": "lead",
+      "prompt": "synth gen lead",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/lead/prompt_synth_gen_lead_001.wav",
+      "seed": 316940879,
+      "sample_rate": 44100,
+      "duration_s": 0.817,
+      "features": {
+        "rms": 0.124741,
+        "peak": 0.95,
+        "spectral_centroid": 6723.49,
+        "attack_ms": 12.59,
+        "hpr": 0.7215,
+        "noise_floor": 0.00636,
+        "duration_s": 0.817
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "lead/prompt_synth_gen_lead_002.wav",
+      "category": "lead",
+      "prompt": "synth gen lead",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/lead/prompt_synth_gen_lead_002.wav",
+      "seed": 3363390476,
+      "sample_rate": 44100,
+      "duration_s": 0.806,
+      "features": {
+        "rms": 0.129197,
+        "peak": 0.95,
+        "spectral_centroid": 6446.75,
+        "attack_ms": 2.56,
+        "hpr": 0.8547,
+        "noise_floor": 0.006387,
+        "duration_s": 0.806
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_001.wav",
+      "category": "lo_fi",
+      "prompt": "lo fi pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_001.wav",
+      "seed": 1908513387,
+      "sample_rate": 44100,
+      "duration_s": 0.391,
+      "features": {
+        "rms": 0.141178,
+        "peak": 0.95,
+        "spectral_centroid": 1922.83,
+        "attack_ms": 2.7,
+        "hpr": 0.0016,
+        "noise_floor": 0.0,
+        "duration_s": 0.391
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_004.wav",
+      "category": "lo_fi",
+      "prompt": "lo fi pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/lo_fi_vs_clean/lo_fi/prompt_lo_fi_pluck_004.wav",
+      "seed": 1427606166,
+      "sample_rate": 44100,
+      "duration_s": 0.41,
+      "features": {
+        "rms": 0.139637,
+        "peak": 0.95,
+        "spectral_centroid": 1933.08,
+        "attack_ms": 2.31,
+        "hpr": 0.0022,
+        "noise_floor": 0.0,
+        "duration_s": 0.41
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_001.wav",
+      "category": "narrow",
+      "prompt": "narrow pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_001.wav",
+      "seed": 1589010826,
+      "sample_rate": 44100,
+      "duration_s": 0.389,
+      "features": {
+        "rms": 0.119426,
+        "peak": 0.95,
+        "spectral_centroid": 4325.17,
+        "attack_ms": 1.07,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.389
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_002.wav",
+      "category": "narrow",
+      "prompt": "narrow pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/narrow_vs_wide/narrow/prompt_narrow_pluck_002.wav",
+      "seed": 1679100166,
+      "sample_rate": 44100,
+      "duration_s": 0.4,
+      "features": {
+        "rms": 0.11962,
+        "peak": 0.95,
+        "spectral_centroid": 4431.46,
+        "attack_ms": 1.02,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.4
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "pad/prompt_synth_gen_pad_001.wav",
+      "category": "pad",
+      "prompt": "synth gen pad",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pad/prompt_synth_gen_pad_001.wav",
+      "seed": 4252019179,
+      "sample_rate": 44100,
+      "duration_s": 2.054,
+      "features": {
+        "rms": 0.17367,
+        "peak": 0.95,
+        "spectral_centroid": 3789.4,
+        "attack_ms": 94.6,
+        "hpr": 0.5548,
+        "noise_floor": 0.012746,
+        "duration_s": 2.054
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "pad/prompt_synth_gen_pad_002.wav",
+      "category": "pad",
+      "prompt": "synth gen pad",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pad/prompt_synth_gen_pad_002.wav",
+      "seed": 2189121659,
+      "sample_rate": 44100,
+      "duration_s": 2.029,
+      "features": {
+        "rms": 0.164081,
+        "peak": 0.95,
+        "spectral_centroid": 3935.83,
+        "attack_ms": 131.29,
+        "hpr": 0.5745,
+        "noise_floor": 0.012085,
+        "duration_s": 2.029
+      },
+      "quality_score": 1.2
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_001.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_001.wav",
+      "seed": 2952067617,
+      "sample_rate": 44100,
+      "duration_s": 0.783,
+      "features": {
+        "rms": 0.081979,
+        "peak": 0.95,
+        "spectral_centroid": 3331.89,
+        "attack_ms": 11.86,
+        "hpr": 0.8745,
+        "noise_floor": 0.000387,
+        "duration_s": 0.783
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "piano/prompt_piano_gen_acoustic_002.wav",
+      "category": "piano",
+      "prompt": "piano gen acoustic",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_002.wav",
+      "seed": 4167083222,
+      "sample_rate": 44100,
+      "duration_s": 0.796,
+      "features": {
+        "rms": 0.085142,
+        "peak": 0.95,
+        "spectral_centroid": 3440.74,
+        "attack_ms": 8.12,
+        "hpr": 0.851,
+        "noise_floor": 0.000354,
+        "duration_s": 0.796
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "pluck/prompt_synth_gen_pluck_001.wav",
+      "category": "pluck",
+      "prompt": "synth gen pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pluck/prompt_synth_gen_pluck_001.wav",
+      "seed": 2406151104,
+      "sample_rate": 44100,
+      "duration_s": 0.397,
+      "features": {
+        "rms": 0.117287,
+        "peak": 0.95,
+        "spectral_centroid": 4167.53,
+        "attack_ms": 1.09,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.397
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "pluck/prompt_synth_gen_pluck_002.wav",
+      "category": "pluck",
+      "prompt": "synth gen pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/pluck/prompt_synth_gen_pluck_002.wav",
+      "seed": 650443620,
+      "sample_rate": 44100,
+      "duration_s": 0.399,
+      "features": {
+        "rms": 0.120581,
+        "peak": 0.95,
+        "spectral_centroid": 4266.81,
+        "attack_ms": 1.02,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.399
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_001.wav",
+      "category": "punchy",
+      "prompt": "punchy pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_001.wav",
+      "seed": 99278758,
+      "sample_rate": 44100,
+      "duration_s": 0.388,
+      "features": {
+        "rms": 0.139794,
+        "peak": 0.95,
+        "spectral_centroid": 4373.5,
+        "attack_ms": 2.49,
+        "hpr": 0.0001,
+        "noise_floor": 0.0,
+        "duration_s": 0.388
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_002.wav",
+      "category": "punchy",
+      "prompt": "punchy pluck",
+      "family": "synth",
+      "path": "outputs/golden_demo_candidates/_contrast_tests/soft_vs_punchy/punchy/prompt_punchy_pluck_002.wav",
+      "seed": 2602856910,
+      "sample_rate": 44100,
+      "duration_s": 0.409,
+      "features": {
+        "rms": 0.143069,
+        "peak": 0.95,
+        "spectral_centroid": 4336.62,
+        "attack_ms": 2.59,
+        "hpr": 0.0002,
+        "noise_floor": 0.0,
+        "duration_s": 0.409
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "rhodes/prompt_piano_gen_rhodes_001.wav",
+      "category": "rhodes",
+      "prompt": "piano gen rhodes",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/rhodes/prompt_piano_gen_rhodes_001.wav",
+      "seed": 4120955425,
+      "sample_rate": 44100,
+      "duration_s": 1.554,
+      "features": {
+        "rms": 0.104338,
+        "peak": 0.95,
+        "spectral_centroid": 4272.88,
+        "attack_ms": 11.2,
+        "hpr": 0.844,
+        "noise_floor": 0.000709,
+        "duration_s": 1.554
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "rhodes/prompt_piano_gen_rhodes_002.wav",
+      "category": "rhodes",
+      "prompt": "piano gen rhodes",
+      "family": "piano",
+      "path": "outputs/golden_demo_candidates/rhodes/prompt_piano_gen_rhodes_002.wav",
+      "seed": 1077924646,
+      "sample_rate": 44100,
+      "duration_s": 1.447,
+      "features": {
+        "rms": 0.108043,
+        "peak": 0.95,
+        "spectral_centroid": 5045.02,
+        "attack_ms": 11.07,
+        "hpr": 0.9075,
+        "noise_floor": 0.000741,
+        "duration_s": 1.447
+      },
+      "quality_score": 1.452
+    },
+    {
+      "file": "riser/prompt_fx_gen_riser_001.wav",
+      "category": "riser",
+      "prompt": "fx gen riser",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/riser/prompt_fx_gen_riser_001.wav",
+      "seed": 2797110299,
+      "sample_rate": 44100,
+      "duration_s": 1.993,
+      "features": {
+        "rms": 0.203622,
+        "peak": 0.95,
+        "spectral_centroid": 9153.95,
+        "attack_ms": 1412.49,
+        "hpr": 0.9984,
+        "noise_floor": 0.004673,
+        "duration_s": 1.993
+      },
+      "quality_score": 1.32
+    },
+    {
+      "file": "riser/prompt_fx_gen_riser_002.wav",
+      "category": "riser",
+      "prompt": "fx gen riser",
+      "family": "fx",
+      "path": "outputs/golden_demo_candidates/riser/prompt_fx_gen_riser_002.wav",
+      "seed": 4169989528,
+      "sample_rate": 44100,
+      "duration_s": 2.006,
+      "features": {
+        "rms": 0.207919,
+        "peak": 0.95,
+        "spectral_centroid": 9510.1,
+        "attack_ms": 1453.29,
+        "hpr": 0.9984,
+        "noise_floor": 0.004707,
+        "duration_s": 2.006
+      },
+      "quality_score": 1.32
+    }
+  ]
+}
