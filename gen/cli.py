@@ -66,6 +66,7 @@ from gen.refinement import (
 )
 from gen.health import cmd_dataset_health
 from gen.listen import cmd_listen, cmd_listening_report
+from gen.rating import cmd_rate, cmd_ratings_summary, cmd_favorites
 from gen.clustering import cmd_cluster_references
 from gen.cluster_report import cmd_cluster_report
 from gen.cluster_gen import cmd_cluster_gen, cmd_cluster_qa
@@ -299,6 +300,17 @@ def main():
     p_mvp = subparsers.add_parser("mvp-audit", help="Final MVP audit: generate 100 files across 20 categories with contrast tests")
     p_mvp.add_argument("--out", "-o", default="outputs/mvp_audit", help="Output directory")
 
+    # ── Rating System ──
+    p_rate = subparsers.add_parser("rate", help="Rate a generated file")
+    p_rate.add_argument("file", help="Path to the .wav file to rate")
+    p_rate.add_argument("--rating", "-r", choices=["good", "bad", "favorite", "trash"], required=True, help="Rating")
+    p_rate.add_argument("--notes", "-n", help="Optional notes about this file")
+
+    p_ratings = subparsers.add_parser("ratings", help="Show rating summary or manage ratings")
+    p_ratings.add_argument("action", nargs="?", choices=["summary"], default="summary", help="Rating action")
+
+    p_fav = subparsers.add_parser("favorites", help="List all favorited files")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -375,6 +387,12 @@ def main():
         cmd_listening_report(args)
     elif args.command == "dataset-health":
         cmd_dataset_health(args)
+    elif args.command == "rate":
+        cmd_rate(args)
+    elif args.command == "ratings":
+        cmd_ratings_summary(args)
+    elif args.command == "favorites":
+        cmd_favorites(args)
     elif args.command == "all":
         cmd_all(args)
     else:

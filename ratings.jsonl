@@ -1,0 +1,4 @@
+{"timestamp": "2026-05-17T20:16:11Z", "file": "outputs/golden_demo_candidates/kick/kick_001.wav", "file_hash": "e45607d1b7bdc2f8d18cac62699a14f1", "rating": "favorite", "notes": "great sub kick"}
+{"timestamp": "2026-05-17T20:16:11Z", "file": "outputs/golden_demo_candidates/glitch/prompt_fx_gen_glitch_001.wav", "file_hash": "b90cb866d5b5fab0eaef927c0a3205cf", "rating": "trash", "notes": "too noisy"}
+{"timestamp": "2026-05-17T20:16:12Z", "file": "outputs/golden_demo_candidates/piano/prompt_piano_gen_acoustic_001.wav", "file_hash": "6e1da5e709b3133704526f9d66e6af20", "rating": "good", "notes": "nice piano tone"}
+{"timestamp": "2026-05-17T20:16:12Z", "file": "outputs/golden_demo_candidates/bell/prompt_piano_gen_bell_001.wav", "file_hash": "7f1c4a055b320249102b8a4fe4cb2a38", "rating": "favorite", "notes": "beautiful bell"}
