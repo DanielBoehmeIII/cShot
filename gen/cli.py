@@ -86,6 +86,8 @@ from gen.pack import cmd_pack, cmd_pack_audit, cmd_theme
 from gen.similar import cmd_similar, cmd_variations
 from gen.genre import cmd_genre, GENRE_PROFILES
 from gen.rank import cmd_rank, cmd_top
+from gen.taste import cmd_taste_profile, cmd_prompt_history
+from gen.make import cmd_make
 from gen.refine_feedback import cmd_refine_feedback
 
 
@@ -373,6 +375,16 @@ def main():
     p_top.add_argument("input_dir", help="Directory of WAV files")
     p_top.add_argument("--n", type=int, default=10, help="Number of top files to show")
 
+    # ── Taste Profile ──
+    p_taste = subparsers.add_parser("taste", help="Show taste profile learned from ratings")
+    p_hist = subparsers.add_parser("prompt-history", help="Show prompt rating history")
+
+    # ── One-Command Producer Mode ──
+    p_make = subparsers.add_parser("make", help="One-command producer mode: generate, polish, rank, export")
+    p_make.add_argument("prompt", nargs="+", help="Pack description")
+    p_make.add_argument("--count", "-n", type=int, default=100, help="Target file count")
+    p_make.add_argument("--out", "-o", help="Output directory")
+
     args = parser.parse_args()
 
     if args.command == "scan":
@@ -486,6 +498,12 @@ def main():
         cmd_rank(args)
     elif args.command == "top":
         cmd_top(args)
+    elif args.command == "taste":
+        cmd_taste_profile(args)
+    elif args.command == "prompt-history":
+        cmd_prompt_history(args)
+    elif args.command == "make":
+        cmd_make(args)
     elif args.command == "all":
         cmd_all(args)
     else:
