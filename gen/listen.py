@@ -1,21 +1,20 @@
-"""Listening workflow: interactive rating with playback, rank outputs, save notes."""
-
+"""Listening UX v2: fast keyboard-driven audition with play/next/favorite/trash, A/B compare, export favorites."""
 import json
-import os
 import shutil
 import subprocess
 import sys
 import time
+from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
-from gen import REPO_ROOT, SAMPLE_RATE
-from gen.io import read_wav, write_wav
+from gen import REPO_ROOT
+from gen.io import read_wav
 from gen.features import compute_features
+from gen.rating import _save_rating
 
 
 def _find_audio_player() -> Optional[str]:
-    """Find an available system audio player for WAV playback."""
     for player in ["aplay", "paplay", "ffplay", "gst-play-1.0", "play"]:
         if shutil.which(player):
             return player
@@ -23,13 +22,10 @@ def _find_audio_player() -> Optional[str]:
 
 
 def _play_audio(path: Path, player: Optional[str] = None):
-    """Play a WAV file using the system audio player."""
     if not player:
         player = _find_audio_player()
     if not player:
-        print("  [no audio player found — install aplay, paplay, or ffplay]")
         return
-
     try:
         if player == "ffplay":
             subprocess.run([player, "-nodisp", "-autoexit", "-loglevel", "quiet", str(path)],
@@ -42,342 +38,312 @@ def _play_audio(path: Path, player: Optional[str] = None):
                           timeout=10, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
     except subprocess.TimeoutExpired:
         pass
-    except Exception as e:
-        print(f"  [playback error: {e}]")
+    except Exception:
+        pass
 
 
-def _load_notes(notes_path: Path) -> dict:
-    """Load existing listening notes from JSON file."""
-    if notes_path.exists():
-        with open(notes_path) as f:
+def _load_session(path: Path) -> dict:
+    if path.exists():
+        with open(path) as f:
             return json.load(f)
-    return {
-        "generated_at": None,
-        "last_updated": None,
-        "session_count": 0,
-        "notes": {},
-    }
+    return {"ratings": {}, "a_bracket": [], "b_bracket": [], "session_count": 0}
 
 
-def _save_notes(notes_path: Path, notes_data: dict):
-    """Save listening notes to JSON file."""
-    notes_data["last_updated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    notes_path.write_text(json.dumps(notes_data, indent=2))
+def _save_session(path: Path, data: dict):
+    data["last_updated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    path.write_text(json.dumps(data, indent=2))
+
+
+def _list_files(in_dir: Path) -> list[Path]:
+    wavs = sorted(in_dir.rglob("*.wav"))
+    return wavs
 
 
 def _format_duration(ms: float) -> str:
     if ms < 1000:
         return f"{ms:.0f}ms"
-    return f"{ms / 1000:.1f}s"
-
-
-def _feature_summary_line(feats: dict) -> str:
-    cent = feats.get("spectral_centroid", 0)
-    low = feats.get("low_band_energy", 0)
-    high = feats.get("high_band_energy", 0)
-    trans = feats.get("transient_count", 0)
-    decay = feats.get("decay_length_ms", 0)
-    hpr = feats.get("hpr", -1)
-    pitch = feats.get("pitch_hz", 0)
-    parts = [f"cent={cent:.0f}Hz", f"low={low:.2f}", f"high={high:.2f}",
-             f"trans={trans}", f"decay={decay:.0f}ms"]
-    if hpr >= 0:
-        parts.append(f"hpr={hpr:.2f}")
-    if pitch > 0:
-        parts.append(f"pitch={pitch:.0f}Hz")
-    return " | ".join(parts)
+    return f"{ms/1000:.1f}s"
 
 
 def cmd_listen(args):
-    """Interactive listening session: rate files, mark good/bad, add notes."""
+    """Fast keyboard-driven listening session."""
     in_dir = Path(args.input_dir)
     if not in_dir.exists():
         print(f"Error: {in_dir} not found", file=sys.stderr)
         sys.exit(1)
 
-    wav_files = sorted(in_dir.glob("*.wav"))
+    wav_files = _list_files(in_dir)
     if not wav_files:
         print(f"Error: no .wav files found in {in_dir}", file=sys.stderr)
         sys.exit(1)
 
-    notes_path = Path(args.notes) if args.notes else in_dir / "listening_notes.json"
-    notes_data = _load_notes(notes_path)
-
-    if notes_data["generated_at"] is None:
-        notes_data["generated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    notes_data["session_count"] = notes_data.get("session_count", 0) + 1
+    session_path = args.notes if args.notes else in_dir / "listen_session.json"
+    session = _load_session(session_path)
+    session["session_count"] = session.get("session_count", 0) + 1
+    ratings = session.setdefault("ratings", {})
+    a_slot = session.get("a_slot")
+    b_slot = session.get("b_slot")
 
     player = _find_audio_player()
-    if not player:
-        print("Warning: no audio player found (install aplay/paplay/ffplay)")
-    else:
-        print(f"Audio player: {player}")
+    has_audio = player is not None
+    if not has_audio:
+        print("No audio player found — install aplay, paplay, or ffplay")
 
-    print(f"Directory: {in_dir}")
-    print(f"Files: {len(wav_files)}")
-    print(f"Notes: {notes_path}")
+    total = len(wav_files)
+    idx = session.get("last_index", 0)
+    if idx >= total:
+        idx = 0
+
+    rated_count = sum(1 for v in ratings.values() if v != "skip")
+    skipped_count = sum(1 for v in ratings.values() if v == "skip")
+
+    print(f"\ncShot Listen — {total} files")
+    print(f"{'='*60}")
     print()
-    print("Controls:")
-    print("  1-5  = rate (1=bad, 5=excellent)")
-    print("  g     = mark as GOOD")
-    print("  b     = mark as BAD")
-    print("  +g    = good + rate (e.g. +4 = good + rate 4)")
-    print("  n     = add note")
-    print("  p     = play again")
-    print("  f     = show features")
-    print("  s     = skip")
-    print("  q     = quit session")
+    print("Keys:")
+    print("  ENTER/SPACE  play")
+    print("  f            favorite")
+    print("  t            trash")
+    print("  g            good")
+    print("  b            bad")
+    print("  s            skip / next")
+    print("  a            set A bracket (compare)")
+    print("  B            set B bracket (compare)")
+    print("  A/B          play A/B slot")
+    print("  e            export favorites")
+    print("  q            quit")
     print()
 
-    session_ratings = {}
-    skipped = 0
-    rated_count = 0
+    while 0 <= idx < total:
+        wav = wav_files[idx]
+        rel = str(wav.relative_to(in_dir))
+        current_rating = ratings.get(str(wav), "")
 
-    for idx, wav_path in enumerate(wav_files):
-        rel_path = str(wav_path.resolve().relative_to(REPO_ROOT))
-        existing = notes_data.get("notes", {}).get(str(wav_path), {})
+        cat = wav.parent.name if wav.parent != in_dir else ""
+        cat_str = f" [{cat}]" if cat else ""
 
-        print(f"\n{'='*60}")
-        print(f"  [{idx + 1}/{len(wav_files)}] {wav_path.name}")
-        print(f"  {rel_path}")
-
-        # Show existing rating if any
-        if existing:
-            old_rating = existing.get("rating")
-            old_flag = existing.get("flag", "")
-            old_note = existing.get("note", "")
-            flag_str = f" [{old_flag.upper()}]" if old_flag else ""
-            rating_str = f" ★={old_rating}" if old_rating else ""
-            note_str = f" \"{old_note}\"" if old_note else ""
-            print(f"  Previous:{rating_str}{flag_str}{note_str}")
-
-        # Compute and show features
-        result = read_wav(wav_path)
+        result = read_wav(wav)
+        feats = {}
         if result:
             samples, sr = result
             feats = compute_features(samples, sr)
-            dur = _format_duration(feats["duration_ms"])
-            rms = feats["rms"]
-            print(f"  {dur} | RMS={rms:.3f} | {_feature_summary_line(feats)}")
+            dur = _format_duration(feats.get("duration_ms", 0))
+            cent = feats.get("spectral_centroid", 0)
+            rms = feats.get("rms", 0)
+            meta = f"{dur} | cent={cent:.0f}Hz | rms={rms:.3f}"
+        else:
+            meta = ""
 
-        # Play the file
-        print("  Playing...", end=" ", flush=True)
-        _play_audio(wav_path, player)
+        a_mark = " [A]" if str(wav) == a_slot else ""
+        b_mark = " [B]" if str(wav) == b_slot else ""
+        rating_dot = "★" if current_rating == "favorite" else "✗" if current_rating == "trash" else "✓" if current_rating == "good" else " " if current_rating == "bad" else " "
+        prog = f"[{idx+1}/{total}]"
+
+        print(f"  {prog}{cat_str} {rating_dot} {rel}")
+        if meta:
+            print(f"         {meta}")
+        if current_rating:
+            print(f"         [{current_rating}]")
         print()
 
-        # Interactive rating loop
+        _play_audio(wav, player)
+
         while True:
             try:
-                inp = input(f"  [{idx + 1}/{len(wav_files)}] Rate (1-5/g/b/note/p/feat/s/q): ").strip().lower()
+                inp = input(f"  [{idx+1}/{total}] > ").strip().lower()
             except (EOFError, KeyboardInterrupt):
-                print("\nQuitting session.")
-                _save_notes(notes_path, notes_data)
-                return
+                inp = "q"
 
-            if inp == "q":
-                _save_notes(notes_path, notes_data)
-                print(f"\nSession saved. Rated: {rated_count}, Skipped: {skipped}")
-                return
+            if inp in ("", " "):
+                _play_audio(wav, player)
+                continue
 
             if inp == "s":
-                skipped += 1
+                ratings[str(wav)] = "skip"
+                session["last_index"] = idx + 1
+                _save_session(session_path, session)
+                idx += 1
                 break
-
-            if inp == "p":
-                _play_audio(wav_path, player)
-                continue
-
-            if inp == "f":
-                if result:
-                    print(f"  Features: {json.dumps({k: round(v, 4) if isinstance(v, float) else v for k, v in feats.items() if isinstance(v, (int, float))}, indent=2)}")
-                continue
 
             if inp == "n":
-                try:
-                    note = input("  Note: ").strip()
-                except (EOFError, KeyboardInterrupt):
-                    continue
-                entry = notes_data.setdefault("notes", {}).setdefault(str(wav_path), {})
-                entry["note"] = note
-                entry["file"] = wav_path.name
-                entry["rel_path"] = rel_path
-                _save_notes(notes_path, notes_data)
-                print(f"  Note saved.")
-                continue
-
-            if inp in ("g", "good"):
-                entry = notes_data.setdefault("notes", {}).setdefault(str(wav_path), {})
-                entry["flag"] = "good"
-                entry["file"] = wav_path.name
-                entry["rel_path"] = rel_path
-                _save_notes(notes_path, notes_data)
-                print(f"  Marked GOOD.")
-                rated_count += 1
+                session["last_index"] = idx + 1
+                _save_session(session_path, session)
+                idx += 1
                 break
 
-            if inp in ("b", "bad"):
-                entry = notes_data.setdefault("notes", {}).setdefault(str(wav_path), {})
-                entry["flag"] = "bad"
-                entry["file"] = wav_path.name
-                entry["rel_path"] = rel_path
-                _save_notes(notes_path, notes_data)
-                print(f"  Marked BAD.")
-                rated_count += 1
+            if inp == "f":
+                ratings[str(wav)] = "favorite"
+                _save_rating({"file": rel, "rating": "favorite", "notes": "", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                _save_session(session_path, session)
+                print(f"  ★ Favorited")
+                idx += 1
                 break
 
-            # Check for "+g" or "+4" style input
-            if inp.startswith("+") and len(inp) > 1:
-                rest = inp[1:]
-                if rest.isdigit():
-                    rating = int(rest)
-                    if 1 <= rating <= 5:
-                        entry = notes_data.setdefault("notes", {}).setdefault(str(wav_path), {})
-                        entry["rating"] = rating
-                        entry["flag"] = "good"
-                        entry["file"] = wav_path.name
-                        entry["rel_path"] = rel_path
-                        _save_notes(notes_path, notes_data)
-                        print(f"  Rated {rating}/5 + GOOD.")
-                        rated_count += 1
-                        break
+            if inp == "t":
+                ratings[str(wav)] = "trash"
+                _save_rating({"file": rel, "rating": "trash", "notes": "", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                _save_session(session_path, session)
+                print(f"  ✗ Trashed")
+                idx += 1
+                break
+
+            if inp == "g":
+                ratings[str(wav)] = "good"
+                _save_rating({"file": rel, "rating": "good", "notes": "", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                _save_session(session_path, session)
+                print(f"  ✓ Good")
+                idx += 1
+                break
+
+            if inp == "b":
+                ratings[str(wav)] = "bad"
+                _save_rating({"file": rel, "rating": "bad", "notes": "", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                _save_session(session_path, session)
+                print(f"  ✗ Bad")
+                idx += 1
+                break
+
+            if inp == "a":
+                a_slot = str(wav)
+                session["a_slot"] = a_slot
+                _save_session(session_path, session)
+                print(f"  Set A bracket: {rel}")
                 continue
 
-            if inp.isdigit():
-                rating = int(inp)
-                if 1 <= rating <= 5:
-                    entry = notes_data.setdefault("notes", {}).setdefault(str(wav_path), {})
-                    entry["rating"] = rating
-                    entry["file"] = wav_path.name
-                    entry["rel_path"] = rel_path
-                    if rating >= 4:
-                        entry["flag"] = "good"
-                    elif rating <= 2:
-                        entry["flag"] = "bad"
-                    _save_notes(notes_path, notes_data)
-                    print(f"  Rated {rating}/5.")
-                    rated_count += 1
-                    break
+            if inp == "b":
+                b_slot = str(wav)
+                session["b_slot"] = b_slot
+                _save_session(session_path, session)
+                print(f"  Set B bracket: {rel}")
+                continue
 
-            print("  Invalid input. Use 1-5, g, b, n, p, f, s, or q.")
+            if inp == "A":
+                if a_slot:
+                    _play_audio(Path(a_slot), player)
+                continue
 
-    _save_notes(notes_path, notes_data)
+            if inp == "B":
+                if b_slot:
+                    _play_audio(Path(b_slot), player)
+                continue
 
-    # Session summary
-    ratings = []
-    flags = {"good": 0, "bad": 0}
-    for path_str, entry in notes_data.get("notes", {}).items():
-        r = entry.get("rating")
-        if r:
-            ratings.append(r)
-        fl = entry.get("flag", "")
-        if fl in flags:
-            flags[fl] += 1
+            if inp == "ab":
+                if a_slot:
+                    print(f"  A: {Path(a_slot).name}")
+                    _play_audio(Path(a_slot), player)
+                if b_slot:
+                    print(f"  B: {Path(b_slot).name}")
+                    _play_audio(Path(b_slot), player)
+                continue
 
+            if inp == "e":
+                export_dir = in_dir / "_favorites"
+                export_dir.mkdir(exist_ok=True)
+                count = 0
+                for fpath_str, rating in ratings.items():
+                    if rating == "favorite":
+                        src = Path(fpath_str) if Path(fpath_str).exists() else in_dir / fpath_str
+                        if src.exists():
+                            shutil.copy2(src, export_dir / src.name)
+                            count += 1
+                other_favs = []
+                from gen.rating import _load_ratings
+                for r in _load_ratings():
+                    if r["rating"] == "favorite":
+                        fp = REPO_ROOT / r["file"]
+                        if fp.exists() and fp.suffix == ".wav":
+                            shutil.copy2(fp, export_dir / fp.name)
+                            count += 1
+                print(f"  Exported {count} favorites → {export_dir}")
+                continue
+
+            if inp == "q":
+                session["last_index"] = idx
+                _save_session(session_path, session)
+                rated = sum(1 for v in ratings.values() if v in ("favorite", "good", "bad", "trash"))
+                skipped = sum(1 for v in ratings.values() if v == "skip")
+                print(f"\nSession saved. Rated: {rated}  Skipped: {skipped}")
+                print(f"Favorites: {export_dir}/" if 'export_dir' in dir() and export_dir.exists() else "")
+                return
+
+    _save_session(session_path, session)
+    rated = sum(1 for v in ratings.values() if v in ("favorite", "good", "bad", "trash"))
+    skipped = sum(1 for v in ratings.values() if v == "skip")
+    favs = sum(1 for v in ratings.values() if v == "favorite")
     print(f"\n{'='*60}")
-    print(f"  SESSION COMPLETE")
-    print(f"{'='*60}")
-    if ratings:
-        avg = sum(ratings) / len(ratings)
-        print(f"  Avg rating: {avg:.2f}/5 ({len(ratings)} rated)")
-    print(f"  Good: {flags['good']}, Bad: {flags['bad']}")
-    print(f"  Skipped: {skipped}")
-    print(f"  Notes: {notes_path}")
+    print(f"Complete! All {total} files reviewed.")
+    print(f"Rated: {rated}  Skipped: {skipped}  Favorites: {favs}")
+    print(f"Session: {session_path}")
+
+    if favs > 0:
+        answer = input("\nExport favorites? (y/n): ").strip().lower()
+        if answer == "y" or answer == "yes":
+            export_dir = in_dir / "_favorites"
+            export_dir.mkdir(exist_ok=True)
+            count = 0
+            for fpath_str, rating in ratings.items():
+                if rating == "favorite":
+                    src = Path(fpath_str) if Path(fpath_str).exists() else in_dir / fpath_str
+                    if src.exists():
+                        shutil.copy2(src, export_dir / src.name)
+                        count += 1
+            from gen.rating import _load_ratings
+            for r in _load_ratings():
+                if r["rating"] == "favorite":
+                    fp = REPO_ROOT / r["file"]
+                    if fp.exists() and fp.suffix == ".wav":
+                        shutil.copy2(fp, export_dir / fp.name)
+                        count += 1
+            print(f"Exported {count} favorites → {export_dir}")
 
 
 def cmd_listening_report(args):
-    """Show summary of listening notes with top/bottom rankings."""
+    """Show summary of listening session with ratings."""
     in_dir = Path(args.input_dir)
-    notes_path = Path(args.notes) if args.notes else in_dir / "listening_notes.json"
+    session_path = Path(args.notes) if args.notes else in_dir / "listen_session.json"
 
-    if not notes_path.exists():
-        print(f"Error: {notes_path} not found.", file=sys.stderr)
+    if not session_path.exists():
+        print(f"Error: {session_path} not found.")
         sys.exit(1)
 
-    with open(notes_path) as f:
-        notes_data = json.load(f)
+    with open(session_path) as f:
+        session = json.load(f)
 
-    entries = list(notes_data.get("notes", {}).items())
+    ratings = session.get("ratings", {})
+    if not ratings:
+        print("No ratings found in session.")
+        return
 
-    print("=" * 60)
-    print("  LISTENING REPORT")
-    print("=" * 60)
-    print(f"\n  Source: {in_dir}")
-    print(f"  Sessions: {notes_data.get('session_count', 0)}")
-    print(f"  Total entries: {len(entries)}")
-    print(f"  Last updated: {notes_data.get('last_updated', 'never')}")
+    stats = defaultdict(int)
+    for fpath, rating in ratings.items():
+        stats[rating] += 1
 
-    # Separate rated and flagged
-    rated = []
-    good = []
-    bad = []
-    noted = []
+    favorites = [f for f, r in ratings.items() if r == "favorite"]
+    good = [f for f, r in ratings.items() if r == "good"]
+    bad = [f for f, r in ratings.items() if r == "bad"]
+    trash = [f for f, r in ratings.items() if r == "trash"]
 
-    for path_str, entry in entries:
-        r = entry.get("rating")
-        if r:
-            rated.append((r, path_str, entry))
-        fl = entry.get("flag", "")
-        if fl == "good":
-            good.append((path_str, entry))
-        elif fl == "bad":
-            bad.append((path_str, entry))
-        if entry.get("note"):
-            noted.append((path_str, entry))
-
-    if rated:
-        rated.sort(key=lambda x: x[0], reverse=True)
-        avg = sum(r for r, _, _ in rated) / len(rated)
-        print(f"\n  ├─ Average rating: {avg:.2f}/5")
-        print(f"  ├─ Rated files: {len(rated)}")
-
-        print(f"\n  Top 5:")
-        for r, path_str, entry in rated[:5]:
-            flag = f" [{entry.get('flag', '').upper()}]" if entry.get('flag') else ""
-            note = f" — {entry['note']}" if entry.get('note') else ""
-            print(f"    ★ {r}/5{flag}  {path_str.split('/')[-1]}{note}")
-
-        print(f"\n  Bottom 5:")
-        for r, path_str, entry in rated[-5:]:
-            flag = f" [{entry.get('flag', '').upper()}]" if entry.get('flag') else ""
-            note = f" — {entry['note']}" if entry.get('note') else ""
-            print(f"    ★ {r}/5{flag}  {path_str.split('/')[-1]}{note}")
-
-    if good:
-        print(f"\n  Flagged GOOD: {len(good)} files")
-        for path_str, entry in good[:5]:
-            note = f" — {entry['note']}" if entry.get('note') else ""
-            print(f"    ✓ {path_str.split('/')[-1]}{note}")
-
-    if bad:
-        print(f"\n  Flagged BAD: {len(bad)} files")
-        for path_str, entry in bad[:5]:
-            note = f" — {entry['note']}" if entry.get('note') else ""
-            print(f"    ✗ {path_str.split('/')[-1]}{note}")
-
-    if noted:
-        print(f"\n  All notes ({len(noted)}):")
-        for path_str, entry in noted:
-            r = entry.get("rating", "-")
-            fl = entry.get("flag", "")
-            flag_str = f" [{fl.upper()}]" if fl else ""
-            print(f"    [{r}]{flag_str} {path_str.split('/')[-1]}: {entry['note']}")
-
-    if not rated and not good and not bad and not noted:
-        print("\n  No ratings or notes found.")
-
-    # Per-class breakdown if directory has class subdirs
-    if rated:
-        from collections import defaultdict
-        class_ratings = defaultdict(list)
-        for r, path_str, entry in rated:
-            cls = path_str.split("/")[-2] if "/" in path_str else "?"
-            class_ratings[cls].append(r)
-
-        if len(class_ratings) > 1:
-            print(f"\n  Per-class averages:")
-            for cls in sorted(class_ratings.keys()):
-                vals = class_ratings[cls]
-                avg_c = sum(vals) / len(vals)
-                print(f"    {cls:15s}: {avg_c:.2f}/5 ({len(vals)} files)")
-
+    total = len(ratings)
+    print(f"Listening Report — {in_dir}")
+    print(f"{'='*60}")
+    print(f"Total files reviewed: {total}")
+    print(f"  Favorite: {stats.get('favorite', 0)}")
+    print(f"  Good:     {stats.get('good', 0)}")
+    print(f"  Bad:      {stats.get('bad', 0)}")
+    print(f"  Trash:    {stats.get('trash', 0)}")
+    print(f"  Skip:     {stats.get('skip', 0)}")
     print()
+
+    if favorites:
+        print(f"Favorites ({len(favorites)}):")
+        for f in favorites[:20]:
+            p = Path(f)
+            print(f"  ★ {p.name}")
+    if good:
+        print(f"\nGood ({len(good)}):")
+        for f in good[:10]:
+            p = Path(f)
+            print(f"  ✓ {p.name}")
+
+    print(f"\nSession count: {session.get('session_count', 0)}")
+    print(f"Last updated: {session.get('last_updated', 'never')}")

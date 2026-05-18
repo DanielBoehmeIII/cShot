@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 import numpy as np
 from scipy import signal as sp_signal
 from gen import SAMPLE_RATE
@@ -391,9 +392,48 @@ def estimate_key(pitches_hz: list[float], confidence_threshold: float = 0.3) -> 
     return best_key or "unknown", confidence
 
 
+def compute_pitch_spectral(samples: np.ndarray, sr: int = SAMPLE_RATE,
+                            fmin: float = 30.0, fmax: float = 2000.0) -> tuple[float, float]:
+    """Spectral pitch detection using harmonic product spectrum (HPS).
+    Returns (pitch_hz, confidence) — better for low fundamentals with strong harmonics."""
+    n = min(len(samples), 16384)
+    if n < 256:
+        return 0.0, 0.0
+    window = np.hanning(n)
+    spec = np.abs(np.fft.rfft(samples[:n] * window))
+    freqs = np.fft.rfftfreq(n, 1/sr)
+    lo = max(1, np.searchsorted(freqs, fmin))
+    hi = min(len(spec), np.searchsorted(freqs, fmax) + 1)
+    if hi - lo < 2:
+        return 0.0, 0.0
+    spec_log = np.log10(spec + 1e-10)
+    n_harmonics = 5
+    hps = np.zeros(hi)
+    for h in range(1, n_harmonics + 1):
+        downsampled = np.zeros(hi)
+        for i in range(lo, hi):
+            idx = i * h
+            if idx < hi:
+                downsampled[i] = spec_log[idx]
+        hps += downsampled
+    hps_peak = np.max(hps[lo:hi])
+    if hps_peak < -5:
+        return 0.0, 0.0
+    peak_idx = np.argmax(hps[lo:hi]) + lo
+    pitch = freqs[peak_idx]
+    confidence = float(np.clip((hps_peak + 10) / 10, 0.0, 1.0))
+    return float(pitch), confidence
+
+
 def detect_pitch_full(samples: np.ndarray, sr: int = SAMPLE_RATE) -> dict:
-    """Full pitch detection: Hz, MIDI note, note name, confidence, key estimate."""
-    pitch_hz, confidence = compute_pitch_confidence(samples, sr)
+    """Full pitch detection: Hz, MIDI note, note name, confidence, key estimate.
+    Uses both autocorrelation (better for clean tones) and spectral HPS (better for bass/harmonics)."""
+    pitch_acf, conf_acf = compute_pitch_confidence(samples, sr)
+    pitch_spec, conf_spec = compute_pitch_spectral(samples, sr)
+    if conf_spec > conf_acf and pitch_spec > 0:
+        pitch_hz, confidence = pitch_spec, conf_spec
+    else:
+        pitch_hz, confidence = pitch_acf, conf_acf
     midi = hz_to_midi(pitch_hz) if pitch_hz > 0 else 0.0
     note = midi_to_note(midi) if midi > 0 else "---"
     return {
@@ -401,6 +441,10 @@ def detect_pitch_full(samples: np.ndarray, sr: int = SAMPLE_RATE) -> dict:
         "midi_note": round(midi, 1),
         "note_name": note,
         "confidence": confidence,
+        "pitch_acf": round(pitch_acf, 1),
+        "pitch_spec": round(pitch_spec, 1),
+        "conf_acf": round(conf_acf, 3),
+        "conf_spec": round(conf_spec, 3),
     }
 
 
@@ -431,9 +475,21 @@ def compute_pitch_confidence(samples: np.ndarray, sr: int = SAMPLE_RATE,
     if max_val < 1e-6:
         return 0.0, 0.0
     peak_lag = np.argmax(autocorr[lag_min:lag_max]) + lag_min
-    pitch = sr / peak_lag
+    sub_candidates = [peak_lag]
+    for mult in range(2, 6):
+        cand = peak_lag * mult
+        if cand < lag_max:
+            sub_candidates.append(cand)
+    best_sub_lag = peak_lag
+    best_sub_val = max_val
+    for cand in sub_candidates:
+        val = autocorr[cand] if cand < len(autocorr) else 0
+        if val > best_sub_val * 0.85:
+            best_sub_lag = cand
+            best_sub_val = val
+    pitch = sr / best_sub_lag
     energy = np.sum(samples ** 2)
-    normalized = max_val / max(energy, 1e-10)
+    normalized = best_sub_val / max(energy, 1e-10)
     confidence = float(np.clip(np.sqrt(normalized), 0.0, 1.0))
     return float(pitch), confidence
 
@@ -484,6 +540,86 @@ def compute_noise_floor_estimate(samples: np.ndarray, percentile: float = 10.0) 
     env = np.abs(samples)
     return float(np.percentile(env, percentile))
 
+
+def detect_tempo(samples: np.ndarray, sr: int = SAMPLE_RATE,
+                 bpm_min: float = 60.0, bpm_max: float = 200.0) -> tuple[float, float]:
+    """Detect tempo (BPM) using onset autocorrelation.
+    Returns (bpm, confidence).
+    """
+    if len(samples) < sr:  # need at least 1 second
+        return 120.0, 0.0
+
+    frame_size = 1024
+    hop_size = 512
+    prev_spec = np.zeros(frame_size // 2)
+    onsets = []
+
+    for i in range(0, len(samples) - frame_size, hop_size):
+        frame = samples[i:i+frame_size]
+        spectrum = np.abs(np.fft.rfft(frame))
+        half = min(len(spectrum), len(prev_spec))
+        flux = float(np.sum(np.maximum(0, spectrum[:half] - prev_spec[:half])))
+        onsets.append(flux)
+        prev_spec = spectrum[:half]
+
+    onsets = np.array(onsets)
+    if len(onsets) < 10 or np.std(onsets) < 1e-10:
+        return 120.0, 0.0
+
+    onset_env = onsets - np.mean(onsets)
+    onset_env = np.maximum(onset_env, 0)
+
+    acf = np.correlate(onset_env, onset_env, mode='full')
+    acf = acf[len(acf)//2:]
+    if len(acf) < 2:
+        return 120.0, 0.0
+
+    lag_min = max(1, int(60.0 * sr / (bpm_max * hop_size)))
+    lag_max = min(len(acf), int(60.0 * sr / (bpm_min * hop_size)))
+    if lag_max <= lag_min:
+        return 120.0, 0.0
+
+    acf[:lag_min] = 0
+    if lag_max < len(acf):
+        acf[lag_max:] = 0
+    acf[0] = 0
+
+    peak_val = np.max(acf)
+    if peak_val < 1e-10:
+        return 120.0, 0.0
+    peak_lag = np.argmax(acf)
+    bpm = 60.0 * sr / (peak_lag * hop_size)
+    bpm = np.clip(bpm, bpm_min, bpm_max)
+
+    energy = np.sum(onset_env ** 2)
+    confidence = float(np.clip(peak_val / max(energy, 1e-10) * 10, 0.0, 1.0))
+
+    return float(bpm), confidence
+
+
+_FEATURE_CACHE: dict[str, dict] = {}
+
+def compute_features_cached(wav_path: str) -> dict:
+    """Compute features for a WAV file with in-memory caching.
+    Cache is invalidated when the file is modified.
+    """
+    from gen.io import read_wav
+    p = Path(wav_path)
+    cache_key = f"{p.resolve()}:{p.stat().st_mtime}"
+    if cache_key in _FEATURE_CACHE:
+        return _FEATURE_CACHE[cache_key]
+    result = read_wav(p)
+    if result is None:
+        return {}
+    samples, sr = result
+    if samples.ndim == 2:
+        samples = samples.mean(axis=1)
+    feats = compute_features(samples, sr)
+    _FEATURE_CACHE[cache_key] = feats
+    return feats
+
+def clear_feature_cache():
+    _FEATURE_CACHE.clear()
 
 def compute_features(samples: np.ndarray, sr: int = SAMPLE_RATE) -> dict:
     """Compute comprehensive feature set for a sample."""

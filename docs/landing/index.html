@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cShot — Custom One-Shot Kits for Producers</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.6; }
+  .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+  header { text-align: center; padding: 80px 0 40px; }
+  h1 { font-size: 3em; font-weight: 800; background: linear-gradient(135deg, #a855f7, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
+  h2 { font-size: 1.5em; color: #888; font-weight: 400; margin-bottom: 40px; }
+  .tagline { font-size: 1.2em; color: #aaa; margin-bottom: 40px; }
+  .cta { display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1.1em; transition: transform 0.2s; }
+  .cta:hover { transform: translateY(-2px); }
+  .section { margin: 60px 0; }
+  .section h3 { font-size: 1.5em; margin-bottom: 24px; color: #c0c0c0; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin: 40px 0; }
+  .step { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 24px; }
+  .step .num { font-size: 2em; font-weight: 800; color: #6366f1; }
+  .step h4 { margin: 12px 0 8px; color: #e0e0e0; }
+  .step p { color: #777; font-size: 0.9em; }
+  pre { background: #111; border: 1px solid #222; border-radius: 8px; padding: 20px; overflow-x: auto; margin: 20px 0; font-size: 0.9em; }
+  code { color: #a78bfa; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .feature { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 24px; }
+  .feature h4 { color: #e0e0e0; margin-bottom: 8px; }
+  .feature p { color: #777; font-size: 0.9em; }
+  .footer { text-align: center; padding: 40px 0; color: #555; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>cShot</h1>
+    <p class="tagline">Custom one-shot kits from songs, samples, genres, and vibes</p>
+    <a class="cta" href="#install">Try cShot</a>
+  </header>
+
+  <div class="section">
+    <h3>How it works</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h4>Describe</h4>
+        <p>Describe the vibe: &ldquo;dark rnb one shots&rdquo; or upload a song/sample</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h4>Generate</h4>
+        <p>cShot creates 20-200 one-shot sounds tailored to your reference in seconds</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h4>Curate</h4>
+        <p>Listen, rate, favorite &mdash; then export your kit to your DAW</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Three ways to create</h3>
+    <div class="features">
+      <div class="feature">
+        <h4>From a Vibe</h4>
+        <p><code>cshot make "dark rnb one shot kit"</code></p>
+        <p>Describe the sound you want. cShot infers genre, mood, and categories.</p>
+      </div>
+      <div class="feature">
+        <h4>From a Song</h4>
+        <p><code>cshot from-song track.wav</code></p>
+        <p>Upload any song. cShot analyzes tempo, key, and texture to create a matching kit.</p>
+      </div>
+      <div class="feature">
+        <h4>From a Sample</h4>
+        <p><code>cshot from-sample clap.wav</code></p>
+        <p>Build complementary sounds around one sample for a coherent mini kit.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="install">
+    <h3>Install</h3>
+    <pre><code>git clone https://github.com/anomalyco/cShot.git
+cd cShot
+pip install -r requirements.txt
+./cshot make "dark rnb one shot kit" --count 50</code></pre>
+    <p>Or install to PATH:</p>
+    <pre><code>pip install -e .
+cshot make "alien trap drum kit" --count 40</code></pre>
+  </div>
+
+  <div class="section">
+    <h3>Demo kits</h3>
+    <pre><code># Generate a quick demo in seconds
+./cshot demo "dark rnb one shots" --count 20
+
+# 5 flagship kits
+./cshot build-demo-kits --count 30</code></pre>
+  </div>
+
+  <div class="footer">
+    <p>MIT License &middot; Generated sounds are safe for commercial use</p>
+    <p><a href="https://github.com/anomalyco/cShot" style="color:#6366f1;">GitHub</a></p>
+  </div>
+</div>
+</body>
+</html>

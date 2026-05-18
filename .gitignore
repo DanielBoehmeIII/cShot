@@ -16,3 +16,15 @@ reference_analysis.json
 class_profiles.json
 __pycache__/
 *.pyc
+
+# Local env / generated analysis
+.venv/
+ratings.jsonl
+taste_profile.json
+palette_embedding.json
+song_dna.json
+reference_db/
+gen/census/*.json
+gen/census/*.html
+gen/census/*.md
+gen/census/*.parquet
