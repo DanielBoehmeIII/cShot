@@ -62,7 +62,7 @@ pub fn apply_sculpt(samples: &mut Vec<f32>, controls: &SculptControls) {
         } else if target_len > samples.len() {
             let extra = target_len - samples.len();
             samples.resize(target_len, 0.0);
-            let fade_len = extra.min((SAMPLE_RATE as f32 * 0.05) as usize);
+            let _fade_len = extra.min((SAMPLE_RATE as f32 * 0.05) as usize);
             for i in samples.len().saturating_sub(extra)..samples.len() {
                 let t = (i - (samples.len() - extra)) as f32 / extra as f32;
                 samples[i] = samples[samples.len() - extra - 1].abs() * 0.01 * t * (1.0 - t);
@@ -115,7 +115,7 @@ pub fn apply_sculpt(samples: &mut Vec<f32>, controls: &SculptControls) {
         if tnb > 0.5 {
             let noise_amt = (tnb - 0.5) * 0.3;
             for i in 0..samples.len() {
-                let t = i as f32 / SAMPLE_RATE as f32;
+                let _t = i as f32 / SAMPLE_RATE as f32;
                 let n = (i as f32 * 127.1).sin().fract() * 2.0 - 1.0;
                 samples[i] = (samples[i] * (1.0 - noise_amt * 0.3) + n * noise_amt * 0.2).clamp(-1.0, 1.0);
             }

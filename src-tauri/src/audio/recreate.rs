@@ -468,7 +468,7 @@ pub fn extract_target_envelope(samples: &[f32], num_points: usize) -> Vec<f32> {
 
 pub fn params_from_analysis(analysis: &AudioAnalysis, samples: &[f32]) -> ResynthesisParams {
     let st = SoundType::from_str(&analysis.sound_type_hint);
-    let pitch = analysis.pitch_estimate.unwrap_or_else(|| match st {
+    let pitch = analysis.pitch_estimate.unwrap_or(match st {
         SoundType::Kick | SoundType::Bass => 60.0,
         SoundType::Snare => 200.0,
         SoundType::ClosedHat => 400.0,

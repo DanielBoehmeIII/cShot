@@ -114,7 +114,7 @@ pub fn generate_click(config: &TransientConfig, num_samples: usize) -> Vec<f32> 
         ClickCharacter::Sharp => {
             for i in pre_attack..(pre_attack + transient_samples).min(num_samples) {
                 let t = (i - pre_attack) as f32 / SAMPLE_RATE as f32;
-                let frac = (i - pre_attack) as f32 / transient_samples.max(1) as f32;
+                let _frac = (i - pre_attack) as f32 / transient_samples.max(1) as f32;
                 let env = (-800.0 * t).exp() * 0.5 + (-200.0 * t).exp() * 0.5;
                 let tone = (2.0 * PI * config.pitch_click_hz * t).sin() * 0.6
                     + (2.0 * PI * config.pitch_click_hz * 1.7 * t).sin() * 0.25
@@ -154,13 +154,13 @@ pub fn generate_click(config: &TransientConfig, num_samples: usize) -> Vec<f32> 
         ClickCharacter::Noise => {
             for i in pre_attack..(pre_attack + transient_samples).min(num_samples) {
                 let t = (i - pre_attack) as f32 / SAMPLE_RATE as f32;
-                let frac = (i - pre_attack) as f32 / transient_samples.max(1) as f32;
+                let _frac = (i - pre_attack) as f32 / transient_samples.max(1) as f32;
                 let env = (-500.0 * t).exp();
                 let n1 = noise_s((i as f32 * 0.8 + seed_phase).fract());
                 let n2 = noise_s((i as f32 * 1.4 + seed_phase * 0.5).fract());
                 let n3 = noise_s((i as f32 * 2.5 + seed_phase * 0.3).fract());
                 let noise = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
-                let hp_alpha = (1.0 / (1.0 + 2.0 * PI * 3000.0 / SAMPLE_RATE as f32));
+                let hp_alpha = 1.0 / (1.0 + 2.0 * PI * 3000.0 / SAMPLE_RATE as f32);
                 let shaped = noise * (1.0 - hp_alpha) + if i > pre_attack && pre_attack > 0 { buf[i-1] * hp_alpha } else { 0.0 };
                 buf[i] = shaped * env * config.sharpness;
             }
@@ -304,11 +304,9 @@ pub fn multiband_transient_processor(samples: &mut [f32], config: &MultiBandTran
         vec![0.0f32; samples.len()],
     ];
 
-    for i in 0..samples.len() {
-        bands[1][i] = samples[i];
-        bands[2][i] = samples[i];
-        bands[3][i] = samples[i];
-    }
+    bands[1].copy_from_slice(samples);
+    bands[2].copy_from_slice(samples);
+    bands[3].copy_from_slice(samples);
 
     low_pass(&mut bands[0], cf1);
     band_pass(&mut bands[1], cf1, cf2);
@@ -370,7 +368,7 @@ fn band_pass(samples: &mut [f32], low_hz: f32, high_hz: f32) {
     let dt = 1.0 / SAMPLE_RATE as f32;
     let alpha_low_c = dt / (rc_low + dt);
     let alpha_high = (rc_high / (rc_high + dt)).clamp(0.0, 1.0);
-    let mut lp = alpha_low_c;
+    let _lp = alpha_low_c;
     let mut prev_lp = 0.0f32;
     let mut prev_hp1 = 0.0f32;
     let mut prev_hp2 = 0.0f32;
@@ -433,9 +431,8 @@ pub fn transient_body_cohesion(samples: &mut [f32], cohesion: f32) {
         let shift_samples = shift_amt as usize;
         if tr_onset + shift_samples < body_band.len() {
             let mut shifted = vec![0.0f32; body_band.len()];
-            for i in tr_onset..body_band.len() - shift_samples {
-                shifted[i + shift_samples] = body_band[i];
-            }
+            let src_end = body_band.len() - shift_samples;
+            shifted[tr_onset + shift_samples..body_band.len()].copy_from_slice(&body_band[tr_onset..src_end]);
             for (i, &s) in shifted.iter().enumerate() {
                 samples[i] = transient_band[i] * cohesion + s * (1.0 - cohesion) + body_band[i].min(s);
             }
@@ -895,7 +892,6 @@ pub fn lookahead_limiter(samples: &mut [f32], ceiling_db: f32, lookahead_ms: f32
     let mut gain: f32 = 1.0;
     let release_coeff = (-1.0 / (SAMPLE_RATE as f32 * 0.05)).exp();
     let attack_coeff = (-1.0 / (SAMPLE_RATE as f32 * 0.0005)).exp();
-    let mut write_idx = 0;
     for read_idx in 0..samples.len() {
         let lookahead_idx = (read_idx + lookahead).min(samples.len() - 1);
         let future_abs = samples[lookahead_idx].abs();
@@ -909,8 +905,7 @@ pub fn lookahead_limiter(samples: &mut [f32], ceiling_db: f32, lookahead_ms: f32
         } else {
             gain += (target_gain - gain) * (1.0 - release_coeff);
         }
-        samples[write_idx] = delayed[read_idx] * gain;
-        write_idx += 1;
+        samples[read_idx] = delayed[read_idx] * gain;
     }
 }
 
@@ -1134,9 +1129,8 @@ pub fn align_transient_peaks(target: &mut [f32], reference: &[f32]) {
         let shift = ref_peak - tgt_peak;
         if tgt_peak + shift < target.len() {
             let mut shifted = vec![0.0f32; target.len()];
-            for i in tgt_peak..target.len() - shift {
-                shifted[i + shift] = target[i];
-            }
+            let src_end = target.len() - shift;
+            shifted[tgt_peak + shift..target.len()].copy_from_slice(&target[tgt_peak..src_end]);
             target.copy_from_slice(&shifted);
         }
     }
@@ -1383,7 +1377,7 @@ pub fn filtered_noise_layer(
     let mut layer = vec![0.0f32; num_samples];
     if density <= 0.0 { return layer; }
     for i in 0..num_samples {
-        let t = i as f32 / sample_rate as f32;
+        let _t = i as f32 / sample_rate as f32;
         let frac = (i as f32 / num_samples.max(1) as f32).min(1.0);
         let n1 = ((seed + i as f32 * 0.37).fract() * 127.1).sin() * 43758.5453;
         let n2 = ((seed * 1.3 + i as f32 * 0.53).fract() * 127.1).sin() * 43758.5453;
@@ -1395,7 +1389,7 @@ pub fn filtered_noise_layer(
         let rc = 1.0 / (2.0 * PI * hp_now.max(20.0));
         let dt = 1.0 / sample_rate as f32;
         let alpha = (rc / (rc + dt)).clamp(0.0, 1.0);
-        let tmp1 = alpha * (layer.get(i.saturating_sub(1)).copied().unwrap_or(0.0) + n - layer.get(i.saturating_sub(1)).copied().unwrap_or(0.0));
+        let _tmp1 = alpha * (layer.get(i.saturating_sub(1)).copied().unwrap_or(0.0) + n - layer.get(i.saturating_sub(1)).copied().unwrap_or(0.0));
         layer[i] = n * density * (1.0 - alpha * 0.5);
     }
     layer
@@ -1481,9 +1475,90 @@ pub fn cinematic_tail_extension(samples: &mut [f32], extension_amount: f32) {
         let sub = (2.0 * PI * sub_freq * local_t).sin() * 0.15 * extension_amount;
         let noise_val = ((i as f32 * 0.04).fract() * 127.1).sin() * 43758.5453;
         let n = (noise_val.fract() * 2.0 - 1.0) * 0.04 * extension_amount;
-        let global_t = i as f32 / SAMPLE_RATE as f32;
+        let _global_t = i as f32 / SAMPLE_RATE as f32;
         let boost = 1.0 + extension_amount * 0.3 * (-0.8 * local_t).exp();
         samples[i] = (samples[i] + sub + n) * boost.min(2.0);
+    }
+}
+
+// ─── Class-Specific DSP Shaping ───────────────────────────
+
+pub fn generate_detuned_oscillators(
+    pitch_hz: f32,
+    detune_cents: f32,
+    num_oscillators: usize,
+    num_samples: usize,
+    sample_rate: u32,
+) -> Vec<f32> {
+    let mut out = vec![0.0f32; num_samples];
+    if num_oscillators == 0 { return out; }
+    let n = num_oscillators as f32;
+    for osc in 0..num_oscillators {
+        let offset = (osc as f32 - (n - 1.0) * 0.5) / n * detune_cents / 100.0;
+        let ratio = 2.0_f32.powf(offset / 12.0);
+        let freq = pitch_hz * ratio;
+        let phase = osc as f32 * 0.27;
+        for i in 0..num_samples {
+            let t = i as f32 / sample_rate as f32;
+            out[i] += (2.0 * PI * freq * t + phase).sin();
+        }
+    }
+    let scale = 1.0 / n;
+    for s in out.iter_mut() { *s *= scale; }
+    out
+}
+
+pub fn apply_room_tail(samples: &mut [f32], decay: f32, delay_ms: f32, sample_rate: u32) {
+    if samples.len() < 64 || decay <= 0.0 { return; }
+    let delay = (delay_ms / 1000.0 * sample_rate as f32) as usize;
+    if delay < 2 || delay >= samples.len() { return; }
+    let mut buf = vec![0.0f32; delay];
+    for i in 0..samples.len() {
+        let fb = buf[i % delay];
+        buf[i % delay] = samples[i];
+        samples[i] += fb * decay;
+    }
+}
+
+pub fn apply_metallic_resonance(samples: &mut [f32], intensity: f32, sample_rate: u32) {
+    if samples.len() < 64 || intensity <= 0.0 { return; }
+    let freqs = [2200.0, 3700.0, 5300.0, 7400.0, 9800.0];
+    let mut metal = vec![0.0f32; samples.len()];
+    for (j, &f) in freqs.iter().enumerate() {
+        let phase_offset = j as f32 * 0.5;
+        for i in 0..samples.len() {
+            let t = i as f32 / sample_rate as f32;
+            let env = (-35.0 * t).exp();
+            metal[i] += (2.0 * PI * f * t + phase_offset).sin() * env * 0.12;
+        }
+    }
+    let peak_m = metal.iter().map(|&s| s.abs()).fold(0.0f32, f32::max);
+    if peak_m > 0.0 {
+        for s in metal.iter_mut() { *s /= peak_m; }
+    }
+    for i in 0..samples.len() {
+        samples[i] += metal[i] * intensity * 0.3;
+    }
+}
+
+pub fn apply_moving_resonant_lp(
+    samples: &mut [f32],
+    start_cutoff: f32,
+    end_cutoff: f32,
+    resonance: f32,
+    sample_rate: u32,
+) {
+    if samples.len() < 4 || resonance <= 0.0 { return; }
+    let mut low = 0.0f32;
+    let mut band = 0.0f32;
+    for i in 0..samples.len() {
+        let frac = (i as f32 / samples.len() as f32).min(1.0);
+        let cutoff = start_cutoff + (end_cutoff - start_cutoff) * frac;
+        let f = 2.0 * (PI * cutoff / sample_rate as f32).sin();
+        let high = samples[i] - low - resonance * band;
+        band = band + f * high;
+        low = low + f * band;
+        samples[i] = low;
     }
 }
 
@@ -1532,7 +1607,7 @@ pub fn apply_tail_texture(samples: &mut [f32], config: &TailTextureConfig) {
             42.0,
             sr,
         );
-        let peak_t = texture.iter().map(|&s| s.abs()).fold(0.0f32, f32::max);
+        let _peak_t = texture.iter().map(|&s| s.abs()).fold(0.0f32, f32::max);
         let peak_s = samples.iter().map(|&s| s.abs()).fold(0.0f32, f32::max);
         if peak_s > 0.001 {
             let blend = config.noise_texture_density * 0.15;

@@ -1,10 +1,15 @@
+#![allow(
+    clippy::collapsible_if,
+    clippy::get_first,
+    clippy::too_many_arguments,
+    clippy::blocks_in_conditions,
+)]
+
 use std::path::PathBuf;
 use std::time::Instant;
-use std::collections::HashMap;
 use cshot_lib::audio::resynthesize;
-use cshot_lib::audio::{SoundType, SAMPLE_RATE};
+use cshot_lib::audio::SoundType;
 use cshot_lib::audio::midi;
-use cshot_lib::audio::dsp;
 use cshot_lib::audio::humanize::{self, HumanizeParams};
 use cshot_lib::audio::process;
 
@@ -96,13 +101,12 @@ fn duration_for_type(st: SoundType) -> f32 {
 }
 
 fn preset_dir() -> PathBuf {
-    let base = std::env::var("CSHOT_PRESET_DIR")
+    std::env::var("CSHOT_PRESET_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| {
             let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
             PathBuf::from(home).join(".cshot").join("presets")
-        });
-    base
+        })
 }
 
 fn build_params(
@@ -426,7 +430,7 @@ fn cmd_presets(args: &[String]) {
 }
 
 fn cmd_automate(args: &[String]) {
-    let output = args.get(0).cloned().unwrap_or_else(|| "automated.wav".to_string());
+    let _output = args.get(0).cloned().unwrap_or_else(|| "automated.wav".to_string());
     let type_name = args.get(1).cloned().unwrap_or_else(|| "kick".to_string());
     let total_duration: f32 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(2000.0);
     let note_interval: f32 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(250.0);

@@ -167,7 +167,7 @@ fn detect_genre_role(analysis: &AudioAnalysis, fp: &SpectralFingerprint) -> Genr
     }
 }
 
-fn classify_transients(analysis: &AudioAnalysis, samples: &[f32]) -> TransientClassification {
+fn classify_transients(analysis: &AudioAnalysis, _samples: &[f32]) -> TransientClassification {
     let count = analysis.transient_count;
     let strength = analysis.transient_strength;
     let crest = if analysis.rms > 0.0 { analysis.peak / analysis.rms } else { 1.0 };
@@ -300,7 +300,7 @@ fn compute_confidence(role: &GenreRole, tc: &TransientClassification, _fp: &Spec
         TransientType::None => 0.4,
         _ => 0.8,
     };
-    (role_conf * 0.5f32 + transient_conf * 0.5f32).min(1.0f32) as f32
+    (role_conf * 0.5f32 + transient_conf * 0.5f32).min(1.0f32)
 }
 
 pub fn score_for_ranking(analysis: &AudioAnalysis, samples: &[f32]) -> f32 {
@@ -417,7 +417,7 @@ pub fn infer_sound_character(samples: &[f32], analysis: &AudioAnalysis) -> Sound
     let transient_style = {
         let count = analysis.transient_count;
         let atk = analysis.attack_ms;
-        let zcr = analysis.zero_crossing_rate;
+        let _zcr = analysis.zero_crossing_rate;
         if count > 4 { TransientStyle::MultiHit }
         else if count >= 3 && analysis.noise_estimate > 0.4 { TransientStyle::Layered }
         else if crest > 10.0 && atk < 2.0 && fp.centroid > 3000.0 { TransientStyle::SharpClick }
@@ -549,13 +549,13 @@ pub fn analyze_genre_intelligence(analysis: &AudioAnalysis) -> GenreIntelligence
 
 fn compute_genre_candidates(analysis: &AudioAnalysis) -> Vec<(String, f32)> {
     let mut candidates = Vec::new();
-    let sc = analysis.spectral_centroid;
+    let _sc = analysis.spectral_centroid;
     let noise = analysis.noise_estimate;
     let sub = analysis.sub_energy_ratio;
     let attack = analysis.attack_ms;
     let crest = analysis.crest_factor;
     let brightness = analysis.brightness;
-    let transient = analysis.transient_strength;
+    let _transient = analysis.transient_strength;
     let zcr = analysis.zero_crossing_rate;
     let duration = analysis.duration_ms;
     let trans_count = analysis.transient_count;

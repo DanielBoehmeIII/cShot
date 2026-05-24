@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 use super::{SoundType, SAMPLE_RATE};
-use super::dsp::{self, ClickCharacter, TransientConfig};
+use super::dsp::{ClickCharacter, TransientConfig};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct ResynthesisParams {
@@ -20,6 +20,9 @@ pub struct ResynthesisParams {
     pub brightness: f32,
     pub layer_mix: Vec<f32>,
     pub seed: u64,
+    pub stereo_width: f32,
+    pub filter_sweep: f32,
+    pub metallic_amount: f32,
 }
 
 impl Default for ResynthesisParams {
@@ -41,6 +44,9 @@ impl Default for ResynthesisParams {
             brightness: 0.5,
             layer_mix: vec![1.0, 0.0, 0.0, 0.0, 0.0],
             seed: 0,
+            stereo_width: 0.0,
+            filter_sweep: 0.0,
+            metallic_amount: 0.0,
         }
     }
 }
@@ -59,7 +65,7 @@ impl ResynthesisParams {
         let s = self.seed as f32;
         let mut p = self.clone();
         let r1 = frac(s * 1.618);
-        let r2 = frac(s * 3.141);
+        let r2 = frac(s * std::f32::consts::PI);
         let r3 = frac(s * 5.789);
         let r4 = frac(s * 7.331);
         let r5 = frac(s * 11.237);
@@ -306,6 +312,87 @@ pub fn params_for_sound_type(sound_type: SoundType, pitch_hz: f32, duration_ms: 
     }
 }
 
+fn apply_class_specific_dsp(samples: &mut [f32], params: &ResynthesisParams) {
+    match params.sound_type {
+        SoundType::Kick => {
+            let mut snap = samples.to_vec();
+            super::dsp::transient_enhance(&mut snap, 3.0);
+            for (i, s) in samples.iter_mut().enumerate() {
+                *s = *s * 0.75 + snap[i] * 0.25;
+            }
+            super::dsp::biquad_low_shelf(samples, params.pitch_hz * 1.5, 3.0, 0.7);
+            super::dsp::biquad_low_shelf(samples, 300.0, -2.0, 0.7);
+        }
+        SoundType::Snare => {
+            super::dsp::biquad_peaking(samples, 220.0, 4.0, 2.0);
+            super::dsp::biquad_high_shelf(samples, 5000.0, 4.0, 0.7);
+        }
+        SoundType::Clap => {
+            super::dsp::biquad_high_shelf(samples, 4000.0, 4.0, 0.7);
+        }
+        SoundType::ClosedHat => {
+            super::dsp::apply_metallic_resonance(samples, 0.5, SAMPLE_RATE);
+            super::dsp::biquad_peaking(samples, 10000.0, 6.0, 3.0);
+            // Enforce extreme shortness: silence the tail half
+            let half = samples.len() / 2;
+            for s in samples.iter_mut().skip(half) {
+                *s = 0.0;
+            }
+        }
+        SoundType::OpenHat => {
+            super::dsp::apply_metallic_resonance(samples, 0.25, SAMPLE_RATE);
+            super::dsp::biquad_high_shelf(samples, 7000.0, 4.0, 0.7);
+        }
+        SoundType::Bass => {
+            if params.sub_gain > 0.8 && params.body_gain > 0.5 {
+                // Sub808: deep sub emphasis, pitch glide accent
+                super::dsp::biquad_low_shelf(samples, 100.0, 5.0, 0.7);
+                super::dsp::biquad_low_shelf(samples, 50.0, 3.0, 0.7);
+            } else if params.click_amount > 0.15 {
+                // BassStab: resonant filter sweep (opens then stays)
+                super::dsp::apply_moving_resonant_lp(
+                    samples,
+                    params.pitch_hz * 0.5,
+                    params.pitch_hz * 4.0,
+                    2.0,
+                    SAMPLE_RATE,
+                );
+                super::dsp::biquad_low_shelf(samples, 120.0, 3.0, 0.7);
+            }
+        }
+        SoundType::Fx => {
+            // Impact: deep sub + room tail
+            super::dsp::biquad_low_shelf(samples, 60.0, 6.0, 0.7);
+            super::dsp::apply_room_tail(samples, 0.20, 25.0, SAMPLE_RATE);
+            super::dsp::apply_room_tail(samples, 0.12, 45.0, SAMPLE_RATE);
+        }
+        SoundType::Other => {
+            if params.body_gain > 0.3 {
+                // SynthStab: detuned oscillator stack + filter envelope
+                let num_samples = samples.len();
+                let detuned = super::dsp::generate_detuned_oscillators(
+                    params.pitch_hz, 15.0, 5, num_samples, SAMPLE_RATE,
+                );
+                for i in 0..num_samples {
+                    let t = i as f32 / SAMPLE_RATE as f32;
+                    let env = (-3.0 * t).exp();
+                    samples[i] += detuned[i] * env * 0.3;
+                }
+                // Filter envelope: closes slowly
+                super::dsp::apply_moving_resonant_lp(
+                    samples,
+                    (params.pitch_hz * 6.0).min(10000.0),
+                    (params.pitch_hz * 2.0).min(5000.0),
+                    1.5,
+                    SAMPLE_RATE,
+                );
+                super::dsp::biquad_high_shelf(samples, 4000.0, 2.0, 0.7);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn render_layers(params: &ResynthesisParams) -> Vec<f32> {
     let num_samples = (SAMPLE_RATE as f32 * params.duration_ms / 1000.0) as usize;
     if num_samples == 0 { return vec![]; }
@@ -383,6 +470,28 @@ fn render_layers(params: &ResynthesisParams) -> Vec<f32> {
         if harshness > 0.01 && params.sound_type != SoundType::ClosedHat && params.sound_type != SoundType::OpenHat {
             super::dsp::biquad_high_shelf(&mut output, 8000.0, -harshness * 4.0, 0.7);
         }
+    }
+
+    // Class-specific DSP shaping for audible differentiation
+    apply_class_specific_dsp(&mut output, params);
+
+    // Filter sweep — moving resonant LP from open to closed
+    if params.filter_sweep > 0.01 {
+        let sweep_start = (params.pitch_hz * 8.0).min(12000.0);
+        let sweep_end = (params.pitch_hz * 1.5).min(4000.0);
+        let resonance = 0.5 + params.filter_sweep * 2.0;
+        super::dsp::apply_moving_resonant_lp(
+            &mut output,
+            sweep_start,
+            sweep_end,
+            resonance,
+            SAMPLE_RATE,
+        );
+    }
+
+    // Metallic resonance enhancement
+    if params.metallic_amount > 0.01 {
+        super::dsp::apply_metallic_resonance(&mut output, params.metallic_amount, SAMPLE_RATE);
     }
 
     // Normalize with headroom
@@ -471,6 +580,7 @@ fn generate_body_layer(params: &ResynthesisParams, num_samples: usize) -> Vec<f3
         SoundType::Tom => &[(1.0, 1.0), (2.0, 0.5), (3.0, 0.25), (4.0, 0.1)],
         SoundType::Perc => &[(1.0, 1.0), (2.0, 0.5), (3.0, 0.15)],
         SoundType::Clap => &[(1.0, 0.7), (1.5, 0.5), (2.0, 0.25)],
+        SoundType::Other => &[(1.0, 1.0), (1.25, 0.5), (1.5, 0.6), (2.0, 0.3), (2.5, 0.15)],
         _ => &[(1.0, 1.0), (2.0, 0.4), (3.0, 0.15)],
     };
     let norm = harmonics.iter().map(|(_, a)| a).sum::<f32>();
@@ -483,6 +593,7 @@ fn generate_body_layer(params: &ResynthesisParams, num_samples: usize) -> Vec<f3
         SoundType::Snare => 0.01,
         SoundType::Bass => 0.03,
         SoundType::Tom => 0.015,
+        SoundType::Other => 0.015,
         _ => 0.0,
     };
 
@@ -532,13 +643,30 @@ fn generate_body_layer(params: &ResynthesisParams, num_samples: usize) -> Vec<f3
     layer
 }
 
+fn clap_noise_envelope(t: f32) -> f32 {
+    let burst_offsets = [0.0_f32, 0.012, 0.025, 0.042, 0.062, 0.090];
+    let mut env = 0.0_f32;
+    for &offset in &burst_offsets {
+        let local_t = (t - offset).max(0.0);
+        env += (-65.0 * local_t).exp();
+    }
+    env = (env * 0.25).min(1.0);
+    if t > 0.090 {
+        let tail_t = t - 0.090;
+        env + (-8.0 * tail_t).exp() * 0.10
+    } else {
+        env
+    }
+}
+
 fn generate_noise_layer(params: &ResynthesisParams, num_samples: usize) -> Vec<f32> {
     if params.noise_amount <= 0.0 { return vec![0.0f32; num_samples]; }
     let mut layer = vec![0.0f32; num_samples];
     let decay_samples = (SAMPLE_RATE as f32 * params.decay_ms / 1000.0) as usize;
-    let tail_samples = (SAMPLE_RATE as f32 * params.tail_ms / 1000.0) as usize;
+    let _tail_samples = (SAMPLE_RATE as f32 * params.tail_ms / 1000.0) as usize;
 
     let s1 = params.seed as f32;
+    let is_clap = params.sound_type == SoundType::Clap;
 
     // Multi-oscillator noise with different densities
     let noise_rates: [(f32, f32, f32); 6] = [
@@ -579,12 +707,17 @@ fn generate_noise_layer(params: &ResynthesisParams, num_samples: usize) -> Vec<f
             n
         };
 
-        // Dual-stage envelope: fast decay then slower tail
-        let env = if i < decay_samples {
+        // Envelope — class-specific
+        let env = if is_clap {
+            clap_noise_envelope(t)
+        } else if i < decay_samples {
             let decay_t = t;
             let fast_decay = (-6.0 * decay_t).exp();
             let texture_mod = 1.0 + 0.08 * (2.0 * PI * 3.0 * t).sin();
             fast_decay * texture_mod
+        } else if params.tail_ms <= 1.0 {
+            let after_t = t - params.decay_ms / 1000.0;
+            (-30.0 * after_t).exp() * (-6.0 * params.decay_ms / 1000.0).exp()
         } else {
             let tail_t = t - params.decay_ms / 1000.0;
             let tail_factor = (-2.5 * tail_t).exp();
@@ -658,7 +791,7 @@ fn generate_tail_layer(params: &ResynthesisParams, num_samples: usize) -> Vec<f3
     let mut layer = vec![0.0f32; num_samples];
     let tail_start = ((params.duration_ms - params.tail_ms) / 1000.0 * SAMPLE_RATE as f32) as usize;
     let tail_len = num_samples - tail_start;
-    if tail_len <= 0 { return layer; }
+    if tail_len == 0 { return layer; }
 
     let sub_freq = (params.pitch_hz * 0.4).max(25.0);
 
@@ -729,7 +862,7 @@ fn generate_tail_layer(params: &ResynthesisParams, num_samples: usize) -> Vec<f3
             SoundType::Fx => 100.0,
             _ => sub_freq * 4.0,
         };
-        let config = super::dsp::TailTextureConfig {
+        let _config = super::dsp::TailTextureConfig {
             resonant_q: resonance_q * 0.5,
             resonant_freq: res_freq,
             resonant_modulation: 0.3,

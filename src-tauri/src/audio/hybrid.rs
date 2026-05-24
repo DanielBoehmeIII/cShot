@@ -64,7 +64,7 @@ pub fn hybrid_reconstruct(
     params: &HybridParams,
 ) -> Vec<f32> {
     let st = SoundType::from_str(&analysis.sound_type_hint);
-    let pitch = analysis.pitch_estimate.unwrap_or_else(|| match st {
+    let pitch = analysis.pitch_estimate.unwrap_or(match st {
         SoundType::Kick | SoundType::Bass => 60.0,
         SoundType::Snare => 200.0,
         SoundType::ClosedHat => 400.0,

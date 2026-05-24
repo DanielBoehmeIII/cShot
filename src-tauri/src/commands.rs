@@ -555,9 +555,9 @@ pub async fn export_wav(
     let src = storage::sound_path(&sound_id);
 
     if !src.exists() {
-        return Err(format!(
-            "The sound file could not be found on disk. It may have been deleted or moved. Try generating the sound again."
-        ));
+          return Err(
+            "The sound file could not be found on disk. It may have been deleted or moved. Try generating the sound again.".to_string()
+        );
     }
 
     let file_size = fs::metadata(&src).map(|m| m.len()).unwrap_or(0);
@@ -2306,7 +2306,7 @@ pub async fn get_taste_profile() -> audio::taste::TasteProfile {
 }
 
 #[tauri::command]
-pub async fn get_taste_suggestions(sound_type: String) -> Vec<String> {
+pub async fn get_taste_suggestions(_sound_type: String) -> Vec<String> {
     let model = audio::taste::TasteModel::load();
     model.top_preferred_terms(10).into_iter().map(|(t, _)| t).collect()
 }
@@ -2484,7 +2484,7 @@ pub async fn generate_with_params(
     duration_ms: Option<f32>,
 ) -> Result<generator::SoundResult, String> {
     let st = audio::SoundType::from_str(&sound_type);
-    let pitch = pitch_hz.unwrap_or_else(|| match st {
+      let pitch = pitch_hz.unwrap_or(match st {
         audio::SoundType::Kick | audio::SoundType::Bass => 60.0,
         audio::SoundType::Snare => 200.0,
         audio::SoundType::ClosedHat => 400.0,
@@ -3581,4 +3581,125 @@ pub async fn save_evolution_member(
         &member.samples, &prompt, &sound_type,
         Some(label), member.generation as i64,
     )
+}
+
+// ─── OneShot API ───────────────────────────────────────────────────
+
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+pub struct SoundClassInfo {
+    pub value: String,
+    pub label: String,
+    pub description: String,
+}
+
+#[derive(Clone, serde::Serialize)]
+pub struct OneshotPreviewResult {
+    pub samples: Vec<f32>,
+    pub duration_ms: f32,
+    pub peak: f32,
+    pub rms: f32,
+    pub sample_rate: u32,
+}
+
+#[derive(Clone, serde::Serialize)]
+pub struct OneshotExportResult {
+    pub path: String,
+    pub filename: String,
+    pub file_size_bytes: u64,
+}
+
+#[tauri::command]
+pub async fn list_sound_classes() -> Vec<SoundClassInfo> {
+    vec![
+        SoundClassInfo { value: "808".into(), label: "808".into(), description: "Classic 808 kick/sub — deep sub-bass with slow pitch drop".into() },
+        SoundClassInfo { value: "kick".into(), label: "Kick".into(), description: "Standard kick drum — punchy attack, fast decay, low body".into() },
+        SoundClassInfo { value: "snare".into(), label: "Snare".into(), description: "Snare drum — noise burst + mid body tone".into() },
+        SoundClassInfo { value: "clap".into(), label: "Clap".into(), description: "Hand clap — staggered noise bursts, short room tail".into() },
+        SoundClassInfo { value: "closed_hat".into(), label: "Closed Hat".into(), description: "Closed hi-hat — short metallic tick, extreme high-pass".into() },
+        SoundClassInfo { value: "open_hat".into(), label: "Open Hat".into(), description: "Open hi-hat — longer metallic decay, bright tail".into() },
+        SoundClassInfo { value: "bass_stab".into(), label: "Bass Stab".into(), description: "Bass stab — short pitched bass hit, filter movement".into() },
+        SoundClassInfo { value: "impact_fx".into(), label: "Impact FX".into(), description: "Cinematic impact — sub drop + noise burst + evolving tail".into() },
+        SoundClassInfo { value: "synth_stab".into(), label: "Synth Stab".into(), description: "Synth stab — detuned oscillators, chord-like body".into() },
+    ]
+}
+
+#[tauri::command]
+pub async fn get_oneshot_defaults(sound_class: String) -> Result<crate::audio::spec::OneShotSpec, String> {
+    let class = crate::audio::spec::SoundClass::from_str(&sound_class);
+    Ok(match class {
+        crate::audio::spec::SoundClass::Sub808 => crate::audio::spec::OneShotSpec::preset_808(),
+        crate::audio::spec::SoundClass::Kick => crate::audio::spec::OneShotSpec::preset_kick(),
+        crate::audio::spec::SoundClass::Snare => crate::audio::spec::OneShotSpec::preset_snare(),
+        crate::audio::spec::SoundClass::Clap => crate::audio::spec::OneShotSpec::preset_clap(),
+        crate::audio::spec::SoundClass::ClosedHat => crate::audio::spec::OneShotSpec::preset_closed_hat(),
+        crate::audio::spec::SoundClass::OpenHat => crate::audio::spec::OneShotSpec::preset_open_hat(),
+        crate::audio::spec::SoundClass::BassStab => crate::audio::spec::OneShotSpec::preset_bass_stab(),
+        crate::audio::spec::SoundClass::ImpactFx => crate::audio::spec::OneShotSpec::preset_impact_fx(),
+        crate::audio::spec::SoundClass::SynthStab => crate::audio::spec::OneShotSpec::preset_synth_stab(),
+    })
+}
+
+#[tauri::command]
+pub async fn render_oneshot(
+    sound_class: String,
+    duration_ms: f32,
+    pitch_hz: f32,
+    gain: f32,
+    controls: Option<crate::audio::one_shot_controls::OneShotControls>,
+) -> Result<OneshotPreviewResult, String> {
+    let class = crate::audio::spec::SoundClass::from_str(&sound_class);
+    let spec = crate::audio::spec::OneShotSpec {
+        sound_class: class,
+        duration_ms,
+        pitch_hz,
+        gain,
+        controls,
+    };
+    let samples = spec.render();
+    if samples.is_empty() {
+        return Err("Rendered audio is empty".to_string());
+    }
+    if samples.iter().any(|s| s.is_nan() || s.is_infinite()) {
+        return Err("Rendered audio contains NaN/Inf".to_string());
+    }
+    let duration_ms_actual = samples.len() as f32 / crate::audio::SAMPLE_RATE as f32 * 1000.0;
+    let peak = crate::audio::compute_peak(&samples);
+    let rms = crate::audio::compute_rms(&samples);
+    Ok(OneshotPreviewResult {
+        samples,
+        duration_ms: duration_ms_actual,
+        peak,
+        rms,
+        sample_rate: crate::audio::SAMPLE_RATE,
+    })
+}
+
+#[tauri::command]
+pub async fn export_oneshot_wav(
+    sound_class: String,
+    duration_ms: f32,
+    pitch_hz: f32,
+    gain: f32,
+    controls: Option<crate::audio::one_shot_controls::OneShotControls>,
+    output_path: String,
+) -> Result<OneshotExportResult, String> {
+    let class = crate::audio::spec::SoundClass::from_str(&sound_class);
+    let spec = crate::audio::spec::OneShotSpec {
+        sound_class: class,
+        duration_ms,
+        pitch_hz,
+        gain,
+        controls,
+    };
+    let path = std::path::PathBuf::from(&output_path);
+    crate::audio::spec::render_to_wav(&spec, &path)?;
+    let file_size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+    let filename = path.file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_default();
+    Ok(OneshotExportResult {
+        path: path.to_string_lossy().to_string(),
+        filename,
+        file_size_bytes: file_size,
+    })
 }

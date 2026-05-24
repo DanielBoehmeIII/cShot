@@ -140,8 +140,7 @@ pub fn process_sound(
         samples.fill(0.0);
     }
 
-    let tags = super::analyze::apply_autotags(samples, &sound_type, None, None);
-    tags
+    super::analyze::apply_autotags(samples, &sound_type, None, None)
 }
 
 // ─── High-Quality Recreation Processing Chain ────────────
@@ -278,7 +277,7 @@ pub fn apply_micro_adjustments(samples: &mut Vec<f32>, adjustments: &[MicroAdjus
                     if new_len < samples.len() {
                         samples.truncate(new_len);
                     } else {
-                        let extra = new_len - samples.len();
+                        let _extra = new_len - samples.len();
                         samples.resize(new_len, 0.0);
                     }
                 }
@@ -324,8 +323,8 @@ pub fn compute_ab_comparison(
     let rms_b = (version_b.iter().map(|s| s * s).sum::<f32>() / version_b.len().max(1) as f32).sqrt();
     let peak_a = version_a.iter().map(|s| s.abs()).fold(0.0f32, f32::max);
     let peak_b = version_b.iter().map(|s| s.abs()).fold(0.0f32, f32::max);
-    let crest_a = if rms_a > 0.0 { peak_a / rms_a } else { 1.0 };
-    let crest_b = if rms_b > 0.0 { peak_b / rms_b } else { 1.0 };
+    let _crest_a = if rms_a > 0.0 { peak_a / rms_a } else { 1.0 };
+    let _crest_b = if rms_b > 0.0 { peak_b / rms_b } else { 1.0 };
 
     let analysis_a = super::analyze::analyze_audio(version_a, super::SAMPLE_RATE, 1);
     let analysis_b = super::analyze::analyze_audio(version_b, super::SAMPLE_RATE, 1);
@@ -429,7 +428,7 @@ pub fn assess_export_readiness(samples: &[f32], target_headroom_db: f32) -> Expo
 }
 
 pub fn selective_regenerate(
-    samples: &mut Vec<f32>,
+    samples: &mut [f32],
     region: &str,
     params: &crate::audio::resynthesize::ResynthesisParams,
 ) {
@@ -444,8 +443,9 @@ pub fn selective_regenerate(
 
     let full = crate::audio::resynthesize::resynthesize(params);
     let len = full.len().min(num_samples);
-    for i in start..end.min(len) {
-        samples[i] = full[i];
+    let end_safe = end.min(len);
+    if start < end_safe {
+        samples[start..end_safe].copy_from_slice(&full[start..end_safe]);
     }
     normalize_peak(samples, -1.0);
     dsp::lookahead_limiter(samples, -0.5, 1.0);

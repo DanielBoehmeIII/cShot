@@ -77,8 +77,10 @@ impl Default for ExposedParams {
 
 impl ExposedParams {
     pub fn simple(character: f32, weight: f32, length: f32, punch: f32, complexity: f32) -> Self {
-        let mut p = Self::default();
-        p.mode = ControlMode::Simple;
+        let mut p = Self {
+            mode: ControlMode::Simple,
+            ..Self::default()
+        };
         p.character = character.clamp(-1.0, 1.0);
         p.weight = weight.clamp(0.0, 1.0);
         p.length = length.clamp(0.0, 1.0);

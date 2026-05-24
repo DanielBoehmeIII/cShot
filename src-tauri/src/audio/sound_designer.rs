@@ -1,5 +1,4 @@
 use super::resynthesize::{self, ResynthesisParams, ResynthesisLayers};
-use super::SoundType;
 use super::dsp;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]

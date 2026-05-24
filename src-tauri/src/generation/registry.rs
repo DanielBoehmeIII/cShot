@@ -7,6 +7,10 @@ pub struct ProviderRegistry {
     active_provider_name: Option<String>,
 }
 
+impl Default for ProviderRegistry {
+    fn default() -> Self { Self::new() }
+}
+
 impl ProviderRegistry {
     pub fn new() -> Self {
         Self {
@@ -38,9 +42,9 @@ impl ProviderRegistry {
         self.active_provider_name.clone()
     }
 
-    pub fn active_provider(&self) -> Option<&Box<dyn AudioProvider>> {
+    pub fn active_provider(&self) -> Option<&dyn AudioProvider> {
         self.active_provider_name.as_ref().and_then(|name| {
-            self.providers.iter().find(|p| p.name() == name)
+            self.providers.iter().find(|p| p.name() == name).map(|p| p.as_ref())
         })
     }
 
@@ -77,9 +81,7 @@ impl ProviderRegistry {
         let mut errors: Vec<String> = Vec::new();
 
         let pre_check = validator::validate_pre_generation(&request);
-        if let Err(e) = pre_check {
-            return Err(e);
-        }
+        pre_check?;
 
         // Build attempt order: cshot-engine first, then active cloud provider if any
         let attempts: Vec<&str> = {

@@ -1,6 +1,6 @@
-use super::analyze::{analyze_audio, AudioAnalysis};
+use super::analyze::AudioAnalysis;
 use super::resynthesize::{self, ResynthesisParams};
-use super::recreate::{self, compute_similarity, SimilarityReport, params_from_analysis};
+use super::recreate::{compute_similarity, SimilarityReport, params_from_analysis};
 use super::mutation;
 use super::SoundType;
 
@@ -278,7 +278,7 @@ pub fn run_evolution(request: &EvolveStepRequest) -> EvolutionState {
 }
 
 fn create_member_from_params(
-    st: SoundType,
+    _st: SoundType,
     base_params: &ResynthesisParams,
     analysis: &AudioAnalysis,
     parent_samples: &[f32],
@@ -373,7 +373,7 @@ fn crossover_params(a: &ResynthesisParams, b: &ResynthesisParams) -> Resynthesis
     let seed = rand_seed();
     let mut p = a.clone();
 
-    if fast_rng(seed + 0) > 0.5 { p.click_amount = b.click_amount; }
+    if fast_rng(seed) > 0.5 { p.click_amount = b.click_amount; }
     if fast_rng(seed + 1) > 0.5 { p.attack_ms = b.attack_ms; }
     if fast_rng(seed + 2) > 0.5 { p.body_gain = b.body_gain; }
     if fast_rng(seed + 3) > 0.5 { p.decay_ms = b.decay_ms; }
@@ -405,7 +405,7 @@ fn select_elites(population: &[EvolutionMember], count: usize) -> Vec<EvolutionM
     sorted
 }
 
-fn compute_quality_score(samples: &[f32], analysis: &AudioAnalysis) -> f32 {
+fn compute_quality_score(_samples: &[f32], analysis: &AudioAnalysis) -> f32 {
     let crest = if analysis.rms > 0.0 { analysis.peak / analysis.rms } else { 1.0 };
     let has_content = analysis.peak > 0.01;
     let transient_quality = if has_content && crest > 3.0 { (crest / 20.0).min(1.0) } else { 0.3 };
@@ -439,7 +439,7 @@ pub fn evolve_step(
     analysis: &AudioAnalysis,
     parent_prompt: &str,
     parent_id: &str,
-    generation: usize,
+    _generation: usize,
     config: &EvolutionConfig,
 ) -> Vec<EvolutionMember> {
     let request = EvolveStepRequest {
@@ -452,8 +452,7 @@ pub fn evolve_step(
         direction_intensity: 0.5,
     };
     let state = run_evolution(&request);
-    let best = state.population.into_iter().take(config.population_size).collect::<Vec<_>>();
-    best
+    state.population.into_iter().take(config.population_size).collect::<Vec<_>>()
 }
 
 // ─── Infinite Variant Machine ─────────────────────────────
@@ -558,7 +557,7 @@ pub fn generate_variants(
         let t = i as f32 / config.count.max(1) as f32;
 
         if let Some(ref direction) = config.direction {
-            let intensity = config.direction_intensity * (0.5 + t * diversity_spread);
+            let _intensity = config.direction_intensity * (0.5 + t * diversity_spread);
             let mut p = base_params.clone();
             match direction.as_str() {
                 "safer" => {

@@ -1,5 +1,5 @@
 use super::analyze::AudioAnalysis;
-use super::audio_intelligence::{self, AudioIntelligenceReport};
+use super::audio_intelligence::{self};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct AutoTags {

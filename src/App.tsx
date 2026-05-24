@@ -8,6 +8,7 @@ import { ToastContainer } from "./components/ToastContainer";
 import { LibraryView } from "./components/LibraryView";
 import { ProviderSelector } from "./components/ProviderSelector";
 import { IntentControls } from "./components/IntentControls";
+import { OneShotPanel } from "./components/OneShotPanel";
 import { useAudioPlayback } from "./hooks/useAudioPlayback";
 import { useToast } from "./hooks/useToast";
 import {
@@ -34,7 +35,7 @@ import {
   type IntentGenerateResult,
 } from "./lib/api";
 
-type View = "generator" | "library";
+type View = "generator" | "library" | "oneshot";
 
 export default function App() {
   const [promptText, setPromptText] = useState("");
@@ -331,6 +332,10 @@ export default function App() {
             e.preventDefault();
             setCurrentView("library");
             break;
+          case "3":
+            e.preventDefault();
+            setCurrentView("oneshot");
+            break;
           case "e":
           case "E":
             e.preventDefault();
@@ -437,22 +442,44 @@ export default function App() {
             >
               cShot
             </button>
-            <span className="hidden sm:inline text-[11px] text-[#636E72] font-mono">
-              {currentView === "generator" ? "describe → generate → preview → export" : "browse → search → export"}
-            </span>
+              <span className="hidden sm:inline text-[11px] text-[#636E72] font-mono">
+                {currentView === "generator" ? "describe → generate → preview → export" : currentView === "oneshot" ? "class → tweak → preview → export" : "browse → search → export"}
+              </span>
           </div>
           <div className="flex items-center gap-2">
             <ProviderSelector />
-            <button
-              onClick={() => setCurrentView(currentView === "generator" ? "library" : "generator")}
-              className={`rounded-lg border px-2.5 py-1.5 text-[10px] font-mono transition-all ${
-                currentView === "library"
-                  ? "border-[#6C5CE7]/50 bg-[#6C5CE7]/10 text-[#6C5CE7]"
-                  : "border-[#2A2A3F] bg-[#1E1E2E] text-[#636E72] hover:border-[#3A3A5F] hover:text-[#DFE6E9]"
-              }`}
-            >
-              {currentView === "generator" ? "Library" : "Generator"}
-            </button>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setCurrentView("generator")}
+                className={`rounded-lg border px-2.5 py-1.5 text-[10px] font-mono transition-all ${
+                  currentView === "generator"
+                    ? "border-[#6C5CE7]/50 bg-[#6C5CE7]/10 text-[#6C5CE7]"
+                    : "border-[#2A2A3F] bg-[#1E1E2E] text-[#636E72] hover:border-[#3A3A5F] hover:text-[#DFE6E9]"
+                }`}
+              >
+                Gen
+              </button>
+              <button
+                onClick={() => setCurrentView("oneshot")}
+                className={`rounded-lg border px-2.5 py-1.5 text-[10px] font-mono transition-all ${
+                  currentView === "oneshot"
+                    ? "border-[#6C5CE7]/50 bg-[#6C5CE7]/10 text-[#6C5CE7]"
+                    : "border-[#2A2A3F] bg-[#1E1E2E] text-[#636E72] hover:border-[#3A3A5F] hover:text-[#DFE6E9]"
+                }`}
+              >
+                1Shot
+              </button>
+              <button
+                onClick={() => setCurrentView("library")}
+                className={`rounded-lg border px-2.5 py-1.5 text-[10px] font-mono transition-all ${
+                  currentView === "library"
+                    ? "border-[#6C5CE7]/50 bg-[#6C5CE7]/10 text-[#6C5CE7]"
+                    : "border-[#2A2A3F] bg-[#1E1E2E] text-[#636E72] hover:border-[#3A3A5F] hover:text-[#DFE6E9]"
+                }`}
+              >
+                Lib
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -690,6 +717,15 @@ export default function App() {
               navigateToGenerator={() => setCurrentView("generator")}
             />
           )}
+
+          {currentView === "oneshot" && (
+            <OneShotPanel
+              onPlay={(id, samples, sampleRate) => {
+                stop();
+                play(id, samples, sampleRate).catch(() => {});
+              }}
+            />
+          )}
         </div>
       </main>
 
@@ -702,10 +738,12 @@ export default function App() {
                 : sound
                   ? `${sound.sound_type} · ${favorites.size} faved · ${variants.length} variations`
                   : "ready"
-              : "library"}
+              : currentView === "oneshot"
+                ? "oneshot · class → tweak → preview → export"
+                : "library"}
           </span>
           <span className="text-[10px] text-[#2A2A3F] font-mono">
-            {currentView === "generator" ? "(space) play · (r) regenerate" : ""}
+            {currentView === "generator" ? "(space) play · (r) regenerate" : currentView === "oneshot" ? "1Shot synth" : "library"}
           </span>
         </div>
       </footer>
@@ -725,6 +763,7 @@ export default function App() {
               {[
                 { keys: "⌘1", desc: "Generator view" },
                 { keys: "⌘2", desc: "Library view" },
+                { keys: "⌘3", desc: "OneShot view" },
                 { keys: "Space", desc: "Play / Stop current sound" },
                 { keys: "Enter", desc: "Generate (from input)" },
                 { keys: "⌘Enter", desc: "Generate from anywhere" },

@@ -527,6 +527,7 @@ static GENRE_MAP: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(
     m
 });
 
+#[allow(dead_code)]
 fn apply_descriptor(ctrl: &mut PromptDspControls, mapping: &DescriptorMapping) {
     (mapping.apply)(ctrl);
 }
@@ -842,7 +843,7 @@ fn apply_compound_edits(ctrl: &mut PromptDspControls) {
 
     // ─── Vote-based conflict resolution ───
     // Instead of winner-takes-all, compute net effect per parameter
-    let mut conflict_type: Option<(&'static str, &'static str)> = None;
+    let mut _conflict_type: Option<(&'static str, &'static str)> = None;
     let descriptor_set: std::collections::HashSet<String> = ctrl.descriptors.iter().map(|d| d.word.clone()).collect();
 
     let conflicting_pairs: [(&str, &str); 11] = [
@@ -861,7 +862,7 @@ fn apply_compound_edits(ctrl: &mut PromptDspControls) {
 
     for &(a, b) in conflicting_pairs.iter() {
         if descriptor_set.contains(a) && descriptor_set.contains(b) {
-            conflict_type = Some((a, b));
+            _conflict_type = Some((a, b));
             let a_conf = ctrl.descriptors.iter().find(|d| d.word == a).map(|d| d.confidence).unwrap_or(0.5);
             let b_conf = ctrl.descriptors.iter().find(|d| d.word == b).map(|d| d.confidence).unwrap_or(0.5);
             let net_vote = a_conf - b_conf;

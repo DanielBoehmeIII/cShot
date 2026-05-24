@@ -1,7 +1,5 @@
-use super::resynthesize::ResynthesisParams;
 use super::params::{ExposedParams, ControlMode};
 use super::humanize::HumanizeParams;
-use super::SoundType;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct InstrumentPreset {

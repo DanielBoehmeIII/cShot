@@ -4,6 +4,10 @@ use super::provider::{
 
 pub struct AudioLdmProvider;
 
+impl Default for AudioLdmProvider {
+    fn default() -> Self { Self }
+}
+
 impl AudioLdmProvider {
     pub fn new() -> Self {
         Self

@@ -2,9 +2,7 @@ use super::analyze::analyze_audio;
 use super::resynthesize;
 use super::recreate;
 use super::mutation;
-use super::morph;
 use super::process;
-use super::synthesize;
 use super::SAMPLE_RATE;
 use super::SoundType;
 
@@ -95,7 +93,7 @@ pub fn run_stress_test(iterations: usize) -> StressTestResult {
             Ok(Ok((s, _, _))) => {
                 passed += 1;
                 let peak = s.iter().map(|&v| v.abs()).fold(0.0f32, f32::max);
-                let rms = s.iter().map(|&v| v * v).sum::<f32>().sqrt() / (s.len() as f32).sqrt();
+                let _rms = s.iter().map(|&v| v * v).sum::<f32>().sqrt() / (s.len() as f32).sqrt();
                 if peak < 0.001 { silent += 1; }
                 if peak >= 1.0 { clipped += 1; }
             }

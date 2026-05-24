@@ -13,6 +13,7 @@ pub mod midi;
 pub mod mock;
 pub mod morph;
 pub mod mutation;
+pub mod one_shot_controls;
 
 pub mod packs;
 pub mod params;
@@ -22,6 +23,7 @@ pub mod resynthesize;
 pub mod sculpt;
 pub mod session;
 pub mod sound_designer;
+pub mod spec;
 pub mod spectral_edit;
 pub mod spectral_intelligence;
 pub mod stress_test;
@@ -42,7 +44,7 @@ pub use humanize::*;
 pub use morph::*;
 #[allow(unused_imports)]
 pub use transform::*;
-#[allow(unused_imports)]
+#[allow(unused_imports, ambiguous_glob_reexports)]
 pub use dsp::*;
 #[allow(unused_imports)]
 pub use io::*;
@@ -54,6 +56,8 @@ pub use process::*;
 pub use recreate::*;
 #[allow(unused_imports)]
 pub use resynthesize::*;
+#[allow(unused_imports)]
+pub use spec::*;
 #[allow(unused_imports)]
 pub use spectral_intelligence::*;
 #[allow(unused_imports)]
@@ -95,6 +99,7 @@ impl SoundType {
         }
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
             "kick" => SoundType::Kick,

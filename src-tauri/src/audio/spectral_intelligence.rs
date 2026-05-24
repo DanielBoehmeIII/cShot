@@ -276,6 +276,5 @@ pub fn spectral_anomaly_score(samples: &[f32]) -> f32 {
     let mud_penalty = fp.muddiness * 0.3;
     let flatness_penalty = (1.0 - fp.spectral_flatness).abs() * 0.2;
     let balance = 1.0 - (fp.sub_energy - 0.2).abs().min(0.5) * 0.2;
-    let total = (balance - harsh_penalty - mud_penalty - flatness_penalty * 0.2).clamp(0.0, 1.0);
-    total
+    (balance - harsh_penalty - mud_penalty - flatness_penalty * 0.2).clamp(0.0, 1.0)
 }

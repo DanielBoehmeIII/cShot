@@ -1,6 +1,5 @@
-use super::{SoundType, SAMPLE_RATE};
-use super::analyze::{analyze_audio, AudioAnalysis};
-use super::resynthesize::{self, ResynthesisParams};
+use super::analyze::AudioAnalysis;
+use super::resynthesize::{self};
 use super::recreate::{self, compute_similarity, SimilarityReport, params_from_analysis};
 
 // ─── Mutation Types ─────────────────────────────────────
@@ -120,7 +119,6 @@ pub fn clean_up_sound(
     let mut params = base_params.clone();
     params.noise_amount = params.noise_amount * 0.3;
     params.saturation_drive = 1.0;
-    params.click_amount = params.click_amount;
     let recreated = resynthesize::resynthesize(&params);
     let similarity = compute_similarity(samples, &recreated, analysis);
     (recreated, similarity)

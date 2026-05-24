@@ -1358,3 +1358,105 @@ export async function analyzeAudioIntelligence(soundId: string): Promise<any> {
   const { invoke } = await import("@tauri-apps/api/core");
   return invoke("analyze_audio_intelligence", { soundId });
 }
+
+// ─── OneShot API ───────────────────────────────────────────────
+
+export interface OneShotControls {
+  brightness: number;
+  punch: number;
+  decay: number;
+  distortion: number;
+  transient_amount: number;
+  noise_amount: number;
+  body_amount: number;
+  stereo_width: number;
+  pitch_drop: number;
+  filter_sweep: number;
+}
+
+export interface OneShotSpec {
+  sound_class: string;
+  duration_ms: number;
+  pitch_hz: number;
+  gain: number;
+  controls: OneShotControls | null;
+}
+
+export interface SoundClassInfo {
+  value: string;
+  label: string;
+  description: string;
+}
+
+export interface OneshotPreviewResult {
+  samples: number[];
+  duration_ms: number;
+  peak: number;
+  rms: number;
+  sample_rate: number;
+}
+
+export interface OneshotExportResult {
+  path: string;
+  filename: string;
+  file_size_bytes: number;
+}
+
+export const DEFAULT_ONESHOT_CONTROLS: OneShotControls = {
+  brightness: 0.5,
+  punch: 0.5,
+  decay: 0.5,
+  distortion: 0.5,
+  transient_amount: 0.5,
+  noise_amount: 0.5,
+  body_amount: 0.5,
+  stereo_width: 0.5,
+  pitch_drop: 0.5,
+  filter_sweep: 0.5,
+};
+
+export async function listSoundClasses(): Promise<SoundClassInfo[]> {
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke("list_sound_classes");
+}
+
+export async function getOneshotDefaults(soundClass: string): Promise<OneShotSpec> {
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke("get_oneshot_defaults", { soundClass });
+}
+
+export async function renderOneshot(
+  soundClass: string,
+  durationMs: number,
+  pitchHz: number,
+  gain: number,
+  controls: OneShotControls | null,
+): Promise<OneshotPreviewResult> {
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke("render_oneshot", {
+    soundClass,
+    durationMs,
+    pitchHz,
+    gain,
+    controls,
+  });
+}
+
+export async function exportOneshotWav(
+  soundClass: string,
+  durationMs: number,
+  pitchHz: number,
+  gain: number,
+  controls: OneShotControls | null,
+  outputPath: string,
+): Promise<OneshotExportResult> {
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke("export_oneshot_wav", {
+    soundClass,
+    durationMs,
+    pitchHz,
+    gain,
+    controls,
+    outputPath,
+  });
+}

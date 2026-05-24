@@ -1,8 +1,48 @@
 {
-  "total_ratings": 5,
-  "favorites": 3,
-  "good": 1,
+  "total_ratings": 8,
+  "favorites": 4,
+  "good": 3,
   "bad": 0,
   "trash": 1,
-  "families": {}
+  "families": {
+    "bass-gen": {
+      "total": 1,
+      "favorites": 1,
+      "favorability": 100.0,
+      "avg_centroid": 1020.0,
+      "avg_transient": 11.0
+    },
+    "drums": {
+      "total": 2,
+      "favorites": 2,
+      "favorability": 100.0,
+      "avg_centroid": 3716.0,
+      "avg_transient": 1.5
+    },
+    "fx-gen": {
+      "total": 1,
+      "favorites": 0,
+      "favorability": 0.0,
+      "avg_centroid": 9858.0,
+      "avg_transient": 1.0
+    },
+    "piano-gen": {
+      "total": 2,
+      "favorites": 2,
+      "favorability": 100.0,
+      "avg_centroid": 4348.0,
+      "avg_transient": 3.0
+    },
+    "synth-gen": {
+      "total": 2,
+      "favorites": 2,
+      "favorability": 100.0,
+      "avg_centroid": 8322.0,
+      "avg_transient": 1.0
+    }
+  },
+  "preferences": {
+    "fav_darkness": "neutral",
+    "fav_punch": "high"
+  }
 }

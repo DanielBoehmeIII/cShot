@@ -1,7 +1,6 @@
 use super::{SoundType, SAMPLE_RATE};
 use super::analyze::{analyze_audio, AudioAnalysis};
-use super::resynthesize::{self, ResynthesisParams};
-use super::params::ExposedParams;
+use super::resynthesize::{self};
 
 // ─── Pack Sound Role ────────────────────────────────────
 

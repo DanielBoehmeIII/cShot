@@ -1,6 +1,5 @@
-use super::{SoundType, SAMPLE_RATE};
+use super::SAMPLE_RATE;
 use super::analyze::AudioAnalysis;
-use super::resynthesize::{self, ResynthesisParams};
 
 // ─── Identity & Messaging ──────────────────────────────
 
@@ -382,7 +381,7 @@ fn compute_texture_identity(analysis: &AudioAnalysis) -> TextureIdentity {
         analysis.noise_estimate * 0.3
     };
 
-    let flatness = super::analyze::compute_spectral_flatness(&vec![analysis.peak, analysis.rms, brightness, zcr]);
+    let flatness = super::analyze::compute_spectral_flatness(&[analysis.peak, analysis.rms, brightness, zcr]);
 
     TextureIdentity {
         noise_character: classification.clone(),
@@ -430,7 +429,7 @@ fn compute_aggressiveness(analysis: &AudioAnalysis) -> f32 {
     let crest_norm = (analysis.crest_factor / 20.0).min(1.0);
     let transient_norm = (analysis.transient_strength / 10.0).min(1.0);
     let attack_norm = if analysis.attack_ms > 0.0 {
-        (1.0 - (analysis.attack_ms / 30.0).min(1.0))
+        1.0 - (analysis.attack_ms / 30.0).min(1.0)
     } else { 0.0 };
     let loudness_norm = (analysis.loudness_lufs + 60.0) / 60.0;
     crest_norm * 0.3 + transient_norm * 0.25 + attack_norm * 0.25 + loudness_norm.clamp(0.0, 1.0) * 0.2
@@ -522,7 +521,7 @@ fn compute_overall_character(
 }
 
 fn compute_identity_embedding(
-    analysis: &AudioAnalysis,
+    _analysis: &AudioAnalysis,
     ti: &TransientIdentity,
     to: &TonalIdentity,
     tx: &TextureIdentity,

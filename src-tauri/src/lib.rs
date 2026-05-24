@@ -1,3 +1,20 @@
+// Crate-level clippy allows for intentional style choices & DSP code patterns
+#![allow(
+    clippy::collapsible_if,
+    clippy::collapsible_else_if,
+    clippy::needless_range_loop,
+    clippy::excessive_precision,
+    clippy::too_many_arguments,
+    clippy::manual_range_contains,
+    clippy::assign_op_pattern,
+    clippy::type_complexity,
+    clippy::manual_clamp,
+    clippy::blocks_in_conditions,
+    clippy::needless_borrow,
+    clippy::derivable_impls,
+    clippy::vec_init_then_push,
+)]
+
 use std::sync::Mutex;
 
 pub struct AppState {
@@ -155,6 +172,10 @@ pub fn run() {
             crate::commands::batch_favorite,
             crate::commands::batch_export,
             crate::commands::get_recent_prompts,
+            crate::commands::list_sound_classes,
+            crate::commands::get_oneshot_defaults,
+            crate::commands::render_oneshot,
+            crate::commands::export_oneshot_wav,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

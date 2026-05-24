@@ -123,6 +123,9 @@ pub fn morph_params(a: &ResynthesisParams, b: &ResynthesisParams, t: f32) -> Res
         brightness: a.brightness + (b.brightness - a.brightness) * t,
         layer_mix: merge_layer_mix(&a.layer_mix, &b.layer_mix, t),
         seed: if t < 0.5 { a.seed } else { b.seed },
+        stereo_width: a.stereo_width + (b.stereo_width - a.stereo_width) * t,
+        filter_sweep: a.filter_sweep + (b.filter_sweep - a.filter_sweep) * t,
+        metallic_amount: a.metallic_amount + (b.metallic_amount - a.metallic_amount) * t,
     }
 }
 

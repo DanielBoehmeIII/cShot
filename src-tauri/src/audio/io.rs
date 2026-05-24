@@ -20,13 +20,11 @@ pub fn write_wav(path: &Path, samples: &[f32], sample_rate: u32) -> Result<(), S
         format!("Could not create WAV file at {}: {}", path.display(), e)
     })?;
 
-    let mut written = 0usize;
-    for &sample in samples {
+    for (written, &sample) in samples.iter().enumerate() {
         let clamped = sample.clamp(-1.0, 1.0);
         writer.write_sample(clamped).map_err(|e| {
             format!("Failed to write sample {}: {}", written, e)
         })?;
-        written += 1;
     }
 
     writer.finalize().map_err(|e| format!("Failed to finalize WAV: {}", e))?;

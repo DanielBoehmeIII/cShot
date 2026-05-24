@@ -119,7 +119,7 @@ pub fn analyze_audio(samples: &[f32], sample_rate: u32, channels: u16) -> AudioA
     let (decay_ms, tail_ms) = compute_decay_and_tail(samples, sample_rate, attack_ms);
     let (transient_strength, transient_count, onset_times_ms) = detect_transients(samples, sample_rate);
     let pitch_estimate = estimate_pitch(samples, sample_rate);
-    let has_pitch = pitch_estimate.map_or(false, |p| p > 20.0 && p < 8000.0);
+    let has_pitch = pitch_estimate.is_some_and(|p| p > 20.0 && p < 8000.0);
     let spectral_profile = compute_spectral_profile(samples, 64);
     let (leading_silence_ms, trailing_silence_ms) = detect_silence_regions(samples, sample_rate);
     let has_leading_silence = leading_silence_ms > 1.0;
@@ -312,8 +312,7 @@ pub fn compute_zero_crossing_rate(samples: &[f32]) -> f32 {
     if samples.len() < 2 { return 0.0; }
     let mut crossings = 0;
     for i in 1..samples.len() {
-        if samples[i] >= 0.0 && samples[i - 1] < 0.0 { crossings += 1; }
-        else if samples[i] < 0.0 && samples[i - 1] >= 0.0 { crossings += 1; }
+        if (samples[i] >= 0.0 && samples[i - 1] < 0.0) || (samples[i] < 0.0 && samples[i - 1] >= 0.0) { crossings += 1; }
     }
     crossings as f32 / samples.len() as f32
 }
@@ -669,7 +668,7 @@ fn compute_attack_sharpness_perception(samples: &[f32], attack_ms: f32) -> f32 {
     let peak_a = attack_region.iter().copied().fold(0.0f32, f32::max);
     if peak_a < 0.001 { return 0.0; }
     let mut rise_samples_10_to_90 = 0;
-    let mut rise_samples_50_to_peak = 0;
+    let mut _rise_samples_50_to_peak = 0;
     let t10 = peak_a * 0.1;
     let t50 = peak_a * 0.5;
     let t90 = peak_a * 0.9;
@@ -677,7 +676,7 @@ fn compute_attack_sharpness_perception(samples: &[f32], attack_ms: f32) -> f32 {
     let mut found_50 = false;
     for (j, &v) in attack_region.iter().enumerate() {
         if !found_10 && v >= t10 { found_10 = true; }
-        if !found_50 && v >= t50 { rise_samples_50_to_peak = j; found_50 = true; }
+        if !found_50 && v >= t50 { _rise_samples_50_to_peak = j; found_50 = true; }
         if v >= t90 { rise_samples_10_to_90 = j; break; }
     }
     if rise_samples_10_to_90 < 1 { return 1.0; }

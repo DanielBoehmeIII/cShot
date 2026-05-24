@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use crate::audio::SoundType;
 use crate::audio::analyze::AudioAnalysis;
 use crate::quality::QualityMetadata;
@@ -227,12 +227,10 @@ fn compute_taste_match(
         score += energy_match * 0.15;
     }
 
-    let quality_match = (
-        quality.spectral_quality * 0.1 +
+    let quality_match = quality.spectral_quality * 0.1 +
         quality.transient_quality * 0.1 +
         quality.noise_floor_quality * 0.05 +
-        (1.0 - quality.clipping_percent / 100.0) * 0.05
-    );
+        (1.0 - quality.clipping_percent / 100.0) * 0.05;
     score += quality_match * 0.15;
 
     if taste.avoided_qualities.contains(&type_str.to_string()) {
@@ -266,13 +264,11 @@ pub fn rank_variants(
         .into_iter()
         .map(|v| {
             let q = quality_map.get(&v.id);
-            let quality_score = q.map(|q| (
-                q.spectral_quality * 0.2 +
+            let quality_score = q.map(|q| q.spectral_quality * 0.2 +
                 q.transient_quality * 0.25 +
                 q.noise_floor_quality * 0.1 +
                 q.dynamic_range * 0.15 +
-                (1.0 - q.clipping_percent / 100.0) * 0.15
-            )).unwrap_or(0.5);
+                (1.0 - q.clipping_percent / 100.0) * 0.15).unwrap_or(0.5);
 
             let taste_score = if let Some(t) = taste {
                 let type_s = t.preferred_type_scores.get(&v.sound_type).copied().unwrap_or(0.5);

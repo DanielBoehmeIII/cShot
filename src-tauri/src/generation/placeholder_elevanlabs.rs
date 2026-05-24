@@ -9,6 +9,10 @@ pub struct ElevenLabsProvider {
     api_key: Option<String>,
 }
 
+impl Default for ElevenLabsProvider {
+    fn default() -> Self { Self::new() }
+}
+
 impl ElevenLabsProvider {
     pub fn new() -> Self {
         let key = std::env::var("CSHOT_ELEVENLABS_API_KEY").ok();

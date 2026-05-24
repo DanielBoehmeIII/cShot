@@ -133,7 +133,6 @@ pub fn apply_variant(samples: &[f32], variant: &MockVariant, seed: u64) -> Vec<f
             let idx = (seed as usize) % amounts.len();
             let mut s = samples.to_vec();
             transient_shape(&mut s, amounts[idx]);
-            let mut s = s;
             process::normalize_peak(&mut s, -1.0);
             s
         }
@@ -148,7 +147,6 @@ pub fn apply_variant(samples: &[f32], variant: &MockVariant, seed: u64) -> Vec<f
             if (rng_seed * 11.0).fract() > 0.5 {
                 s = shorten(&s, shorten_factor);
             }
-            let mut s = s;
             process::normalize_peak(&mut s, -1.0);
             s
         }

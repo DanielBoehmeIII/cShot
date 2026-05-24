@@ -110,8 +110,7 @@ pub fn compute_quality(
 
     let tonal_clarity = {
         let pitch = audio::estimate_pitch(samples, SAMPLE_RATE);
-        if pitch.is_some() {
-            let pitch_val = pitch.unwrap();
+        if let Some(pitch_val) = pitch {
             let in_range = pitch_val > 40.0 && pitch_val < 2000.0;
             let low_noise = zcr < 0.08;
             let clean_harmonics = spectral_centroid / pitch_val.max(1.0) < 30.0;

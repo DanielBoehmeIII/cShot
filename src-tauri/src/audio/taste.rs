@@ -156,7 +156,7 @@ impl TasteModel {
         self.is_dirty = true;
 
         // Auto-save every 10 actions
-        if self.profile.total_actions % 10 == 0 {
+        if self.profile.total_actions.is_multiple_of(10) {
             self.save();
         }
     }
@@ -196,12 +196,13 @@ impl TasteModel {
     }
 
     pub fn suggested_defaults(&self, _sound_type: &str) -> super::params::ExposedParams {
-        let mut params = super::params::ExposedParams::default();
-        params.brightness = self.profile.preferred_brightness;
-        params.weight = self.profile.preferred_energy;
-        params.length = (self.profile.preferred_duration_ms / 500.0).clamp(0.0, 1.0);
-        params.character = (self.profile.preferred_brightness - 0.5) * 2.0;
-        params
+        super::params::ExposedParams {
+            brightness: self.profile.preferred_brightness,
+            weight: self.profile.preferred_energy,
+            length: (self.profile.preferred_duration_ms / 500.0).clamp(0.0, 1.0),
+            character: (self.profile.preferred_brightness - 0.5) * 2.0,
+            ..super::params::ExposedParams::default()
+        }
     }
 
     pub fn score_variant(&self, sound_type: &str, brightness: f32, energy: f32) -> f32 {

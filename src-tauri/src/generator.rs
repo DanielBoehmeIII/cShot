@@ -148,7 +148,7 @@ pub fn generate(
         ref_samples
     } else {
         // Use the new resynthesis engine with prompt-to-DSP control
-        let pitch = ctrl.pitch_hz.unwrap_or_else(|| match st {
+        let pitch = ctrl.pitch_hz.unwrap_or(match st {
             audio::SoundType::Kick | audio::SoundType::Bass => 60.0,
             audio::SoundType::Snare => 200.0,
             audio::SoundType::ClosedHat | audio::SoundType::OpenHat => 400.0,
@@ -158,7 +158,7 @@ pub fn generate(
             audio::SoundType::Fx => 100.0,
             audio::SoundType::Other => 200.0,
         });
-        let dur = ctrl.duration_ms.unwrap_or_else(|| match st {
+        let dur = ctrl.duration_ms.unwrap_or(match st {
             audio::SoundType::Kick => 300.0,
             audio::SoundType::Snare => 350.0,
             audio::SoundType::ClosedHat => 200.0,
@@ -295,7 +295,7 @@ pub fn generate_smart_variants(
     sound_type_str: &str,
     count: usize,
     mode: u8,
-    similarity_target: f32,
+    _similarity_target: f32,
 ) -> Result<Vec<VariantResult>, String> {
     let ctrl = prompt_dsp::parse_prompt_rich(prompt_text);
     let st = audio::SoundType::from_str(&ctrl.sound_type);
@@ -309,7 +309,7 @@ pub fn generate_smart_variants(
     let base_params = audio::resynthesize::params_for_sound_type(st, pitch, dur);
 
     // Variation intensity based on mode
-    let (variation_amount, similarity_weight, quality_weight) = match mode {
+    let (variation_amount, _similarity_weight, _quality_weight) = match mode {
         0 => (0.1, 0.5, 0.4),    // safer: keep close, high quality threshold
         1 => (0.3, 0.3, 0.3),    // balanced
         2 => (0.6, 0.1, 0.2),    // experimental: more variation, less similarity
@@ -414,6 +414,29 @@ pub fn generate_smart_variants(
     Ok(results)
 }
 
+/// Generate a sound from a typed OneShotSpec.
+/// Routes through the sound-class-specific synthesis path defined by spec.rs.
+pub fn generate_from_spec(spec: &crate::audio::spec::OneShotSpec) -> Result<SoundResult, String> {
+    let st_str = spec.sound_class.as_str().to_string();
+    let seed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos() as i64;
+
+    let samples = spec.render();
+
+    if samples.is_empty() {
+        return Err("Spec rendered empty audio.".to_string());
+    }
+
+    audio::process::validate_audio_integrity(&samples)?;
+
+    let actual_duration_ms = samples.len() as f32 / 44100.0 * 1000.0;
+    audio::validate::validate_one_shot_duration(actual_duration_ms).ok();
+
+    save_and_return(&samples, &st_str, &st_str, None, seed)
+}
+
 /// Legacy wrapper for backwards compatibility
 pub fn generate_resynthesis_variants(
     prompt_text: &str,
@@ -475,7 +498,7 @@ pub fn save_and_return(
                 variant_name: variant_name.map(|s| s.to_string()),
                 created_at: String::new(),
                 model: "cshot-engine".to_string(),
-                seed: seed as i64,
+                seed,
             });
         }
     }

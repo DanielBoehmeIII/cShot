@@ -9,6 +9,10 @@ pub struct StableAudioProvider {
     api_key: Option<String>,
 }
 
+impl Default for StableAudioProvider {
+    fn default() -> Self { Self::new() }
+}
+
 impl StableAudioProvider {
     pub fn new() -> Self {
         let key = std::env::var("CSHOT_STABLEAUDIO_API_KEY").ok();

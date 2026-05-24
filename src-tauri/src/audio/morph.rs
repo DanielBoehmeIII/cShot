@@ -46,6 +46,7 @@ fn linear_crossfade(a: &[f32], b: &[f32], t: f32) -> Vec<f32> {
     out
 }
 
+#[allow(dead_code)]
 fn power_crossfade(a: &[f32], b: &[f32], t: f32) -> Vec<f32> {
     let max_len = a.len().max(b.len());
     let mut out = Vec::with_capacity(max_len);
@@ -121,18 +122,14 @@ fn extract_body(samples: &[f32], onset: usize, tail_start: usize) -> Vec<f32> {
     let body_start = (onset + (SAMPLE_RATE as f32 * 0.015) as usize).min(samples.len());
     let body_end = tail_start.min(samples.len());
     if body_start >= body_end { return isolated; }
-    for i in body_start..body_end {
-        isolated[i] = samples[i];
-    }
+    isolated[body_start..body_end].copy_from_slice(&samples[body_start..body_end]);
     isolated
 }
 
 fn extract_tail(samples: &[f32], tail_start: usize) -> Vec<f32> {
     let mut isolated = vec![0.0f32; samples.len()];
     if tail_start >= samples.len() { return isolated; }
-    for i in tail_start..samples.len() {
-        isolated[i] = samples[i];
-    }
+    isolated[tail_start..].copy_from_slice(&samples[tail_start..]);
     isolated
 }
 

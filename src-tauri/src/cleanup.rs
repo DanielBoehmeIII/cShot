@@ -201,8 +201,8 @@ pub fn reset_database(dry_run: bool) -> Result<String, String> {
         .map_err(|e| format!("Backup failed: {}. Reset aborted.", e))?;
 
     fs::remove_file(&db_path).ok();
-    fs::remove_file(&db_path.with_extension("db-wal")).ok();
-    fs::remove_file(&db_path.with_extension("db-shm")).ok();
+    fs::remove_file(db_path.with_extension("db-wal")).ok();
+    fs::remove_file(db_path.with_extension("db-shm")).ok();
 
     let conn = crate::db::init_database(&db_path)
         .map_err(|e| format!("Could not re-create database: {}", e))?;
